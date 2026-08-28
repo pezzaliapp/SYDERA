@@ -1,0 +1,117 @@
+/*
+ * SYDERA design tokens.
+ *
+ * Restrained, typographic, no decorative mysticism. The light palette is the
+ * base; the dark palette redefines only the tokens, so every component works
+ * in both themes without conditional styling.
+ */
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --step--1: clamp(0.8125rem, 0.79rem + 0.11vw, 0.875rem);
+  --step-0: clamp(0.9375rem, 0.91rem + 0.14vw, 1rem);
+  --step-1: clamp(1.0625rem, 1.02rem + 0.23vw, 1.1875rem);
+  --step-2: clamp(1.25rem, 1.18rem + 0.35vw, 1.4375rem);
+  --step-3: clamp(1.5rem, 1.38rem + 0.6vw, 1.875rem);
+  --step-4: clamp(1.875rem, 1.65rem + 1.1vw, 2.5rem);
+
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2rem;
+  --space-xl: 3rem;
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+
+  --surface-0: #f7f8fa;
+  --surface-1: #ffffff;
+  --surface-2: #eef1f5;
+  --surface-inset: #f2f4f8;
+  --border: #d7dce4;
+  --border-strong: #b7c0cd;
+
+  --text-1: #14181f;
+  --text-2: #464f5d;
+  --text-3: #6b7585;
+
+  --accent: #2f5d8a;
+  --accent-strong: #234763;
+  --accent-soft: #e6eef6;
+  --accent-contrast: #ffffff;
+
+  --highlight: #8a6212;
+  --highlight-soft: #fbf1dc;
+
+  --danger: #a02a24;
+  --danger-soft: #fbeceb;
+
+  --focus: #1f6feb;
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.06);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --surface-0: #0b0f16;
+    --surface-1: #131924;
+    --surface-2: #1a2130;
+    --surface-inset: #101724;
+    --border: #26303f;
+    --border-strong: #3a4658;
+
+    --text-1: #e8edf5;
+    --text-2: #b4becd;
+    --text-3: #8b96a6;
+
+    --accent: #8fb6dd;
+    --accent-strong: #b3cfe9;
+    --accent-soft: #17263a;
+    --accent-contrast: #0b0f16;
+
+    --highlight: #e8b64c;
+    --highlight-soft: #2a2314;
+
+    --danger: #e98b85;
+    --danger-soft: #2c1614;
+
+    --focus: #7cb0ff;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --surface-0: #0b0f16;
+  --surface-1: #131924;
+  --surface-2: #1a2130;
+  --surface-inset: #101724;
+  --border: #26303f;
+  --border-strong: #3a4658;
+
+  --text-1: #e8edf5;
+  --text-2: #b4becd;
+  --text-3: #8b96a6;
+
+  --accent: #8fb6dd;
+  --accent-strong: #b3cfe9;
+  --accent-soft: #17263a;
+  --accent-contrast: #0b0f16;
+
+  --highlight: #e8b64c;
+  --highlight-soft: #2a2314;
+
+  --danger: #e98b85;
+  --danger-soft: #2c1614;
+
+  --focus: #7cb0ff;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
