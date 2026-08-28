@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AppShell } from './components/AppShell.tsx'
-import { useRoute } from './app/router.ts'
+import { paths, useRoute } from './app/router.ts'
 import { useTheme } from './app/useTheme.ts'
-import { useProfiles } from './app/useProfiles.ts'
+import { useSydera } from './app/useSydera.ts'
+import { buildAnalysis } from './app/useAnalysis.ts'
 import { registerServiceWorker } from './pwa/registerServiceWorker.ts'
 import {
   DEFAULT_PREFERENCES,
@@ -12,16 +13,16 @@ import {
   savePreferences,
   type Preferences,
 } from './core/prefs/preferences.ts'
-import { aboutDocument, disclaimerDocument, privacyDocument } from './content/it.ts'
-import { HomeView } from './views/HomeView.tsx'
-import { ProfilesView } from './views/ProfilesView.tsx'
-import { ProfileFormView } from './views/ProfileFormView.tsx'
-import { AnalysisView } from './views/AnalysisView.tsx'
+import { saveSydera } from './core/storage/sydera.ts'
+import { aboutDocument, disclaimerDocument, it, privacyDocument } from './content/it.ts'
+import { EntryView } from './views/EntryView.tsx'
+import { ReturningView } from './views/ReturningView.tsx'
+import { ResultView } from './views/ResultView.tsx'
 import { DocumentView } from './views/DocumentView.tsx'
 import { SettingsView } from './views/SettingsView.tsx'
-import { OnboardingView } from './views/OnboardingView.tsx'
 import { DataDeletedView } from './views/DataDeletedView.tsx'
 import { NotFoundView } from './views/NotFoundView.tsx'
+import type { HouseSystemId } from './core/astrology/types.ts'
 
 export function App() {
   const route = useRoute()
@@ -29,7 +30,7 @@ export function App() {
   const [preferencesLoaded, setPreferencesLoaded] = useState(false)
   const [applyUpdate, setApplyUpdate] = useState<(() => void) | null>(null)
   const [dataDeleted, setDataDeleted] = useState(false)
-  const { state: profiles, reload } = useProfiles()
+  const { state: sydera, reload } = useSydera()
 
   useEffect(() => {
     setPreferences(loadPreferences())
@@ -47,19 +48,22 @@ export function App() {
     savePreferences(next)
   }, [])
 
-  const completeOnboarding = useCallback(() => {
-    updatePreferences({
-      ...loadPreferences(),
-      introductionCompleted: true,
-      disclaimerAcknowledged: DISCLAIMER_VERSION,
-    })
+  const acknowledge = useCallback(() => {
+    updatePreferences({ ...loadPreferences(), disclaimerAcknowledged: DISCLAIMER_VERSION, introductionCompleted: true })
   }, [updatePreferences])
 
-  if (!preferencesLoaded) return null
+  const stored = sydera.status === 'ready' ? sydera.sydera : null
 
-  // After a successful deletion the application does not jump straight back to
-  // the introduction: the user first sees an explicit confirmation of what was
-  // removed, and only "Continua" resets SYDERA to its initial state.
+  const changeHouseSystem = useCallback(
+    (system: HouseSystemId) => {
+      if (!stored) return
+      void saveSydera({ ...stored.input, houseSystem: system }, new Date().toISOString(), stored).then(reload)
+    },
+    [stored, reload],
+  )
+
+  if (!preferencesLoaded || sydera.status === 'loading') return null
+
   if (dataDeleted) {
     return (
       <DataDeletedView
@@ -72,37 +76,73 @@ export function App() {
     )
   }
 
-  // The introduction, including the explicit disclaimer acknowledgement, must
-  // precede any personal analysis.
-  if (!preferences.introductionCompleted || !isDisclaimerCurrent(preferences)) {
-    return <OnboardingView onComplete={completeOnboarding} />
-  }
+  const acknowledged = isDisclaimerCurrent(preferences)
+  // The reference date belongs to the interface: every engine receives it as
+  // an explicit input and stays deterministic.
+  const analysis = stored ? buildAnalysis(stored, Date.now()) : null
+
+  const bare = route.name === 'start' || route.name === 'data'
+
+  const content = (() => {
+    switch (route.name) {
+      case 'start':
+        return stored ? (
+          <ReturningView sydera={stored} />
+        ) : (
+          <EntryView existing={null} acknowledged={acknowledged} onAcknowledge={acknowledge} onSaved={reload} />
+        )
+      case 'data':
+        return (
+          <EntryView existing={stored} acknowledged={acknowledged} onAcknowledge={acknowledge} onSaved={reload} />
+        )
+      case 'result':
+        if (!stored || !analysis) {
+          return (
+            <section className="card">
+              <h1 className="page-title">{it.app.name}</h1>
+              <p className="muted">{it.sintesi.missingAstrology}</p>
+              <div className="row">
+                <a className="button button--primary" href={paths.start}>
+                  {it.sintesi.completeData}
+                </a>
+              </div>
+            </section>
+          )
+        }
+        return <ResultView section={route.section} analysis={analysis} sydera={stored} />
+      case 'privacy':
+        return <DocumentView document={privacyDocument} />
+      case 'disclaimer':
+        return <DocumentView document={disclaimerDocument} />
+      case 'about':
+        return <DocumentView document={aboutDocument} />
+      case 'settings':
+        return (
+          <SettingsView
+            preferences={preferences}
+            onPreferencesChange={updatePreferences}
+            hasSydera={stored !== null}
+            houseSystem={stored?.input.houseSystem ?? 'whole-sign'}
+            onHouseSystemChange={changeHouseSystem}
+            onDataDeleted={() => setDataDeleted(true)}
+          />
+        )
+      default:
+        return <NotFoundView path={route.path} />
+    }
+  })()
 
   return (
     <AppShell
       route={route}
+      bare={bare}
       updateAvailable={applyUpdate !== null}
       onApplyUpdate={() => {
         applyUpdate?.()
         setApplyUpdate(null)
       }}
     >
-      {route.name === 'home' ? <HomeView profiles={profiles} /> : null}
-      {route.name === 'profiles' ? <ProfilesView profiles={profiles} onChanged={reload} /> : null}
-      {route.name === 'profile-new' ? <ProfileFormView onCreated={reload} /> : null}
-      {route.name === 'analysis' ? <AnalysisView profileId={route.profileId} /> : null}
-      {route.name === 'privacy' ? <DocumentView document={privacyDocument} /> : null}
-      {route.name === 'disclaimer' ? <DocumentView document={disclaimerDocument} /> : null}
-      {route.name === 'about' ? <DocumentView document={aboutDocument} /> : null}
-      {route.name === 'settings' ? (
-        <SettingsView
-          preferences={preferences}
-          onPreferencesChange={updatePreferences}
-          profiles={profiles}
-          onDataDeleted={() => setDataDeleted(true)}
-        />
-      ) : null}
-      {route.name === 'not-found' ? <NotFoundView path={route.path} /> : null}
+      {content}
     </AppShell>
   )
 }

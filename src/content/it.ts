@@ -1,116 +1,192 @@
 /**
  * Italian user interface strings.
  *
- * All user-facing wording lives here so that a second language can be added
- * later without touching calculation or interpretation logic.
+ * All user-facing wording lives here so a second language can be added later
+ * without touching calculation or interpretation logic.
  */
 import type { LegalDocument } from './types.ts'
 
 export const it = {
   app: {
     name: 'SYDERA',
+    subtitle: 'Astrologia · Numerologia',
     tagline: 'Due sistemi simbolici. Un profilo personale.',
-    summary:
-      'SYDERA mette a confronto astrologia occidentale e numerologia pitagorica con calcoli trasparenti. I dati restano sul dispositivo.',
+    localNotice: 'I tuoi dati restano sul tuo dispositivo.',
   },
   nav: {
-    label: 'Navigazione principale',
-    home: 'Panoramica',
-    profiles: 'Profili',
+    label: 'Sezioni della tua SYDERA',
+    secondaryLabel: 'Documenti e impostazioni',
+    skipToContent: 'Vai al contenuto principale',
     privacy: 'Privacy',
     disclaimer: 'Avvertenze',
     about: 'Informazioni',
     settings: 'Impostazioni',
-    skipToContent: 'Vai al contenuto principale',
+    myS: 'La mia SYDERA',
+    data: 'I miei dati',
   },
-  theme: {
-    label: 'Tema',
-    system: 'Sistema',
-    light: 'Chiaro',
-    dark: 'Scuro',
+  sections: {
+    sintesi: 'Sintesi',
+    astrologia: 'Astrologia',
+    numerologia: 'Numerologia',
+    convergenze: 'Convergenze',
+    cicli: 'Cicli',
   },
-  home: {
-    title: 'Panoramica',
-    emptyTitle: 'Nessun profilo presente',
-    emptyBody:
-      'SYDERA parte vuota: nessun profilo di esempio, nessun dato precaricato. Crea un profilo per iniziare l’analisi numerologica.',
-    createProfile: 'Crea un profilo',
-    statusTitle: 'Stato delle funzioni',
-    statusNumerology: 'Numerologia pitagorica',
-    statusNumerologyValue: 'Disponibile',
-    statusAstrology: 'Astrologia occidentale',
-    statusAstrologyValue: 'In valutazione tecnica',
-    statusAstrologyNote:
-      'Il motore astrologico sarà attivato solo dopo la verifica di accuratezza, licenza e costo zero delle librerie candidate.',
-    statusConvergence: 'Convergenze fra i due sistemi',
-    statusConvergenceValue: 'Non ancora disponibile',
-    storageTitle: 'Dove sono i tuoi dati',
-    storageBody:
-      'I profili sono salvati in IndexedDB, nel browser di questo dispositivo. Non esiste alcun account e nessun profilo viene inviato a un server SYDERA.',
-    profilesTitle: 'Profili salvati',
+  theme: { label: 'Tema', system: 'Sistema', light: 'Chiaro', dark: 'Scuro' },
+
+  intro: {
+    what: 'SYDERA affianca astrologia occidentale e numerologia pitagorica, distinguendo sempre il calcolo dall’interpretazione simbolica.',
+    privacy:
+      'I dati che inserisci restano nel browser di questo dispositivo: nessun account, nessun server, nessun tracciamento.',
+    acknowledge:
+      'Ho letto le avvertenze: astrologia e numerologia non sono metodi predittivi scientificamente validati e SYDERA non fornisce consulenza medica, psicologica, legale o finanziaria.',
+    acknowledgeRequired: 'Per calcolare la tua SYDERA è necessario accettare le avvertenze.',
+    readDisclaimer: 'Leggi le avvertenze complete',
+    readPrivacy: 'Leggi l’informativa privacy',
   },
-  profiles: {
-    title: 'Profili',
-    subtitle: 'I profili restano su questo dispositivo e possono essere eliminati in qualsiasi momento.',
-    create: 'Nuovo profilo',
-    empty: 'Non hai ancora creato profili.',
-    open: 'Apri analisi',
-    delete: 'Elimina',
-    deleteConfirmTitle: 'Eliminare questo profilo?',
-    deleteConfirmBody: 'L’operazione rimuove definitivamente il profilo da questo dispositivo e non può essere annullata.',
+
+  entry: {
+    title: 'SYDERA',
+    editTitle: 'I miei dati',
+    submit: 'CALCOLA SYDERA',
+    submitEdit: 'RICALCOLA SYDERA',
     cancel: 'Annulla',
-    confirmDelete: 'Elimina definitivamente',
-    createdAt: 'Creato il',
-    unknownTime: 'Ora di nascita non indicata',
+    dateLabel: 'Data di nascita',
+    dateHelp: 'Data civile come risulta all’atto di nascita.',
+    timeLabel: 'Ora di nascita',
+    timeHelp: 'Ora locale indicata sul documento. Determina Ascendente, Medio Cielo e case.',
+    timeUnknown: 'Non conosco l’ora di nascita',
+    timeUnknownHelp:
+      'SYDERA non inventerà un orario. Senza ora esatta non calcola Ascendente, Medio Cielo, case e aspetti, e mostra le posizioni come intervallo sulla giornata.',
+    precisionLabel: 'Precisione dell’ora',
+    precisionHelp: 'Serve a dichiarare quanto è incerto l’Ascendente, non a modificare il calcolo.',
+    precisionOptions: {
+      exact: 'Al minuto',
+      five: 'Circa cinque minuti',
+      fifteen: 'Circa un quarto d’ora',
+      hour: 'Circa un’ora',
+    },
+    placeLabel: 'Luogo di nascita',
+    placeHelp: 'La ricerca avviene sul tuo dispositivo: nessun luogo viene inviato all’esterno.',
+    placeSearching: 'Ricerca…',
+    placeLoading: 'Caricamento dell’archivio dei luoghi (una sola volta)…',
+    placeLoadError:
+      'Archivio dei luoghi non disponibile. Puoi inserire manualmente coordinate e fuso orario.',
+    placeNoResults: 'Nessun luogo trovato. Prova un altro nome oppure inserisci le coordinate manualmente.',
+    placeSelected: 'Luogo selezionato',
+    placeChange: 'Cambia luogo',
+    placeManual: 'Inserisci coordinate manualmente',
+    placeManualLabel: 'Nome del luogo',
+    latitudeLabel: 'Latitudine (gradi, positiva a nord)',
+    longitudeLabel: 'Longitudine (gradi, positiva a est)',
+    zoneLabel: 'Fuso orario (identificativo IANA)',
+    zoneHelp: 'Ad esempio Europe/Rome. Il fuso storico corretto viene ricavato da questo identificativo.',
+    manualConfirm: 'Usa queste coordinate',
+    nameLabel: 'Nome completo di nascita',
+    nameHelp: 'Necessario per la numerologia. Non serve ai calcoli astrologici e puoi lasciarlo vuoto.',
+    errors: {
+      dateRequired: 'Inserisci la data di nascita.',
+      dateInvalid: 'La data indicata non esiste nel calendario.',
+      dateRange: 'La data deve essere compresa fra l’anno 1000 e l’anno 2400.',
+      timeRequired: 'Inserisci l’ora di nascita oppure indica che non la conosci.',
+      timeInvalid: 'Inserisci un’ora valida.',
+      placeRequired: 'Indica il luogo di nascita: senza luogo non è possibile convertire l’ora in UTC.',
+      latitude: 'La latitudine deve essere compresa fra -90 e 90.',
+      longitude: 'La longitudine deve essere compresa fra -180 e 180.',
+      zone: 'Identificativo di fuso orario non riconosciuto.',
+    },
   },
-  profileForm: {
-    title: 'Nuovo profilo',
-    subtitle: 'SYDERA chiede solo i dati necessari ai calcoli richiesti.',
-    labelField: 'Etichetta del profilo',
-    labelHelp: 'Serve solo a riconoscere il profilo nell’elenco su questo dispositivo.',
-    nameField: 'Nome completo di nascita',
-    nameHelp:
-      'Necessario esclusivamente per la numerologia pitagorica. Non è richiesto per i calcoli astrologici.',
-    dateField: 'Data di nascita',
-    dateHelp: 'Data civile riportata sul documento di nascita.',
-    timeKnownField: 'Conosco l’ora di nascita',
-    timeField: 'Ora di nascita (ora locale)',
-    timeHelp:
-      'L’ora non incide sui calcoli numerologici. Sarà usata dal motore astrologico, quando disponibile, per Ascendente e case.',
-    placeField: 'Luogo di nascita',
-    placeHelp:
-      'Facoltativo in questa fase: senza motore astrologico attivo il luogo non viene utilizzato per alcun calcolo.',
-    save: 'Salva profilo',
-    cancel: 'Annulla',
-    requiredName: 'Inserisci il nome completo di nascita.',
-    requiredLabel: 'Inserisci un’etichetta per il profilo.',
-    requiredDate: 'Inserisci una data di nascita valida.',
-    invalidDate: 'La data indicata non esiste nel calendario.',
-    outOfRangeDate: 'La data deve essere compresa fra l’anno 1000 e l’anno 2400.',
-    invalidTime: 'Inserisci un’ora valida.',
-    privacyReminder:
-      'Questi dati vengono salvati soltanto nel browser di questo dispositivo. Puoi eliminarli quando vuoi da Impostazioni.',
+
+  returning: {
+    title: 'La mia SYDERA',
+    calculatedOn: 'Calcolata il',
+    open: 'APRI LA MIA SYDERA',
+    edit: 'Modifica i dati',
   },
-  analysis: {
-    title: 'Analisi numerologica',
-    calculatedLayer: 'Dati calcolati',
-    interpretationLayer: 'Lettura simbolica',
+
+  result: {
     layerNote:
-      'I numeri sono il risultato di un calcolo deterministico verificabile. Le letture che li accompagnano appartengono alla tradizione simbolica e non sono un dato scientifico.',
+      'I dati calcolati sono verificabili e riproducibili. Le letture che li accompagnano appartengono a tradizioni simboliche e non sono un dato scientifico.',
+    calculated: 'Dati calcolati',
+    symbolic: 'Lettura simbolica',
+    showCalculation: 'Mostra il calcolo',
+    hideCalculation: 'Nascondi il calcolo',
+    referenceDate: 'Data di riferimento',
+  },
+
+  sintesi: {
+    title: 'Sintesi',
+    lead: 'I punti principali della tua SYDERA, con il rimando alle sezioni che li spiegano.',
+    astroTitle: 'Dall’astrologia',
+    numeroTitle: 'Dalla numerologia',
+    convergenceTitle: 'Fra i due sistemi',
+    missingAstrology: 'Astrologia non calcolabile con i dati attuali.',
+    missingNumerology: 'Numerologia non calcolabile: manca il nome completo di nascita.',
+    missingConvergence: 'Le convergenze richiedono entrambi i sistemi.',
+    completeData: 'Completa i dati',
+  },
+
+  astrology: {
+    title: 'Astrologia',
+    lead: 'Posizioni calcolate per l’istante di nascita convertito in UTC.',
+    positions: 'Posizioni',
+    angles: 'Ascendente e Medio Cielo',
+    houses: 'Case',
+    aspects: 'Aspetti',
+    ascendant: 'Ascendente',
+    midheaven: 'Medio Cielo',
+    house: 'Casa',
+    retrograde: 'retrogrado',
+    orb: 'orbita',
+    applying: 'in avvicinamento',
+    separating: 'in allontanamento',
+    houseSystem: 'Sistema di case',
+    houseSystemNames: { 'whole-sign': 'Segni interi', equal: 'Case uguali', placidus: 'Placidus' },
+    partialTitle: 'Analisi parziale: ora di nascita non indicata',
+    partialBody:
+      'Senza un’ora esatta SYDERA non calcola Ascendente, Medio Cielo, case e aspetti, e non inventa un orario di comodo. Le posizioni qui sotto sono l’intervallo percorso dal corpo nell’arco della giornata.',
+    partialRange: 'intervallo nella giornata',
+    partialSignUncertain: 'cambia segno durante la giornata',
+    refusedTitle: 'Sistema di case non calcolabile',
+    refusedBody:
+      'Placidus non è definito a questa latitudine: la costruzione richiede che ogni grado sorga e tramonti, condizione che oltre il circolo polare non è soddisfatta. SYDERA non sostituisce automaticamente un altro sistema.',
+    refusedChoose: 'Scegli un sistema alternativo nelle impostazioni del metodo.',
+    utcUsed: 'Istante UTC usato',
+    offsetUsed: 'Scarto applicato',
+    zoneUsed: 'Fuso orario',
+    siderealTime: 'Tempo siderale locale',
+    obliquity: 'Obliquità dell’eclittica',
+    uncertaintyTitle: 'Precisione dichiarata',
+    uncertaintyBody: (degrees: string, minutes: string) =>
+      `Con un’ora nota a ±${minutes} minuti, l’Ascendente è determinato entro circa ±${degrees}°. La precisione del calcolo non è la precisione del dato inserito.`,
+    caveats: {
+      'pre-1970': 'Nascita precedente al 1970: i dati storici sui fusi orari sono dichiarati approssimativi dalla fonte. Verifica lo scarto applicato.',
+      'local-mean-time': 'A questa data il luogo non adottava ancora un fuso standard: è stata usata l’ora media locale.',
+      'unusual-offset': 'Lo scarto applicato non è un numero intero di mezze ore: verificalo se possibile.',
+      'manual-override': 'Scarto impostato manualmente da te, non ricavato dalle regole del fuso.',
+    },
+  },
+
+  numerology: {
+    title: 'Numerologia',
+    lead: 'Numeri calcolati con le convenzioni dichiarate nel metodo.',
+    missingName: 'Nome completo di nascita non inserito',
+    missingNameBody:
+      'La numerologia si calcola dalle lettere del nome di nascita. SYDERA non inventa un nome: aggiungilo dai tuoi dati per vedere questa sezione.',
+    addName: 'Aggiungi il nome',
     coreNumbers: 'Numeri fondamentali',
     cycles: 'Cicli personali',
     pinnacles: 'Pinnacoli',
     challenges: 'Sfide',
-    method: 'Metodo di calcolo',
-    showTrace: 'Mostra il calcolo',
-    hideTrace: 'Nascondi il calcolo',
-    referenceDate: 'Data di riferimento per i cicli',
+    letterTable: 'Corrispondenza lettere e valori',
+    vowel: 'Vocale',
+    consonant: 'Consonante',
     masterNumber: 'Numero maestro',
-    notCalculable: 'Calcolo non eseguibile con le informazioni disponibili',
+    ageRange: 'Età',
+    fromAge: 'da',
+    onwards: 'in poi',
+    method: 'Metodo di calcolo',
     normalisedName: 'Adattamenti applicati al nome prima del calcolo',
-    astrologyPending: 'Sezione astrologica',
-    astrologyPendingBody:
-      'Il motore astrologico non è ancora attivo. SYDERA non mostra posizioni planetarie stimate o approssimate: finché il calcolo non è affidabile, questa sezione resta vuota.',
+    notCalculable: 'Calcolo non eseguibile con le informazioni disponibili',
     numbers: {
       lifePath: 'Sentiero di vita',
       expression: 'Espressione (Destino)',
@@ -149,8 +225,7 @@ export const it = {
       nameSumLabel: 'Somma del nome',
       nameSum: {
         total: 'Tutte le lettere del nome completo vengono sommate e il totale viene ridotto una sola volta.',
-        'per-word':
-          'Ogni parola del nome viene ridotta separatamente e i risultati vengono poi sommati e ridotti.',
+        'per-word': 'Ogni parola del nome viene ridotta separatamente e i risultati vengono poi sommati e ridotti.',
       },
       yLabel: 'Regola della lettera Y',
       y: {
@@ -162,8 +237,7 @@ export const it = {
       wLabel: 'Trattamento della W',
       w: 'La W è sempre trattata come consonante. Alcune scuole la considerano vocale in combinazioni come “OW”: SYDERA non applica questa variante, perché la regola non è formulata in modo uniforme e non sarebbe riproducibile.',
       masterLabel: 'Numeri maestri',
-      masterOn:
-        'I totali 11, 22 e 33 vengono conservati come numeri maestri invece di essere ridotti a una sola cifra.',
+      masterOn: 'I totali 11, 22 e 33 vengono conservati come numeri maestri invece di essere ridotti a una sola cifra.',
       masterOff: 'I numeri maestri non vengono conservati: ogni risultato è ridotto da 1 a 9.',
       masterCyclesNote:
         'Anno, mese e giorno personale sono per tradizione espressi sulla scala 1–9: in questi cicli i numeri maestri non vengono mai conservati.',
@@ -179,25 +253,83 @@ export const it = {
       docsNote:
         'Il metodo completo, con esempi e casi limite, è descritto nel documento tecnico del progetto (docs/NUMEROLOGY_METHOD.md).',
     },
-    letterTable: 'Corrispondenza lettere e valori',
-    vowel: 'Vocale',
-    consonant: 'Consonante',
-    ageRange: 'Età',
-    fromAge: 'da',
-    toAge: 'a',
-    onwards: 'in poi',
   },
+
+  convergence: {
+    title: 'Convergenze',
+    lead: 'Confronto fra i temi simbolici che i due sistemi mettono in evidenza.',
+    caution:
+      'Una convergenza indica soltanto che i due vocaboli simbolici insistono sullo stesso tema. Non è una prova, né una misura di una caratteristica personale.',
+    incomplete: 'Confronto non disponibile',
+    incompleteBody:
+      'Le convergenze richiedono sia i dati astrologici sia quelli numerologici. Completa i dati mancanti per vedere questa sezione.',
+    levels: {
+      'convergenza-forte': 'Convergenza forte',
+      'convergenza-moderata': 'Convergenza moderata',
+      neutro: 'Neutro',
+      contrasto: 'Contrasto significativo',
+    },
+    levelExplanations: {
+      'convergenza-forte': 'Entrambi i sistemi insistono su questo tema.',
+      'convergenza-moderata': 'Entrambi i sistemi toccano il tema, con intensità minore.',
+      neutro: 'Nessuno dei due sistemi mette in evidenza il tema.',
+      contrasto: 'Un sistema evidenzia il tema, l’altro no: le due letture divergono qui.',
+    },
+    themes: {
+      analisi: 'Analisi',
+      comunicazione: 'Comunicazione',
+      indipendenza: 'Indipendenza',
+      creativita: 'Creatività',
+      stabilita: 'Stabilità',
+      emotivita: 'Orientamento emotivo',
+      relazione: 'Relazioni',
+      organizzazione: 'Organizzazione',
+      innovazione: 'Innovazione',
+      introspezione: 'Introspezione',
+      concretezza: 'Orientamento pratico',
+    },
+    fromAstrology: 'Fattori astrologici',
+    fromNumerology: 'Fattori numerologici',
+    methodTitle: 'Come viene calcolato il confronto',
+    methodBody:
+      'A ogni segno e a ogni numero è associato un insieme di temi documentato e sempre uguale. I punteggi vengono normalizzati e confrontati con soglie fisse. Il procedimento è descritto in docs/CONVERGENCE_TAXONOMY.md.',
+  },
+
+  cycles: {
+    title: 'Cicli',
+    lead: 'Periodi in corso, calcolati alla data di riferimento.',
+    caution:
+      'I cicli descrivono temi simbolici associati a un periodo. Non indicano eventi certi e non vanno usati per decidere questioni importanti.',
+    transitsTitle: 'Transiti in corso',
+    transitsEmpty: 'Nessun transito entro l’orbita stretta usata da SYDERA a questa data.',
+    transitsUnavailable:
+      'I transiti richiedono un tema natale completo, quindi ora e luogo di nascita.',
+    personalTitle: 'Cicli numerologici',
+    personalUnavailable: 'I cicli numerologici richiedono il nome completo di nascita.',
+    transiting: 'In transito',
+    onNatal: 'sul punto natale',
+    orb: 'orbita',
+  },
+
   settings: {
     title: 'Impostazioni',
     appearance: 'Aspetto',
+    method: 'Metodo di calcolo',
+    methodBody:
+      'Impostazioni avanzate. L’esperienza normale non richiede di scegliere: SYDERA usa i Segni interi, il sistema definito a ogni latitudine.',
+    houseSystem: 'Sistema di case',
+    houseSystemHelp:
+      'Tradizioni astrologiche diverse usano sistemi di case diversi e ottengono posizioni diverse dagli stessi dati. SYDERA non sostiene che un sistema sia scientificamente o oggettivamente superiore a un altro.',
     data: 'Dati locali',
     dataBody:
-      'SYDERA conserva i profili in IndexedDB e alcune preferenze non personali in localStorage. Nessun dato viene inviato all’esterno.',
-    profilesStored: 'Profili salvati su questo dispositivo',
+      'SYDERA conserva la tua analisi in IndexedDB e alcune preferenze non personali in localStorage. Nessun dato viene inviato all’esterno.',
+    stored: 'Analisi salvata su questo dispositivo',
+    storedYes: 'Sì',
+    storedNo: 'No',
     deleteAll: 'ELIMINA TUTTI I MIEI DATI',
     deleteAllTitle: 'Eliminare tutti i dati locali di SYDERA?',
     deleteAllBody:
-      'Vengono rimossi tutti i profili salvati e tutte le preferenze dell’applicazione su questo dispositivo. L’operazione è definitiva e non può essere annullata. I file che hai esportato manualmente non vengono toccati.',
+      'Vengono rimossi la tua analisi e tutte le preferenze dell’applicazione su questo dispositivo. L’operazione è definitiva e non può essere annullata. I file che hai esportato manualmente non vengono toccati.',
     deleteAllConfirm: 'Sì, elimina tutto',
     deleteAllWorking: 'Eliminazione in corso…',
     deleteAllRetry: 'Riprova',
@@ -210,65 +342,35 @@ export const it = {
     documents: 'Documenti',
     reviewDisclaimer: 'Rileggi le avvertenze',
     reviewPrivacy: 'Rileggi l’informativa privacy',
+    notices: 'Note sulle componenti di terze parti',
   },
+
   dataDeleted: {
     title: 'Dati eliminati',
-    lead:
-      'Tutti i dati personali gestiti da SYDERA su questo dispositivo sono stati eliminati in modo definitivo.',
+    lead: 'Tutti i dati personali gestiti da SYDERA su questo dispositivo sono stati eliminati in modo definitivo.',
     removedTitle: 'Che cosa è stato eliminato',
     removed: [
-      'Tutti i profili salvati, con nome, data, ora e luogo di nascita.',
-      'Tutti i risultati numerologici derivati da quei profili.',
+      'La tua analisi, con nome, data, ora e luogo di nascita.',
+      'Tutti i risultati astrologici e numerologici derivati da quei dati.',
       'Tutte le preferenze dell’applicazione, compresa l’accettazione delle avvertenze.',
     ],
     keptTitle: 'Che cosa non è stato toccato',
     kept: [
       'I file che hai esportato volontariamente: non fanno parte dell’archivio dell’applicazione.',
-      'La copia offline del programma, che non contiene alcuna informazione personale.',
+      'La copia offline del programma e l’archivio dei luoghi, che non contengono alcuna informazione personale.',
     ],
-    note: 'Selezionando “Continua” SYDERA riparte dalla presentazione iniziale, come al primo avvio.',
+    note: 'Selezionando “Continua” SYDERA riparte dalla schermata iniziale.',
     continue: 'Continua',
   },
-  onboarding: {
-    step: 'Passaggio',
-    of: 'di',
-    next: 'Continua',
-    back: 'Indietro',
-    identityTitle: 'SYDERA',
-    identityBody:
-      'Uno strumento di esplorazione simbolica personale che affianca astrologia occidentale e numerologia pitagorica, distinguendo sempre il calcolo dall’interpretazione.',
-    whatTitle: 'Che cosa fa SYDERA',
-    whatBullets: [
-      'Calcola in modo deterministico i numeri della numerologia pitagorica.',
-      'Mostra il procedimento di ogni calcolo, passaggio per passaggio.',
-      'Distingue in modo esplicito i dati calcolati dalle letture simboliche.',
-      'Funziona offline, senza account e senza server.',
-    ],
-    privacyTitle: 'Privacy in breve',
-    privacyBullets: [
-      'I dati inseriti restano nel browser di questo dispositivo.',
-      'Nessun account, nessuna registrazione, nessun profilo remoto.',
-      'Nessuna pubblicità, nessuna analitica, nessun tracciamento.',
-      'Puoi eliminare tutti i dati locali in qualsiasi momento.',
-    ],
-    privacyLink: 'Leggi l’informativa completa',
-    disclaimerTitle: 'Avvertenze da accettare',
-    disclaimerLink: 'Leggi le avvertenze complete',
-    acknowledge:
-      'Ho letto e compreso le avvertenze: astrologia e numerologia non sono metodi predittivi scientificamente validati e SYDERA non fornisce consulenza medica, psicologica, legale o finanziaria.',
-    start: 'Inizia',
-    acknowledgeRequired: 'Per proseguire è necessario accettare le avvertenze.',
-  },
+
   common: {
     close: 'Chiudi',
     back: 'Indietro',
     notAvailable: 'Non disponibile',
-    yes: 'Sì',
-    no: 'No',
     loading: 'Caricamento…',
     error: 'Si è verificato un errore',
     storageUnavailable:
-      'Questo browser non consente l’accesso all’archivio locale: SYDERA non può salvare profili in questa modalità.',
+      'Questo browser non consente l’accesso all’archivio locale: SYDERA non può salvare la tua analisi in questa modalità.',
     updateAvailable: 'È disponibile una nuova versione di SYDERA.',
     updateAction: 'Aggiorna',
   },
@@ -278,16 +380,16 @@ export const privacyDocument: LegalDocument = {
   title: 'Informativa privacy',
   updated: 'Aggiornata: agosto 2026',
   intro:
-    'Questa informativa descrive il comportamento tecnico reale dell’applicazione. Se in futuro l’architettura dovesse cambiare, l’informativa sarà aggiornata prima della pubblicazione della nuova versione.',
+    'Questa informativa descrive il comportamento tecnico reale dell’applicazione. Se l’architettura dovesse cambiare, l’informativa sarà aggiornata prima della pubblicazione della nuova versione.',
   sections: [
     {
       title: 'Trattamento locale',
       paragraphs: [
-        'SYDERA è un’applicazione locale. I dati che inserisci vengono elaborati dal browser sul tuo dispositivo e non vengono trasmessi intenzionalmente ad alcun server SYDERA.',
+        'SYDERA è un’applicazione locale. I dati che inserisci vengono elaborati dal browser sul tuo dispositivo e non vengono trasmessi ad alcun server SYDERA.',
       ],
       bullets: [
         'Nessun account e nessuna registrazione.',
-        'Nessun profilo personale su server remoti.',
+        'Nessun dato personale su server remoti.',
         'Nessuna pubblicità, analitica, telemetria o profilazione.',
         'Nessuno script di tracciamento di terze parti.',
       ],
@@ -295,36 +397,45 @@ export const privacyDocument: LegalDocument = {
     {
       title: 'Dati raccolti',
       paragraphs: [
-        'SYDERA chiede solo le informazioni necessarie al calcolo richiesto: un’etichetta per riconoscere il profilo, il nome completo di nascita (necessario esclusivamente per la numerologia) e la data di nascita. Ora e luogo di nascita sono facoltativi e servono al futuro motore astrologico.',
+        'SYDERA chiede solo le informazioni necessarie ai calcoli: data di nascita, ora di nascita, luogo di nascita e, soltanto per la numerologia, il nome completo di nascita. Il nome è facoltativo e non serve ai calcoli astrologici.',
         'Non vengono richiesti indirizzo e-mail, numero di telefono, documenti di identità, account social o password.',
+      ],
+    },
+    {
+      title: 'Astrologia, fuso orario e luogo',
+      paragraphs: [
+        'Le posizioni planetarie sono calcolate localmente da una libreria inclusa nell’applicazione: non esiste alcun servizio esterno di effemeridi e nessuna data o ora di nascita lascia il dispositivo.',
+        'Il fuso orario storico viene ricavato dal database IANA già presente nel browser attraverso le funzioni standard del linguaggio: nessun dato viene inviato per ottenerlo.',
+        'L’archivio dei luoghi di nascita è un file statico distribuito insieme all’applicazione e scaricato dallo stesso indirizzo da cui hai aperto SYDERA, una sola volta. La ricerca del luogo avviene interamente sul dispositivo: il nome che digiti non viene inviato da nessuna parte, e non viene usato alcun servizio di geocodifica.',
       ],
     },
     {
       title: 'Dove sono conservati i dati',
       paragraphs: [
-        'I profili sono salvati in IndexedDB, l’archivio strutturato del browser. Alcune preferenze non personali dell’applicazione (tema, avvenuta accettazione delle avvertenze) sono salvate in localStorage.',
-        'La cache offline del service worker contiene solo i file dell’applicazione: nessuna informazione personale viene memorizzata in quella cache.',
+        'La tua analisi è salvata in IndexedDB, l’archivio strutturato del browser. Alcune preferenze non personali (tema, avvenuta accettazione delle avvertenze, sistema di case scelto) sono salvate in localStorage.',
+        'La cache offline contiene solo i file del programma e l’archivio dei luoghi: nessuna informazione personale viene memorizzata in quella cache.',
       ],
     },
     {
       title: 'Cancellazione',
       paragraphs: [
-        'Puoi eliminare un singolo profilo dall’elenco dei profili oppure rimuovere tutti i dati locali dalla sezione Impostazioni, con il comando “Elimina tutti i miei dati”.',
-        'La cancellazione rimuove il database dei profili e le preferenze dell’applicazione. I file che hai esportato volontariamente non fanno parte dell’archivio dell’applicazione e non vengono modificati.',
+        'Puoi rimuovere tutti i dati locali dalla sezione Impostazioni, con il comando “Elimina tutti i miei dati”.',
+        'La cancellazione rimuove l’analisi salvata e le preferenze dell’applicazione. I file che hai esportato volontariamente non fanno parte dell’archivio dell’applicazione e non vengono modificati.',
         'L’eliminazione viene confermata soltanto quando è stata effettivamente completata. Se SYDERA è aperta in un’altra scheda o finestra, il browser rinvia l’operazione: in quel caso non viene eliminato nulla e l’applicazione ti chiede di chiudere le altre schede e riprovare.',
       ],
     },
     {
       title: 'Connessioni di rete',
       paragraphs: [
-        'L’applicazione viene scaricata dal sito che la ospita e poi funziona offline. Non contiene font remoti, script esterni o chiamate ad API di terze parti.',
+        'L’applicazione viene scaricata dal sito che la ospita e poi funziona offline. Non contiene font remoti, script esterni o chiamate ad API di terze parti. L’unica richiesta che effettua è il download dell’archivio dei luoghi dallo stesso indirizzo dell’applicazione.',
+        'SYDERA dichiara inoltre una Content Security Policy che consente esclusivamente risorse provenienti dal proprio indirizzo. Se il servizio di hosting o una rete di distribuzione inserisse uno script di analitica nella pagina servita, il browser lo rifiuterebbe prima di eseguirlo: la promessa di non usare analitica e script di terze parti resta valida indipendentemente da come il sito viene ospitato.',
         'SYDERA non vende informazioni personali e non le utilizza per finalità pubblicitarie.',
       ],
     },
     {
       title: 'Responsabilità dell’utente',
       paragraphs: [
-        'Poiché i dati restano sul dispositivo, la loro protezione dipende anche dalle misure di sicurezza del dispositivo e del browser. Chi ha accesso al browser potrebbe accedere ai profili salvati.',
+        'Poiché i dati restano sul dispositivo, la loro protezione dipende anche dalle misure di sicurezza del dispositivo e del browser. Chi ha accesso al browser potrebbe accedere all’analisi salvata.',
       ],
     },
   ],
@@ -340,7 +451,7 @@ export const disclaimerDocument: LegalDocument = {
       title: 'Natura simbolica',
       paragraphs: [
         'Astrologia e numerologia non sono metodi predittivi scientificamente validati. I risultati sono forniti a scopo informativo, culturale, di intrattenimento e di riflessione personale.',
-        'Le posizioni astronomiche e i risultati numerici possono derivare da calcoli matematici, ma la loro interpretazione appartiene a tradizioni simboliche e non costituisce prova scientifica riguardo a personalità, compatibilità o eventi futuri.',
+        'Le posizioni astronomiche e i risultati numerici derivano da calcoli matematici verificabili, ma la loro interpretazione appartiene a tradizioni simboliche e non costituisce prova scientifica riguardo a personalità, compatibilità o eventi futuri.',
       ],
     },
     {
@@ -361,7 +472,8 @@ export const disclaimerDocument: LegalDocument = {
       title: 'Limiti dichiarati',
       paragraphs: [
         'SYDERA non descrive eventi futuri come certi e non produce interpretazioni destinate a spaventare o condizionare chi legge.',
-        'Quando un calcolo non può essere eseguito in modo affidabile con le informazioni disponibili, l’applicazione lo dichiara esplicitamente invece di produrre un risultato inventato.',
+        'Quando un calcolo non può essere eseguito in modo affidabile con le informazioni disponibili, l’applicazione lo dichiara esplicitamente invece di produrre un risultato inventato: senza ora di nascita non calcola Ascendente, Medio Cielo e case, e senza nome non calcola la numerologia.',
+        'La precisione del calcolo non è la precisione del dato inserito: un’ora di nascita arrotondata rende l’Ascendente incerto di diversi gradi, e SYDERA lo dichiara.',
       ],
     },
   ],
@@ -369,14 +481,11 @@ export const disclaimerDocument: LegalDocument = {
 
 export const aboutDocument: LegalDocument = {
   title: 'Informazioni su SYDERA',
-  updated: 'Versione 0.1.0 — fase 1',
+  updated: 'Versione 0.2.0 — fase 2',
   intro:
     'SYDERA è un’applicazione web progressiva locale dedicata all’analisi simbolica personale: astrologia occidentale e numerologia pitagorica, con calcoli trasparenti e ispezionabili.',
   sections: [
-    {
-      title: 'Progetto',
-      paragraphs: ['Ideazione, progettazione e sviluppo: Alessandro Pezzali.'],
-    },
+    { title: 'Progetto', paragraphs: ['Ideazione, progettazione e sviluppo: Alessandro Pezzali.'] },
     {
       title: 'Principi',
       paragraphs: [
@@ -390,15 +499,21 @@ export const aboutDocument: LegalDocument = {
       ],
     },
     {
-      title: 'Stato di sviluppo',
+      title: 'Come sono validati i calcoli',
       paragraphs: [
-        'Questa versione implementa il motore di numerologia pitagorica, l’architettura locale dei dati e la struttura dell’applicazione. Il motore astrologico verrà introdotto solo dopo la verifica documentata di accuratezza, licenza e assenza di costi.',
+        'Le posizioni planetarie sono confrontate con i valori indipendenti del sistema Horizons del Jet Propulsion Laboratory; l’obliquità con il polinomio IAU 2006; Ascendente, Medio Cielo e cuspidi con le loro definizioni geometriche. Le tolleranze sono fissate prima dell’implementazione e gli scostamenti osservati sono riportati nella suite di test.',
+      ],
+    },
+    {
+      title: 'Componenti di terze parti',
+      paragraphs: [
+        'Le posizioni planetarie usano Astronomy Engine (licenza MIT). L’archivio dei luoghi deriva da GeoNames, © GeoNames, distribuito con licenza Creative Commons Attribution 4.0. I fusi orari storici provengono dal database IANA incluso nel browser. L’elenco completo è nel file THIRD_PARTY_NOTICES.md del progetto.',
       ],
     },
     {
       title: 'Tecnologia',
       paragraphs: [
-        'React, TypeScript e Vite; IndexedDB per i profili, localStorage per le sole preferenze, service worker per il funzionamento offline. Nessuna dipendenza a pagamento, nessun servizio di intelligenza artificiale esterno.',
+        'React, TypeScript e Vite; IndexedDB per l’analisi, localStorage per le sole preferenze, service worker per il funzionamento offline. Nessuna dipendenza a pagamento, nessun servizio di intelligenza artificiale esterno.',
       ],
     },
   ],

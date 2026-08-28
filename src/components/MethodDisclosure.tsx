@@ -9,7 +9,7 @@ import type { NumerologyOptions } from '../core/numerology/types.ts'
  * convention SYDERA uses; it never claims that convention is the correct one.
  */
 export function MethodDisclosure({ options }: { readonly options: NumerologyOptions }) {
-  const text = it.analysis.methodDisclosure
+  const text = it.numerology.methodDisclosure
 
   const entries: ReadonlyArray<{ term: string; description: string; note?: string }> = [
     {

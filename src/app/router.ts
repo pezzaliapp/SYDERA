@@ -2,16 +2,17 @@
  * Hash-based router.
  *
  * A hash route keeps the application deployable as plain static files on any
- * host (GitHub Pages included) without server rewrites, and without adding a
- * routing dependency.
+ * host, without server rewrites and without a routing dependency.
  */
 import { useCallback, useSyncExternalStore } from 'react'
 
+export const RESULT_SECTIONS = ['sintesi', 'astrologia', 'numerologia', 'convergenze', 'cicli'] as const
+export type ResultSection = (typeof RESULT_SECTIONS)[number]
+
 export type Route =
-  | { readonly name: 'home' }
-  | { readonly name: 'profiles' }
-  | { readonly name: 'profile-new' }
-  | { readonly name: 'analysis'; readonly profileId: string }
+  | { readonly name: 'start' }
+  | { readonly name: 'data' }
+  | { readonly name: 'result'; readonly section: ResultSection }
   | { readonly name: 'privacy' }
   | { readonly name: 'disclaimer' }
   | { readonly name: 'about' }
@@ -19,10 +20,10 @@ export type Route =
   | { readonly name: 'not-found'; readonly path: string }
 
 export const paths = {
-  home: '#/',
-  profiles: '#/profili',
-  profileNew: '#/profili/nuovo',
-  analysis: (profileId: string) => `#/analisi/${encodeURIComponent(profileId)}`,
+  start: '#/',
+  data: '#/dati',
+  result: '#/sydera',
+  section: (section: ResultSection) => (section === 'sintesi' ? '#/sydera' : `#/sydera/${section}`),
   privacy: '#/privacy',
   disclaimer: '#/avvertenze',
   about: '#/informazioni',
@@ -33,12 +34,17 @@ export function parseHash(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/'
   const segments = path.split('/').filter(Boolean).map(decodeURIComponent)
 
-  if (segments.length === 0) return { name: 'home' }
+  if (segments.length === 0) return { name: 'start' }
   switch (segments[0]) {
-    case 'profili':
-      return segments[1] === 'nuovo' ? { name: 'profile-new' } : { name: 'profiles' }
-    case 'analisi':
-      return segments[1] ? { name: 'analysis', profileId: segments[1] } : { name: 'profiles' }
+    case 'dati':
+      return { name: 'data' }
+    case 'sydera': {
+      const section = segments[1]
+      if (!section) return { name: 'result', section: 'sintesi' }
+      return (RESULT_SECTIONS as readonly string[]).includes(section)
+        ? { name: 'result', section: section as ResultSection }
+        : { name: 'result', section: 'sintesi' }
+    }
     case 'privacy':
       return { name: 'privacy' }
     case 'avvertenze':

@@ -20,7 +20,7 @@ export function ConfirmDialog({
   title,
   body,
   confirmLabel,
-  cancelLabel = it.profiles.cancel,
+  cancelLabel = it.entry.cancel,
   tone = 'default',
   onConfirm,
   onCancel,
@@ -80,7 +80,7 @@ export function ConfirmDialog({
         <p id="confirm-body" className="muted">
           {body}
         </p>
-        <div className="row" style={{ justifyContent: 'flex-end' }}>
+        <div className="row row--end">
           <button type="button" className="button" ref={cancelRef} onClick={onCancel}>
             {cancelLabel}
           </button>

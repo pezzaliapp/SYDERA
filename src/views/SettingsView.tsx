@@ -4,21 +4,17 @@ import { paths } from '../app/router.ts'
 import { ConfirmDialog } from '../components/ConfirmDialog.tsx'
 import { deleteAllLocalData } from '../core/storage/wipe.ts'
 import type { Preferences, ThemePreference } from '../core/prefs/preferences.ts'
-import type { ProfilesState } from '../app/useProfiles.ts'
+import type { HouseSystemId } from '../core/astrology/types.ts'
 
 interface SettingsViewProps {
   readonly preferences: Preferences
   readonly onPreferencesChange: (preferences: Preferences) => void
-  readonly profiles: ProfilesState
-  /** Called only once the data has actually been deleted. */
+  readonly hasSydera: boolean
+  readonly houseSystem: HouseSystemId
+  readonly onHouseSystemChange: (system: HouseSystemId) => void
   readonly onDataDeleted: () => void
 }
 
-/**
- * State of the destructive deletion flow. 'blocked' means IndexedDB deferred
- * the deletion because another SYDERA tab holds the database: nothing was
- * removed and the user is asked to close it and retry.
- */
 type DeletionState = 'idle' | 'confirming' | 'working' | 'blocked' | 'error'
 
 const THEMES: ReadonlyArray<{ value: ThemePreference; label: string }> = [
@@ -27,7 +23,16 @@ const THEMES: ReadonlyArray<{ value: ThemePreference; label: string }> = [
   { value: 'dark', label: it.theme.dark },
 ]
 
-export function SettingsView({ preferences, onPreferencesChange, profiles, onDataDeleted }: SettingsViewProps) {
+const HOUSE_SYSTEMS: readonly HouseSystemId[] = ['whole-sign', 'equal', 'placidus']
+
+export function SettingsView({
+  preferences,
+  onPreferencesChange,
+  hasSydera,
+  houseSystem,
+  onHouseSystemChange,
+  onDataDeleted,
+}: SettingsViewProps) {
   const [deletion, setDeletion] = useState<DeletionState>('idle')
 
   const wipe = async (): Promise<void> => {
@@ -39,8 +44,6 @@ export function SettingsView({ preferences, onPreferencesChange, profiles, onDat
         return
       }
       setDeletion('idle')
-      // Hands control to the application, which shows the dedicated
-      // confirmation before returning to the initial state.
       onDataDeleted()
     } catch {
       setDeletion('error')
@@ -75,14 +78,41 @@ export function SettingsView({ preferences, onPreferencesChange, profiles, onDat
         </div>
       </section>
 
+      <section className="card" aria-labelledby="settings-method">
+        <h2 className="section-title" id="settings-method">
+          {it.settings.method}
+        </h2>
+        <p className="muted small">{it.settings.methodBody}</p>
+        <div className="field">
+          <span className="field__label" id="house-label">
+            {it.settings.houseSystem}
+          </span>
+          <div className="segmented" role="group" aria-labelledby="house-label">
+            {HOUSE_SYSTEMS.map((system) => (
+              <button
+                key={system}
+                type="button"
+                className="segmented__option"
+                aria-pressed={houseSystem === system}
+                disabled={!hasSydera}
+                onClick={() => onHouseSystemChange(system)}
+              >
+                {it.astrology.houseSystemNames[system]}
+              </button>
+            ))}
+          </div>
+          <p className="field__help">{it.settings.houseSystemHelp}</p>
+        </div>
+      </section>
+
       <section className="card" aria-labelledby="settings-data">
         <h2 className="section-title" id="settings-data">
           {it.settings.data}
         </h2>
         <p className="muted">{it.settings.dataBody}</p>
         <dl className="definition-list">
-          <dt>{it.settings.profilesStored}</dt>
-          <dd>{profiles.status === 'ready' ? profiles.profiles.length : it.common.notAvailable}</dd>
+          <dt>{it.settings.stored}</dt>
+          <dd>{hasSydera ? it.settings.storedYes : it.settings.storedNo}</dd>
         </dl>
         {deletion === 'blocked' ? (
           <div className="notice notice--warning" role="alert">

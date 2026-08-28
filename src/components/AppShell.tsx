@@ -7,23 +7,21 @@ interface AppShellProps {
   readonly children: ReactNode
   readonly updateAvailable: boolean
   readonly onApplyUpdate: () => void
+  /** Chrome is hidden on the entry and returning screens, which are the whole app there. */
+  readonly bare: boolean
 }
 
-const NAV_ITEMS = [
-  { path: paths.home, label: it.nav.home, icon: '◎', match: ['home'] },
-  { path: paths.profiles, label: it.nav.profiles, icon: '☰', match: ['profiles', 'profile-new', 'analysis'] },
-  { path: paths.privacy, label: it.nav.privacy, icon: '⚿', match: ['privacy'] },
-  { path: paths.disclaimer, label: it.nav.disclaimer, icon: '⚠', match: ['disclaimer'] },
-  { path: paths.about, label: it.nav.about, icon: 'ⓘ', match: ['about'] },
-  { path: paths.settings, label: it.nav.settings, icon: '⚙', match: ['settings'] },
+const SECONDARY = [
+  { path: paths.privacy, label: it.nav.privacy, match: 'privacy' },
+  { path: paths.disclaimer, label: it.nav.disclaimer, match: 'disclaimer' },
+  { path: paths.about, label: it.nav.about, match: 'about' },
+  { path: paths.settings, label: it.nav.settings, match: 'settings' },
 ] as const
 
-export function AppShell({ route, children, updateAvailable, onApplyUpdate }: AppShellProps) {
+export function AppShell({ route, children, updateAvailable, onApplyUpdate, bare }: AppShellProps) {
   const mainRef = useRef<HTMLElement>(null)
   const firstRender = useRef(true)
 
-  // Move focus to the main region on navigation so keyboard and screen-reader
-  // users land on the new content instead of the top of the document.
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false
@@ -33,6 +31,24 @@ export function AppShell({ route, children, updateAvailable, onApplyUpdate }: Ap
     window.scrollTo({ top: 0 })
   }, [route])
 
+  if (bare) {
+    return (
+      <div className="app app--bare">
+        {updateAvailable ? (
+          <div className="banner" role="status">
+            <span>{it.common.updateAvailable}</span>
+            <button type="button" className="button button--quiet" onClick={onApplyUpdate}>
+              {it.common.updateAction}
+            </button>
+          </div>
+        ) : null}
+        <main className="main main--bare" id="main" ref={mainRef} tabIndex={-1}>
+          {children}
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <a className="skip-link" href="#main">
@@ -40,10 +56,18 @@ export function AppShell({ route, children, updateAvailable, onApplyUpdate }: Ap
       </a>
 
       <header className="app-header">
-        <div className="brand">
+        <a className="brand" href={paths.result}>
           <span className="brand__name">{it.app.name}</span>
-          <span className="brand__tagline">{it.app.tagline}</span>
-        </div>
+          <span className="brand__tagline">{it.app.subtitle}</span>
+        </a>
+        <nav className="app-header__nav" aria-label={it.nav.secondaryLabel}>
+          <a className="button button--quiet small" href={paths.data}>
+            {it.nav.data}
+          </a>
+          <a className="button button--quiet small" href={paths.settings}>
+            {it.nav.settings}
+          </a>
+        </nav>
       </header>
 
       {updateAvailable ? (
@@ -55,29 +79,28 @@ export function AppShell({ route, children, updateAvailable, onApplyUpdate }: Ap
         </div>
       ) : null}
 
-      <div className="app-body">
-        <nav className="nav" aria-label={it.nav.label}>
-          <ul className="nav__list">
-            {NAV_ITEMS.map((item) => {
-              const current = (item.match as readonly string[]).includes(route.name)
-              return (
-                <li key={item.path}>
-                  <a className="nav__link" href={item.path} {...(current ? { 'aria-current': 'page' as const } : {})}>
-                    <span className="nav__icon" aria-hidden="true">
-                      {item.icon}
-                    </span>
-                    <span>{item.label}</span>
-                  </a>
-                </li>
-              )
-            })}
+      <main className="main" id="main" ref={mainRef} tabIndex={-1}>
+        {children}
+      </main>
+
+      <footer className="app-footer">
+        <nav aria-label={it.nav.secondaryLabel}>
+          <ul className="footer__list">
+            {SECONDARY.map((item) => (
+              <li key={item.path}>
+                <a
+                  className="footer__link"
+                  href={item.path}
+                  {...(route.name === item.match ? { 'aria-current': 'page' as const } : {})}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
-
-        <main className="main" id="main" ref={mainRef} tabIndex={-1}>
-          {children}
-        </main>
-      </div>
+        <p className="footer__note small">{it.app.localNotice}</p>
+      </footer>
     </div>
   )
 }

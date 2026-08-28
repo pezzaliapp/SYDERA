@@ -7,8 +7,14 @@
  * leaves the device.
  */
 export const DATABASE_NAME = 'sydera'
-export const DATABASE_VERSION = 1
-export const PROFILE_STORE = 'profiles'
+export const DATABASE_VERSION = 2
+/**
+ * One record, one analysis. SYDERA is not a profile manager: the store holds
+ * the single set of birth data the person entered, under a fixed key.
+ */
+export const SYDERA_STORE = 'sydera'
+/** Removed in version 2, when the profile collection was dropped. */
+const LEGACY_PROFILE_STORE = 'profiles'
 
 export class StorageUnavailableError extends Error {
   constructor(cause?: unknown) {
@@ -40,8 +46,14 @@ export function openDatabase(): Promise<IDBDatabase> {
     const request = factory.open(DATABASE_NAME, DATABASE_VERSION)
     request.onupgradeneeded = () => {
       const database = request.result
-      if (!database.objectStoreNames.contains(PROFILE_STORE)) {
-        database.createObjectStore(PROFILE_STORE, { keyPath: 'id' })
+      if (!database.objectStoreNames.contains(SYDERA_STORE)) {
+        database.createObjectStore(SYDERA_STORE)
+      }
+      // Version 1 stored a collection of profiles. That concept is gone, so
+      // the old store is removed rather than migrated: nothing in it belongs
+      // to the single-analysis model.
+      if (database.objectStoreNames.contains(LEGACY_PROFILE_STORE)) {
+        database.deleteObjectStore(LEGACY_PROFILE_STORE)
       }
     }
     request.onsuccess = () => resolve(request.result)
@@ -56,8 +68,8 @@ export async function withStore<T>(
 ): Promise<T> {
   const database = await openDatabase()
   try {
-    const transaction = database.transaction(PROFILE_STORE, mode)
-    const result = await promisify(run(transaction.objectStore(PROFILE_STORE)))
+    const transaction = database.transaction(SYDERA_STORE, mode)
+    const result = await promisify(run(transaction.objectStore(SYDERA_STORE)))
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve()
       transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed'))

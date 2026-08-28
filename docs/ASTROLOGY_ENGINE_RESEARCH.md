@@ -1,7 +1,7 @@
 # Astrology engine research
 
-Status: **research complete — implementation not yet started**
-Date: August 2026
+Status: **research complete — engine approved and adopted in Phase 2**
+Date: August 2026 (re-verified immediately before installation)
 Author: Alessandro Pezzali
 
 This document is the mandatory evaluation required before any astrology
@@ -49,8 +49,13 @@ Assessment against the requirements:
 
 * R1 — satisfied. Provides heliocentric and geocentric vectors, ecliptic and
   equatorial coordinates, and includes Pluto.
-* R2 — satisfied within the documented validity window (Pluto is the limiting
-  body; the published model is intended for roughly 1700–2200).
+* R2 — satisfied. **Correction to the first edition of this document:** it
+  stated that Pluto limited the usable window to roughly 1700–2200. That was
+  wrong. Reading the shipped source of 2.1.19, `PlutoStateTable` holds 51
+  states from t = −730000 to t = +730000 days relative to J2000 — approximately
+  **year 1 to year 3999** — and `GetSegment` returns `null` outside that span so
+  the integrator crawls to the requested time instead of failing. Every
+  plausible birth date is therefore inside the tabulated window.
 * R3 — satisfied. Pure JavaScript/TypeScript, no binary, no data files to
   fetch at runtime, no network access.
 * R4 — satisfied. Library only, no service.
@@ -64,10 +69,31 @@ Assessment against the requirements:
   transforms, but no astrological house system and no Ascendant helper. Those
   must be implemented inside SYDERA (see section 4).
 * R9 — out of scope for the library, as intended.
-* R10 — the codebase is mature and its last release predates this review by
-  a considerable margin. This is judged acceptable because the library is
-  self-contained, has no dependencies, and implements fixed astronomical
-  models that do not need frequent updates; a pinned version remains valid.
+* R10 — mature, low-cadence maintenance. Re-verified before installation:
+  latest npm release 2.1.19 published 2023-12-14, most recent upstream commit
+  2025-01-27, repository not archived. Judged acceptable because the library is
+  self-contained, has no dependencies, and implements fixed astronomical models
+  that do not need frequent updates; the version is pinned exactly and could be
+  vendored if upstream ever stopped.
+
+### Re-verification performed immediately before installation
+
+| Condition | Result |
+|-----------|--------|
+| Licence | MIT — npm registry metadata and GitHub API `license.spdx_id` |
+| Monetary cost | none |
+| Account or API key | none |
+| Runtime network requirement | none — the series coefficients are compiled into the source |
+| External service | none |
+| Browser compatible | yes — plain ES module and CommonJS, no Node built-ins |
+| Offline compatible | yes |
+| Dependencies | none (`"dependencies": {}`) |
+| Payload | ~116 kB minified (the 1.8 MB npm figure includes sources and documentation) |
+
+The library documents that it approximates UT1 as equal to UTC. The maximum
+error of that approximation is under one second, which moves the Ascendant by
+less than 0.004° — far below the tolerances defined in
+`ASTROLOGY_VALIDATION.md`, and negligible against real birth-time precision.
 
 ### 2.2 astronomia (`astronomia`)
 
@@ -216,7 +242,12 @@ SYDERA implements the astrological layer itself on top of it:
 
 ## 7. Decision
 
-Proceed to Phase 2 with `astronomy-engine` as the planetary source and a
-SYDERA-owned, tested chart layer. Do not install it until the validation
-fixtures of section 5 exist, so that the library and its verification arrive
-together.
+Adopted for Phase 2: `astronomy-engine`, pinned to exactly **2.1.19**, as the
+planetary source, with a SYDERA-owned and independently tested chart layer for
+sidereal time, Ascendant, Midheaven, houses and aspects.
+
+The validation fixtures described in section 5 were committed before the
+dependency was installed, so the library and its verification arrived together.
+The full validation design, reference provenance and numerical tolerances are
+in `ASTROLOGY_VALIDATION.md`; the house-system decision is in
+`HOUSE_SYSTEM_DECISION.md`.

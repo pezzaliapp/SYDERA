@@ -32,13 +32,13 @@ export function NumberCard({ name, source, result }: NumberCardProps) {
 
       {result.isMaster ? (
         <p>
-          <span className="badge badge--master">★ {it.analysis.masterNumber}</span>
+          <span className="badge badge--master">★ {it.numerology.masterNumber}</span>
         </p>
       ) : null}
 
       {theme ? (
         <p className="small muted">
-          <span className="visually-hidden">{it.analysis.interpretationLayer}: </span>
+          <span className="visually-hidden">{it.result.symbolic}: </span>
           {theme.reading}
         </p>
       ) : null}
@@ -51,14 +51,14 @@ export function NumberCard({ name, source, result }: NumberCardProps) {
           aria-controls={traceId}
           onClick={() => setShowTrace((value) => !value)}
         >
-          {showTrace ? it.analysis.hideTrace : it.analysis.showTrace}
+          {showTrace ? it.result.hideCalculation : it.result.showCalculation}
         </button>
       </div>
 
       {showTrace ? (
         <div className="trace" id={traceId}>
           <p>
-            {it.analysis.calculatedLayer}: {result.inputs.join(' · ')}
+            {it.result.calculated}: {result.inputs.join(' · ')}
           </p>
           <ol>
             <li>totale: {result.reduction.rawValue}</li>

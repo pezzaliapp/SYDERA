@@ -2,6 +2,38 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Content-Security-Policy.
+
+      SYDERA needs no external runtime resource of any kind, so the policy is
+      as tight as the application allows: everything must come from its own
+      origin, and nothing may be executed or loaded from anywhere else.
+
+      This also removes, from the application side, any script a hosting layer
+      or CDN might inject into the served HTML — an analytics or RUM beacon,
+      for instance — which would otherwise contradict SYDERA's promise of no
+      analytics, no telemetry and no third-party scripts.
+
+      Directive by directive, verified against what the application does:
+        default-src 'self'   nothing is loaded from another origin
+        script-src  'self'   one bundled module script; no inline script
+        style-src   'self'   one bundled stylesheet; no inline style attribute
+        img-src     'self' data:   icons, plus data URIs for generated marks
+        font-src    'self'   system fonts only, no web font is fetched
+        connect-src 'self'   the birth-place dataset, from the same origin
+        worker-src  'self'   the service worker
+        manifest-src 'self'  the web app manifest
+        object-src  'none'   no plugins
+        base-uri    'self'   the base URL cannot be rewritten
+        form-action 'none'   no form is ever submitted anywhere
+
+      frame-ancestors is deliberately absent: it is ignored in a meta policy
+      and only works as an HTTP header, which static hosting cannot set.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>SYDERA — Astrologia e numerologia simbolica</title>
     <meta

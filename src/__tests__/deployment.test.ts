@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -65,6 +65,69 @@ describe('index.html', () => {
   it('assumes no domain root and loads nothing from another host', () => {
     expect(references.some((reference) => reference.startsWith('./'))).toBe(false)
     expect(html).not.toMatch(/(?:src|href)="https?:\/\//)
+  })
+})
+
+describe('content security policy', () => {
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8')
+  const policy = /http-equiv="Content-Security-Policy"[\s\S]*?content="([^"]+)"/.exec(html)?.[1] ?? ''
+
+  const directive = (name: string): string => {
+    const found = policy.split(';').map((part) => part.trim()).find((part) => part.startsWith(`${name} `))
+    return found ? found.slice(name.length + 1).trim() : ''
+  }
+
+  it('declares a policy in the document', () => {
+    expect(policy, 'index.html must carry a Content-Security-Policy').not.toBe('')
+  })
+
+  it('confines every resource type to the application origin', () => {
+    expect(directive('default-src')).toBe("'self'")
+    expect(directive('script-src')).toBe("'self'")
+    expect(directive('style-src')).toBe("'self'")
+    expect(directive('font-src')).toBe("'self'")
+    expect(directive('connect-src')).toBe("'self'")
+    expect(directive('worker-src')).toBe("'self'")
+    expect(directive('manifest-src')).toBe("'self'")
+    expect(directive('base-uri')).toBe("'self'")
+    expect(directive('img-src')).toBe("'self' data:")
+    expect(directive('object-src')).toBe("'none'")
+    expect(directive('form-action')).toBe("'none'")
+  })
+
+  it('permits no escape hatch that would let an injected script run', () => {
+    // A hosting layer or CDN can inject a script into the served HTML; these
+    // keywords are exactly what would let such a script execute.
+    expect(policy).not.toContain("'unsafe-inline'")
+    expect(policy).not.toContain("'unsafe-eval'")
+    expect(policy).not.toContain('*')
+    expect(policy).not.toMatch(/https?:/)
+  })
+
+  it('omits frame-ancestors, which a meta policy cannot enforce', () => {
+    // Silently including it would suggest a protection that is not in force.
+    expect(policy).not.toContain('frame-ancestors')
+  })
+
+  it('keeps the document free of inline scripts and styles the policy would block', () => {
+    expect(html).not.toMatch(/<script(?![^>]*\ssrc=)[^>]*>[\s\S]*?<\/script>/)
+    expect(html).not.toMatch(/<style[^>]*>/)
+  })
+})
+
+describe('no inline style attributes', () => {
+  // style-src is 'self' with no 'unsafe-inline', so a style attribute anywhere
+  // in the interface would silently stop being applied.
+  const componentFiles = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory() ? componentFiles(join(dir, entry.name)) : entry.name.endsWith('.tsx') ? [join(dir, entry.name)] : [],
+    )
+
+  it('uses classes instead of style props throughout the interface', () => {
+    for (const file of [...componentFiles(join(ROOT, 'src', 'views')), ...componentFiles(join(ROOT, 'src', 'components'))]) {
+      const source = readFileSync(file, 'utf8')
+      expect(source, `${file.slice(ROOT.length + 1)} must not use an inline style attribute`).not.toContain('style={{')
+    }
   })
 })
 

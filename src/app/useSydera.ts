@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
-import { listProfiles } from '../core/storage/profiles.ts'
 import { isStorageAvailable } from '../core/storage/db.ts'
-import type { StoredProfile } from '../core/storage/types.ts'
+import { loadSydera, type StoredSydera } from '../core/storage/sydera.ts'
 
-export type ProfilesState =
+export type SyderaState =
   | { readonly status: 'loading' }
-  | { readonly status: 'ready'; readonly profiles: readonly StoredProfile[] }
+  | { readonly status: 'empty' }
+  | { readonly status: 'ready'; readonly sydera: StoredSydera }
   | { readonly status: 'unavailable' }
   | { readonly status: 'error'; readonly message: string }
 
-export function useProfiles(): { state: ProfilesState; reload: () => void } {
-  const [state, setState] = useState<ProfilesState>({ status: 'loading' })
+/** The single stored analysis, or its absence. */
+export function useSydera(): { state: SyderaState; reload: () => void } {
+  const [state, setState] = useState<SyderaState>({ status: 'loading' })
   const [revision, setRevision] = useState(0)
 
   useEffect(() => {
@@ -20,9 +21,10 @@ export function useProfiles(): { state: ProfilesState; reload: () => void } {
       return
     }
     setState({ status: 'loading' })
-    listProfiles()
-      .then((profiles) => {
-        if (!cancelled) setState({ status: 'ready', profiles })
+    loadSydera()
+      .then((sydera) => {
+        if (cancelled) return
+        setState(sydera ? { status: 'ready', sydera } : { status: 'empty' })
       })
       .catch((error: unknown) => {
         if (!cancelled) setState({ status: 'error', message: error instanceof Error ? error.message : String(error) })

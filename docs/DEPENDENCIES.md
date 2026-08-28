@@ -28,10 +28,17 @@ The application ships exactly two runtime packages.
 |---------|---------|---------|---------|------|-------|
 | react | 19.x | MIT | none | none | UI library |
 | react-dom | 19.x | MIT | none | none | DOM renderer |
+| astronomy-engine | **2.1.19, pinned exactly** | MIT | none | none | planetary and lunar positions; no dependencies, ~116 kB minified, re-verified immediately before installation |
 
 Everything else — routing, storage, the service worker, the PWA icons, the
-numerology engine — is written inside the project rather than imported, which
-keeps the audited surface small.
+numerology engine, the historical timezone layer, the Ascendant, houses,
+aspects, convergences and the place search — is written inside the project
+rather than imported, which keeps the audited surface small.
+
+The birth-place dataset is data, not code: a trimmed extract of GeoNames
+(CC BY 4.0) shipped as a static file, downloaded from the application's own
+origin the first time a place is searched, and attributed in
+`THIRD_PARTY_NOTICES.md`.
 
 ## Build and test dependencies
 
@@ -67,6 +74,7 @@ plan. `npm audit --omit=dev` reports 0 vulnerabilities.
 | Candidate | Reason |
 |-----------|--------|
 | Swiss Ephemeris (any binding) | AGPL propagation, or a paid professional licence (CHF 750) |
+| `@photostructure/tz-lookup` and similar | not needed: the dataset carries each place's IANA zone, and manual entry covers the rest |
 | Any hosted astrology or ephemeris API | metered cost, and would transmit birth data off-device |
 | Any geocoding API | cost risk and privacy exposure |
 | Any analytics or telemetry SDK | forbidden by the privacy architecture |

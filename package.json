@@ -1,7 +1,7 @@
 {
   "name": "sydera",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "SYDERA — local-first Progressive Web App for personal symbolic analysis (Western astrology and Pythagorean numerology).",
   "author": "Alessandro Pezzali",
@@ -16,9 +16,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "fixtures:fetch": "node scripts/fetch-reference-fixtures.mjs",
+    "places:build": "node scripts/build-place-dataset.mjs"
   },
   "dependencies": {
+    "astronomy-engine": "2.1.19",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

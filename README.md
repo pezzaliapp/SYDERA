@@ -21,12 +21,21 @@ Concept, design and development: **Alessandro Pezzali**.
 | Local-first data architecture (IndexedDB) | implemented |
 | Application shell, Privacy, Disclaimer, About | implemented |
 | PWA: manifest, icons, service worker, offline shell | implemented |
-| Astrology engine | researched, **not implemented** — see `docs/ASTROLOGY_ENGINE_RESEARCH.md` |
-| Birth place and historical timezone resolution | researched, **not implemented** — see `docs/GEO_TIMEZONE_RESEARCH.md` |
-| Convergence engine between the two systems | not started |
+| Astrology engine | implemented and validated against independent references |
+| Historical timezone and UTC conversion | implemented, with ambiguity, gap and pre-1970 handling |
+| Birth place resolution | implemented, local dataset, no geocoding service |
+| Convergence engine between the two systems | implemented — see `docs/CONVERGENCE_TAXONOMY.md` |
+| Period analysis (transits and numerological cycles) | implemented |
 
-No astrological position is displayed until the engine is validated. SYDERA
-prefers an empty section to an invented number.
+SYDERA prefers an empty section to an invented number: without a birth time it
+calculates no Ascendant, no Midheaven and no houses, and says so; without a
+birth name it calculates no numerology and says so.
+
+Validation summary (observed maxima, tolerances in `docs/ASTROLOGY_VALIDATION.md`):
+planetary longitudes within **0.21′** of JPL Horizons, the Moon within
+**0.05′**, mean obliquity within **0.0001″** of the IAU 2006 polynomial,
+Ascendant and Midheaven **0.0000′** from their geometric definitions, Placidus
+cusps **0.0000′** from theirs.
 
 ---
 
@@ -102,6 +111,29 @@ Routing stays hash-based, so no server rewrite is needed and a reload of any
 route resolves to the same document. The repository intentionally contains no
 `CNAME` file: the custom domain belongs to the user site, and project pages
 inherit it automatically.
+
+### Content Security Policy
+
+`index.html` carries a strict policy — every directive is `'self'`, with no
+`'unsafe-inline'`, no `'unsafe-eval'`, no wildcard and no external host. SYDERA
+needs no external runtime resource, so nothing is given up by this.
+
+It also serves a privacy purpose. A hosting layer or CDN can inject a script
+into the HTML it serves — an analytics or RUM beacon, typically — which would
+contradict SYDERA's promise of no analytics and no third-party scripts. Under
+`script-src 'self'` such a script is refused by the browser before it runs, so
+the promise holds regardless of how the site is hosted.
+
+Two limitations of delivering the policy in a `<meta>` tag rather than an HTTP
+header, stated because they are real:
+
+* `frame-ancestors` is ignored in a meta policy, so clickjacking protection
+  would need a response header. Static hosting cannot set one; a CDN in front
+  of the site could, at no cost.
+* A meta policy governs everything the parser encounters after it. The tag sits
+  immediately after `<meta charset>`, before any other element, so an injected
+  script placed anywhere later in the document is covered — which is where
+  edge-injected beacons are placed.
 
 ---
 
