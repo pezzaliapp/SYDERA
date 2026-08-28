@@ -12,9 +12,14 @@ export function registerServiceWorker(onUpdateReady: UpdateHandler): void {
   if (!import.meta.env.PROD) return
   if (location.protocol !== 'https:' && location.hostname !== 'localhost') return
 
+  // Derived from the Vite base, so the worker path and scope always match the
+  // directory the application is actually deployed in (/SYDERA/ in production,
+  // the same base during development and preview).
+  const base = import.meta.env.BASE_URL
+
   const register = (): void => {
     void navigator.serviceWorker
-      .register(new URL('sw.js', document.baseURI).href, { scope: './' })
+      .register(new URL(`${base}sw.js`, location.origin).href, { scope: base })
       .then((registration) => {
         const notifyIfWaiting = (worker: ServiceWorker | null): void => {
           if (!worker) return

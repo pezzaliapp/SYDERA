@@ -80,10 +80,28 @@ npm run build     # production build into dist/
 npm run preview   # serve the production build locally
 ```
 
-Node.js 20 or newer is required. The build output in `dist/` is a set of static
-files that can be served by any static host, including GitHub Pages: the app
-uses a relative base path and hash routing, so it works from any sub-path
-without server rewrites.
+Node.js 20 or newer is required (the Pages workflow builds on Node 22). The
+output in `dist/` is a set of static files served by any static host.
+
+## Deployment
+
+SYDERA is published to GitHub Pages by `.github/workflows/deploy-pages.yml`,
+which runs on every push to `main` using only first-party GitHub actions
+(`checkout`, `setup-node`, `configure-pages`, `upload-pages-artifact`,
+`deploy-pages`) — no secret, no token, no third-party service, no cost.
+
+The site is served from a sub-directory, `https://www.alessandropezzali.it/SYDERA/`,
+so `vite.config.ts` sets `base: '/SYDERA/'`. That value is the single source of
+truth: `index.html` references assets through the `%BASE_URL%` placeholder, the
+service worker is registered at `` `${import.meta.env.BASE_URL}sw.js` `` with the
+same value as its scope, and the worker's own precache entries are relative to
+its location. `src/__tests__/deployment.test.ts` fails the build if the manifest,
+`index.html` or the worker ever stop agreeing with the configured base.
+
+Routing stays hash-based, so no server rewrite is needed and a reload of any
+route resolves to the same document. The repository intentionally contains no
+`CNAME` file: the custom domain belongs to the user site, and project pages
+inherit it automatically.
 
 ---
 

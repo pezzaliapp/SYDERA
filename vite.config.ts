@@ -52,9 +52,12 @@ function syderaServiceWorker(): Plugin {
 }
 
 export default defineConfig({
-  // Relative base: the build works on GitHub Pages project pages, on a custom
-  // domain, or from any sub-path, without rebuilding.
-  base: './',
+  // SYDERA is published as a GitHub Pages project site, served from the
+  // /SYDERA/ sub-directory (https://www.alessandropezzali.it/SYDERA/).
+  // Everything that needs to know the deployment path derives it from here:
+  // the service worker registration uses import.meta.env.BASE_URL, and a test
+  // asserts that public/manifest.webmanifest stays in step with this value.
+  base: '/SYDERA/',
   plugins: [react(), syderaServiceWorker()],
   build: {
     target: 'es2022',
