@@ -253,3 +253,134 @@ export const themeMeaning: Readonly<Record<string, string>> = Object.freeze({
   introspezione: 'il movimento verso l’interno',
   concretezza: 'l’ancoraggio ai risultati tangibili',
 })
+
+/* ------------------------------------------------------------------ portrait
+ *
+ * The opening portrait is composed, not concatenated. Instead of writing 144
+ * Sun × Ascendant paragraphs by hand, each factor contributes a noun phrase
+ * and the engine joins them into a relation: "un bisogno di appartenenza che
+ * si presenta con un contegno formale". The phrases below are the building
+ * blocks; the joining rules live in core/interpretation/portrait.ts.
+ */
+
+/** What the identity is after. Subject of the portrait sentence. */
+export const sunNeed: BySign = Object.freeze({
+  ariete: 'un bisogno di partire per primi',
+  toro: 'un bisogno di continuità',
+  gemelli: 'un bisogno di scambio e di varietà',
+  cancro: 'un bisogno di appartenenza',
+  leone: 'un bisogno di riconoscimento',
+  vergine: 'un bisogno di fare le cose per bene',
+  bilancia: 'un bisogno di accordo',
+  scorpione: 'un bisogno di andare a fondo',
+  sagittario: 'un bisogno di respiro e di senso',
+  capricorno: 'un bisogno di costruire qualcosa che duri',
+  acquario: 'un bisogno di pensare per conto proprio',
+  pesci: 'un bisogno di sentire prima di definire',
+})
+
+/** How that need shows up on first contact. */
+export const ascendantManner: BySign = Object.freeze({
+  ariete: 'modi diretti e senza preamboli',
+  toro: 'un passo calmo e poco negoziabile',
+  gemelli: 'un tratto curioso e conversevole',
+  cancro: 'un’apertura prudente',
+  leone: 'una presenza calda e visibile',
+  vergine: 'un contegno osservativo',
+  bilancia: 'modi cortesi e concilianti',
+  scorpione: 'un contegno selettivo e controllato',
+  sagittario: 'un tratto franco e informale',
+  capricorno: 'un contegno formale',
+  acquario: 'un tratto personale e un po’ fuori registro',
+  pesci: 'un tratto morbido e adattabile',
+})
+
+/** What the emotional floor is made of. */
+export const moonSecurity: BySign = Object.freeze({
+  ariete: 'una sicurezza che si scarica in fretta',
+  toro: 'una sicurezza che chiede stabilità',
+  gemelli: 'una sicurezza che passa dal parlarne',
+  cancro: 'una sicurezza fatta di legami stretti',
+  leone: 'una sicurezza che ha bisogno di essere vista',
+  vergine: 'una sicurezza che passa dal mettere in ordine',
+  bilancia: 'una sicurezza legata al clima fra le persone',
+  scorpione: 'una sicurezza tenuta per sé',
+  sagittario: 'una sicurezza che ha bisogno di spazio',
+  capricorno: 'una sicurezza che si tiene sotto controllo',
+  acquario: 'una sicurezza tenuta a una certa distanza',
+  pesci: 'una sicurezza permeabile a ciò che arriva da fuori',
+})
+
+/** The Life Path enters as a modifier of the whole, never as its own sentence. */
+export const lifePathModifier: ByNumber = Object.freeze({
+  1: 'con una direzione che punta all’autonomia',
+  2: 'con una direzione che passa dalla relazione',
+  3: 'con una direzione orientata all’espressione',
+  4: 'con una direzione orientata alla costruzione',
+  5: 'con una direzione orientata al movimento',
+  6: 'con una direzione orientata alla cura',
+  7: 'con una direzione orientata alla ricerca',
+  8: 'con una direzione orientata alla gestione concreta',
+  9: 'con una direzione orientata alla sintesi',
+  11: 'con una direzione sensibile e ideale',
+  22: 'con una direzione che unisce visione e costruzione',
+  33: 'con una direzione orientata alla dedizione',
+})
+
+/** Elements, used to decide whether two factors agree or pull apart. */
+export const signElement: Readonly<Record<ZodiacSign, 'fuoco' | 'terra' | 'aria' | 'acqua'>> = Object.freeze({
+  ariete: 'fuoco', leone: 'fuoco', sagittario: 'fuoco',
+  toro: 'terra', vergine: 'terra', capricorno: 'terra',
+  gemelli: 'aria', bilancia: 'aria', acquario: 'aria',
+  cancro: 'acqua', scorpione: 'acqua', pesci: 'acqua',
+})
+
+/** How the two halves of a portrait sentence are joined. */
+export const portraitJoin = Object.freeze({
+  /** The two factors point the same way. */
+  agreement: (a: string, b: string) => `${a} che si presenta con ${b}, senza troppa distanza fra le due cose`,
+  /** They do not, and that distance is itself the reading. */
+  tension: (a: string, b: string) => `${a} che si presenta con ${b}: la distanza fra ciò che si cerca e come lo si porta in giro è parte del quadro`,
+  /** The inner floor either supports the identity or asks for something else. */
+  moonSupports: (need: string) => `Sotto, ${need}: la spinta trova un appoggio coerente`,
+  moonDiverges: (need: string) => `Sotto, però, ${need}: il motore e la base non chiedono la stessa cosa`,
+})
+
+/* ---------------------------------------------------------------- contrasts
+ *
+ * A contrast has to name both sides. These give each theme a plain-language
+ * drive, and each pair of opposed drives a sentence saying how they qualify
+ * one another.
+ */
+
+export const themeDrive: Readonly<Record<string, string>> = Object.freeze({
+  analisi: 'il bisogno di verificare prima di muoversi',
+  comunicazione: 'il bisogno di scambiare e di nominare le cose',
+  indipendenza: 'il bisogno di decidere da sé',
+  creativita: 'la spinta a dare forma personale alle cose',
+  stabilita: 'il bisogno di terreno fermo',
+  emotivita: 'la centralità di ciò che si sente',
+  relazione: 'il bisogno di tenere insieme il legame',
+  organizzazione: 'l’esigenza di strutturare e di gestire',
+  innovazione: 'la spinta a cambiare schema',
+  introspezione: 'il movimento verso l’interno',
+  concretezza: 'l’esigenza di risultati tangibili',
+})
+
+/** What it means, in practice, when two opposed drives are both strong. */
+export const oppositionResolution: Readonly<Record<string, string>> = Object.freeze({
+  'indipendenza|relazione':
+    'L’autonomia viene quindi cercata senza rompere il legame: le decisioni importanti passano da questo doppio vincolo, e nessuna delle due parti viene sacrificata a lungo.',
+  'innovazione|stabilita':
+    'Il cambiamento viene quindi cercato a partire da una base che non si muove: si innova, ma solo con qualcosa di garantito alle spalle.',
+  'analisi|creativita':
+    'Verifica e slancio si alternano: si parte, poi si torna a controllare, e il ritmo di lavoro ne porta il segno.',
+  'emotivita|organizzazione':
+    'Ciò che si sente viene quindi gestito più che seguito: il metodo serve a tenere in ordine l’emotività, non a sostituirla.',
+})
+
+/** What a hard aspect costs in practice, once both sides have been named. */
+export const hardAspectConsequence: Readonly<Record<string, string>> = Object.freeze({
+  quadrato: 'quando entrambe entrano in gioco una delle due tende a cedere, e il compromesso va ricostruito ogni volta',
+  opposizione: 'si tende a oscillare fra i due poli invece di tenerli insieme, e l’equilibrio è una posizione da mantenere attivamente',
+})

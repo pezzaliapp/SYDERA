@@ -47,8 +47,12 @@ export interface Signal {
   readonly domain: DomainId | null
   /** The sentence it contributes to that domain. */
   readonly statement: string
-  /** A sentence for the opening portrait, for structural factors only. */
-  readonly portrait?: string
+  /**
+   * Marks a factor structural enough to matter to the opening portrait. The
+   * portrait composes its own language from relations between factors; this
+   * flag only says which factors are eligible.
+   */
+  readonly structural?: boolean
 }
 
 /** A theme, with everything that supports it, ranked. */

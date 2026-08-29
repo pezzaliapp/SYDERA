@@ -247,9 +247,64 @@ describe('contrasts are never quietly turned into agreement', () => {
     const found = tensions([], contrasted, [])
     expect(found.some((tension) => tension.kind === 'contrasto-fra-sistemi')).toBe(true)
     const statement = found.find((tension) => tension.kind === 'contrasto-fra-sistemi')?.statement ?? ''
-    // It must name the disagreement, not smooth it over.
-    expect(statement).toMatch(/non coincidono/)
+    // It must state the disagreement, not smooth it over.
+    expect(statement).toMatch(/non trova conferma/)
     expect(statement).not.toMatch(/equilibrio fra i due|si compensano/)
+  })
+
+  test('a contrast names both competing tendencies, not just the theme', () => {
+    const contrasted = compareSystems(
+      { factors: [{ factor: 'sun', sign: 'acquario' }, { factor: 'moon', sign: 'acquario' }] },
+      { numbers: [{ label: 'Sentiero di vita', value: 2 }] },
+    )
+    const statement = tensions([], contrasted, []).find((t) => t.kind === 'contrasto-fra-sistemi')?.statement ?? ''
+    // Side A: a drive in plain language, with the factors that support it.
+    expect(statement).toMatch(/spinta|bisogno|esigenza|centralità|movimento/)
+    expect(statement).toMatch(/Sole in Acquario|Luna in Acquario/)
+    // Side B: what the other language puts there instead.
+    expect(statement).toMatch(/indicano piuttosto un’altra direzione|non aggiungono nulla/)
+    // And how the two qualify one another.
+    expect(statement).toMatch(/poggia su un appoggio solo/)
+  })
+
+  test('contrast wording changes when the supporting factors change', () => {
+    const first = compareSystems(
+      { factors: [{ factor: 'sun', sign: 'acquario' }, { factor: 'moon', sign: 'acquario' }] },
+      { numbers: [{ label: 'Sentiero di vita', value: 2 }] },
+    )
+    const second = compareSystems(
+      { factors: [{ factor: 'sun', sign: 'vergine' }, { factor: 'moon', sign: 'vergine' }] },
+      { numbers: [{ label: 'Sentiero di vita', value: 3 }] },
+    )
+    const a = tensions([], first, []).find((t) => t.kind === 'contrasto-fra-sistemi')?.statement
+    const b = tensions([], second, []).find((t) => t.kind === 'contrasto-fra-sistemi')?.statement
+    expect(a).toBeDefined()
+    expect(b).toBeDefined()
+    expect(a).not.toBe(b)
+  })
+
+  test('two opposed strong themes are named on both sides with their evidence', () => {
+    const report = buildReport(FULL)
+    const opposed = tensions(report.signals, FULL.convergence, report.themes).find(
+      (tension) => tension.kind === 'temi-opposti',
+    )
+    if (!opposed) return
+    // Both poles named, each with the factors behind it.
+    expect(opposed.statement).toMatch(/Da una parte .+; dall’altra .+/)
+    expect(opposed.evidence.length).toBeGreaterThanOrEqual(2)
+    // Each pole carries its evidence in parentheses.
+    expect((opposed.statement.match(/\(/g) ?? []).length).toBeGreaterThanOrEqual(2)
+  })
+
+  test('a hard aspect states what the friction costs, not only that it exists', () => {
+    const chart = FULL.chart
+    if (chart?.kind !== 'complete') return
+    const signals = astrologySignals(chart)
+    const hard = tensions(signals, { comparisons: [], incomplete: false }, rankThemes(signals)).find(
+      (tension) => tension.kind === 'aspetto-di-tensione',
+    )
+    if (!hard) return
+    expect(hard.statement).toMatch(/tende a cedere|oscillare fra i due poli/)
   })
 
   test('a hard aspect between personal points becomes a named tension', () => {
@@ -267,6 +322,56 @@ describe('contrasts are never quietly turned into agreement', () => {
     const section = report.sections.find((entry) => entry.id === 'tensioni')
     expect(section).toBeDefined()
     expect(section?.paragraphs.join(' ').length).toBeGreaterThan(40)
+  })
+})
+
+describe('the portrait is a synthesis, not a concatenation', () => {
+  const report = buildReport(FULL)
+  const profile = report.sections.find((section) => section.id === 'profilo')
+
+  test('it relates factors to one another', () => {
+    const text = profile?.paragraphs[1] ?? ''
+    // A relation, not two sentences side by side.
+    expect(text).toMatch(/che si presenta con|Sotto,/)
+  })
+
+  test('it draws on more than one factor', () => {
+    expect(profile?.evidence.length).toBeGreaterThanOrEqual(3)
+    const systems = new Set(profile?.evidence.map((item) => item.system))
+    expect(systems.size).toBe(2)
+  })
+
+  test('no portrait sentence appears verbatim in any domain section', () => {
+    const portraitSentences = (profile?.paragraphs.slice(1) ?? [])
+      .flatMap((paragraph) => paragraph.split(/(?<=\.)\s+/))
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 25)
+
+    const domainText = report.sections
+      .filter((section) => (DOMAINS as readonly string[]).includes(section.id))
+      .flatMap((section) => section.paragraphs)
+      .join(' ')
+
+    for (const sentence of portraitSentences) {
+      expect(domainText, `portrait sentence repeated in a domain: "${sentence.slice(0, 60)}"`).not.toContain(sentence)
+    }
+  })
+
+  test('the Life Path qualifies the portrait instead of standing alone', () => {
+    const text = profile?.paragraphs[1] ?? ''
+    expect(text).toMatch(/, con una direzione/)
+  })
+
+  test('a chart with nothing to relate gets no portrait at all', () => {
+    // Numerology only: no Sun, no Ascendant, nothing to combine.
+    const report = buildReport({ ...NO_TIME, chart: null })
+    expect(report.sections.find((section) => section.id === 'profilo')).toBeUndefined()
+    expect(report.omitted.map((entry) => entry.id)).toContain('profilo')
+  })
+
+  test('it stays one or two paragraphs', () => {
+    // The framing line plus the portrait itself.
+    expect(profile?.paragraphs.length).toBeLessThanOrEqual(3)
   })
 })
 

@@ -12,6 +12,7 @@ import type { NumerologyProfile } from '../numerology/profile.ts'
 import { it } from '../../content/it.ts'
 import { personalYearTheme, themeMeaning } from '../../content/interpretation.it.ts'
 import { aspectReadings, bodyReadings } from '../../content/astrologyThemes.it.ts'
+import { buildPortrait } from './portrait.ts'
 import { astrologySignals, numerologySignals } from './signals.ts'
 import { capitalise, rankThemes, strengths, tensions } from './synthesis.ts'
 import { MAX_STATEMENTS_PER_DOMAIN } from './weights.ts'
@@ -80,25 +81,31 @@ export function buildReport(input: ReportInput): Report {
     return numerology ? it.report.reasons.noSignals : it.report.reasons.noName
   }
 
-  // 1. The portrait: only the structural factors, which is what keeps it from
-  //    turning into a list of everything.
-  const portraitSignals = signals.filter((signal) => signal.portrait).sort((a, b) => b.weight - a.weight)
-  if (portraitSignals.length >= 2) {
+  // 1. The portrait, composed from relations between factors rather than from
+  //    a list of them. A chart with nothing to relate gets no portrait.
+  const portrait = buildPortrait({
+    chart: chart?.kind === 'complete' ? chart : null,
+    numerology,
+    themes: ranked,
+  })
+
+  if (portrait && portrait.combinations >= 1) {
     sections.push({
       id: 'profilo',
       title: it.report.sections.profilo,
-      paragraphs: [
-        it.report.framing,
-        portraitSignals.map((signal) => `${capitalise(signal.portrait as string)}.`).join(' '),
-      ],
-      evidence: uniqueEvidence(portraitSignals),
+      paragraphs: [it.report.framing, ...portrait.paragraphs],
+      evidence: portrait.evidence,
     })
   } else {
     omitted.push({ id: 'profilo', title: it.report.sections.profilo, reason: missingReason() })
   }
 
   // 2-6. One section per domain, from the factors that speak about it.
-  const portraitStatements = new Set(portraitSignals.map((signal) => signal.portrait))
+  // The portrait speaks its own language now, so a domain sentence can never
+  // duplicate it. The guard stays as a structural safety net.
+  const portraitSentences = new Set(
+    (portrait?.paragraphs ?? []).flatMap((paragraph) => paragraph.split(/(?<=\.)\s+/).map((s) => s.trim())),
+  )
 
   for (const domain of DOMAINS) {
     const candidates = signals.filter((signal) => signal.domain === domain).sort((a, b) => b.weight - a.weight)
@@ -116,7 +123,7 @@ export function buildReport(input: ReportInput): Report {
     // list of near-identical clauses.
     let aspectsUsed = 0
     const supporting = others
-      .filter((signal) => !portraitStatements.has(signal.statement))
+      .filter((signal) => !portraitSentences.has(`${capitalise(signal.statement)}.`))
       .filter((signal) => {
         if (!signal.evidence.key.startsWith('aspect:')) return true
         if (aspectsUsed >= 1) return false

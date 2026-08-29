@@ -91,7 +91,7 @@ export function astrologySignals(chart: CompleteChart): Signal[] {
       themes: themesOfSign(sign),
       domain: factor.domain,
       statement,
-      ...(factor.inPortrait ? { portrait: factor.text[sign] } : {}),
+      ...(factor.inPortrait ? { structural: true } : {}),
     })
 
     // A retrograde personal planet turns its function inward; said once, plainly.
@@ -166,7 +166,7 @@ export function numerologySignals(profile: NumerologyProfile): Signal[] {
       themes: themesOfNumber(entry.value),
       domain: entry.domain,
       statement,
-      ...(entry.inPortrait ? { portrait: statement } : {}),
+      ...(entry.inPortrait ? { structural: true } : {}),
     })
   }
 

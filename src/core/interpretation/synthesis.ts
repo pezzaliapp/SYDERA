@@ -7,8 +7,12 @@
  * thing the two systems have to say.
  */
 import type { ConvergenceResult } from '../convergence/taxonomy.ts'
-import { themeMeaning } from '../../content/interpretation.it.ts'
-import { it } from '../../content/it.ts'
+import {
+  hardAspectConsequence,
+  oppositionResolution,
+  themeDrive,
+  themeMeaning,
+} from '../../content/interpretation.it.ts'
 import { HARD_ASPECTS, MIN_FACTORS_FOR_STRENGTH, STRENGTH_RELATIVE_FLOOR } from './weights.ts'
 import type { Evidence, Signal, SystemId, Tension, ThemeSupport } from './types.ts'
 
@@ -64,59 +68,89 @@ export function tensions(
 ): Tension[] {
   const found: Tension[] = []
 
-  // 1. The systems disagree about a theme.
+  // 1. The systems disagree about a theme. Both sides are named, with the
+  //    factors that actually support them, and what the other language puts
+  //    in that place instead.
   for (const comparison of convergence.comparisons) {
     if (comparison.level !== 'contrasto') continue
     const leadingIsAstrology = comparison.astrology >= comparison.numerology
-    // "la astrologia" is wrong in Italian; the article elides.
-    const leadingSystem = leadingIsAstrology ? 'dall’astrologia' : 'dalla numerologia'
-    const otherSystem = leadingIsAstrology ? 'la numerologia' : 'l’astrologia'
-    const meaning = themeMeaning[comparison.theme] ?? it.convergence.themes[comparison.theme]
     const supporting = leadingIsAstrology ? comparison.astrologyFactors : comparison.numerologyFactors
+    if (supporting.length === 0) continue
+
+    const drive = themeDrive[comparison.theme] ?? themeMeaning[comparison.theme] ?? ''
+    const leadingName = leadingIsAstrology ? 'nelle posizioni' : 'nei numeri'
+    const otherName = leadingIsAstrology ? 'i numeri' : 'le posizioni'
+
+    // What the quiet system emphasises instead, so the contrast has two poles.
+    const counterTheme = convergence.comparisons
+      .filter((entry) => entry.theme !== comparison.theme)
+      .sort((a, b) =>
+        leadingIsAstrology ? b.numerology - a.numerology : b.astrology - a.astrology,
+      )[0]
+    const counterFactors = counterTheme
+      ? leadingIsAstrology
+        ? counterTheme.numerologyFactors
+        : counterTheme.astrologyFactors
+      : []
+    const counterDrive = counterTheme ? themeDrive[counterTheme.theme] ?? '' : ''
+
+    const counterClause =
+      counterTheme && counterDrive && counterFactors.length > 0
+        ? ` ${capitalise(otherName)} indicano piuttosto un’altra direzione: ${counterDrive} (${readableFactors(counterFactors)}).`
+        : ` ${capitalise(otherName)} non aggiungono nulla su questo punto.`
 
     found.push({
       kind: 'contrasto-fra-sistemi',
       statement:
-        `Sul tema «${it.convergence.themes[comparison.theme]}» — ${meaning} — le due letture non coincidono: ` +
-        `emerge con forza ${leadingSystem}, mentre ${otherSystem} non lo mette in evidenza. ` +
-        `Non è una contraddizione da risolvere: indica che quella spinta poggia su un solo appoggio, e regge finché quello regge.`,
+        `${capitalise(drive)} compare ${leadingName} — ${readableFactors(supporting)} — ma non trova conferma dall’altra parte.` +
+        counterClause +
+        ` Le due spinte non si annullano: la prima resta, e va tenuta sapendo che poggia su un appoggio solo.`,
       evidence: (ranked.find((entry) => entry.theme === comparison.theme)?.evidence ?? []).slice(0, 4),
     })
-    if (supporting.length === 0) continue
   }
 
   // 2. A hard aspect between two personal points is a tension by definition.
+  //    The two functions are already named; what was missing was the cost.
   for (const signal of signals) {
     const parts = signal.evidence.key.split(':')
     if (parts[0] !== 'aspect') continue
     const aspect = parts[2] as (typeof HARD_ASPECTS)[number]
     if (!HARD_ASPECTS.includes(aspect)) continue
+    const consequence = hardAspectConsequence[aspect]
+    // The base sentence already carries a colon, so the consequence is joined
+    // as a clause rather than with a second one.
+    const base = capitalise(signal.statement)
     found.push({
       kind: 'aspetto-di-tensione',
-      statement: `${capitalise(signal.statement)}.`,
+      statement: consequence ? `${base}. In pratica ${consequence}.` : `${base}.`,
       evidence: [signal.evidence],
     })
   }
 
   // 3. Two strong themes that ask for opposite things.
-  const opposed: ReadonlyArray<readonly [string, string, string]> = [
-    ['indipendenza', 'relazione', 'il bisogno di decidere da soli e quello di tenere insieme il rapporto'],
-    ['innovazione', 'stabilita', 'la spinta a cambiare e il bisogno di terreno fermo'],
-    ['analisi', 'creativita', 'la verifica prima di muoversi e la spinta a dare forma subito'],
-    ['emotivita', 'organizzazione', 'la centralità del sentire e la richiesta di gestire con metodo'],
+  const opposed: ReadonlyArray<readonly [string, string]> = [
+    ['indipendenza', 'relazione'],
+    ['innovazione', 'stabilita'],
+    ['analisi', 'creativita'],
+    ['emotivita', 'organizzazione'],
   ]
   const strong = new Set(strengths(ranked).map((entry) => entry.theme))
-  for (const [first, second, description] of opposed) {
+  for (const [first, second] of opposed) {
     if (!strong.has(first as ThemeSupport['theme']) || !strong.has(second as ThemeSupport['theme'])) continue
     const evidence = [
       ...(ranked.find((entry) => entry.theme === first)?.evidence ?? []).slice(0, 2),
       ...(ranked.find((entry) => entry.theme === second)?.evidence ?? []).slice(0, 2),
     ]
+    const firstEvidence = (ranked.find((entry) => entry.theme === first)?.evidence ?? []).slice(0, 2)
+    const secondEvidence = (ranked.find((entry) => entry.theme === second)?.evidence ?? []).slice(0, 2)
+    const resolution = oppositionResolution[`${first}|${second}`] ?? ''
+
     found.push({
       kind: 'temi-opposti',
       statement:
-        `Due spinte forti convivono e chiedono cose diverse: ${description}. ` +
-        `Nel quadro non si annullano: si alternano, e il punto è capire quale delle due sta guidando in un dato momento.`,
+        `Da una parte ${themeDrive[first] ?? first} (${labelList(firstEvidence)}); ` +
+        `dall’altra ${themeDrive[second] ?? second} (${labelList(secondEvidence)}).` +
+        (resolution ? ` ${resolution}` : ` Le due cose non si annullano: si alternano, e conta sapere quale sta guidando.'`),
       evidence,
     })
   }
@@ -126,6 +160,44 @@ export function tensions(
 
 function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+const BODY_LABELS: Readonly<Record<string, string>> = {
+  sun: 'Sole', moon: 'Luna', mercury: 'Mercurio', venus: 'Venere', mars: 'Marte',
+  jupiter: 'Giove', saturn: 'Saturno', uranus: 'Urano', neptune: 'Nettuno', pluto: 'Plutone',
+  ascendant: 'Ascendente',
+}
+
+/**
+ * Turns the two shapes the convergence engine produces into readable Italian:
+ * "sun in vergine" -> "Sole in Vergine", "Anima = 8" -> "Anima 8".
+ */
+function readableFactors(factors: readonly string[]): string {
+  const labels = factors.slice(0, 3).map((factor) => {
+    if (factor.includes(' = ')) {
+      const [label, value] = factor.split(' = ')
+      return `${label} ${value}`
+    }
+    const match = /^(\S+) in (\S+)$/.exec(factor)
+    if (!match) return factor
+    const bodyLabel = BODY_LABELS[match[1] ?? ''] ?? (match[1] ?? '')
+    const sign = match[2] ?? ''
+    return `${bodyLabel} in ${sign.charAt(0).toUpperCase()}${sign.slice(1)}`
+  })
+  return joinWithAnd(labels)
+}
+
+function labelList(evidence: readonly Evidence[]): string {
+  return joinWithAnd(evidence.map((item) => item.label.replace(/^[^—]+ — /, '')))
+}
+
+function joinWithAnd(parts: readonly string[]): string {
+  if (parts.length === 0) return ''
+  if (parts.length === 1) return parts[0] as string
+  const last = parts[parts.length - 1] as string
+  // Euphonic "ed" before a word starting with a vowel.
+  const conjunction = /^[aeiouAEIOU]/.test(last) ? 'ed' : 'e'
+  return `${parts.slice(0, -1).join(', ')} ${conjunction} ${last}`
 }
 
 export { capitalise }
