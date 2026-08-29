@@ -11,8 +11,9 @@ import type { Transit } from '../cycles/transits.ts'
 import type { NumerologyProfile } from '../numerology/profile.ts'
 import { it } from '../../content/it.ts'
 import { personalYearTheme, themeMeaning } from '../../content/interpretation.it.ts'
-import { aspectReadings, bodyReadings } from '../../content/astrologyThemes.it.ts'
+import { bodyReadings } from '../../content/astrologyThemes.it.ts'
 import { buildPortrait } from './portrait.ts'
+import { aspectName, pointLabel, tidy, toPoint } from './italian.ts'
 import { astrologySignals, numerologySignals } from './signals.ts'
 import { capitalise, rankThemes, strengths, tensions } from './synthesis.ts'
 import { MAX_STATEMENTS_PER_DOMAIN } from './weights.ts'
@@ -41,6 +42,11 @@ function paragraphFrom(signals: readonly Signal[]): string {
     })
     .map((sentence) => `${sentence}.`)
     .join(' ')
+}
+
+/** Every paragraph the report emits passes through the tidier. */
+function clean(paragraphs: readonly string[]): string[] {
+  return paragraphs.map((paragraph) => tidy(paragraph))
 }
 
 function uniqueEvidence(signals: readonly Signal[]): Evidence[] {
@@ -133,6 +139,17 @@ export function buildReport(input: ReportInput): Report {
 
     const forDomain = [primary, ...supporting].slice(0, MAX_STATEMENTS_PER_DOMAIN)
 
+    // A section resting on a single, secondary statement is not a reading of
+    // that area: it is one sentence with a heading over it.
+    if (forDomain.length === 1 && (forDomain[0] as Signal).weight < 2) {
+      omitted.push({
+        id: domain,
+        title: it.report.sections[DOMAIN_SECTION[domain]],
+        reason: it.report.reasons.thinEvidence,
+      })
+      continue
+    }
+
     sections.push({
       id: domain,
       title: it.report.sections[DOMAIN_SECTION[domain]],
@@ -143,7 +160,7 @@ export function buildReport(input: ReportInput): Report {
 
   // 7. Strengths: themes more than one factor supports.
   const strong = strengths(ranked)
-  if (strong.length > 0) {
+  if (strong.length > 1) {
     const lines = strong.slice(0, 4).map((entry) => {
       const support =
         entry.systems.length > 1
@@ -162,11 +179,24 @@ export function buildReport(input: ReportInput): Report {
       ),
     })
   } else {
-    omitted.push({ id: 'forze', title: it.report.sections.forze, reason: missingReason() })
+    omitted.push({
+      id: 'forze',
+      title: it.report.sections.forze,
+      reason: strong.length === 1 ? it.report.reasons.singleStrength : missingReason(),
+    })
   }
 
   // 8. Tensions, named rather than averaged away.
-  const foundTensions = tensions(signals, convergence, ranked)
+  const domainText = sections
+    .filter((section) => (DOMAINS as readonly string[]).includes(section.id))
+    .flatMap((section) => section.paragraphs)
+    .join(' ')
+
+  const foundTensions = tensions(signals, convergence, ranked).filter((tension) => {
+    // A hard aspect already explained inside a domain does not need repeating.
+    const firstSentence = tension.statement.split(/(?<=\.)\s+/)[0]?.trim() ?? ''
+    return firstSentence.length < 25 || !domainText.includes(firstSentence)
+  })
   // Three paragraphs built from the same template read as filler. One example
   // of each kind of tension says more than three of the same kind.
   const varied = ['contrasto-fra-sistemi', 'temi-opposti', 'aspetto-di-tensione']
@@ -195,7 +225,11 @@ export function buildReport(input: ReportInput): Report {
 
   // 9. The thread: the single dominant theme and where it shows up.
   const leading = ranked[0]
-  if (leading && leading.evidence.length >= 2) {
+  // With a single strength, a thread that names the same theme is the same
+  // paragraph written twice.
+  const threadWouldRepeatStrength = strong.length <= 1 && leading !== undefined && strong[0]?.theme === leading.theme
+
+  if (leading && leading.evidence.length >= 2 && !threadWouldRepeatStrength) {
     const where = sections
       .filter((section) => (DOMAINS as readonly string[]).includes(section.id))
       .filter((section) => section.evidence.some((evidence) => leading.evidence.some((item) => item.key === evidence.key)))
@@ -217,7 +251,11 @@ export function buildReport(input: ReportInput): Report {
       evidence: leading.evidence.slice(0, 6),
     })
   } else {
-    omitted.push({ id: 'filo', title: it.report.sections.filo, reason: it.report.reasons.noSignals })
+    omitted.push({
+      id: 'filo',
+      title: it.report.sections.filo,
+      reason: threadWouldRepeatStrength ? it.report.reasons.threadRepeats : it.report.reasons.noSignals,
+    })
   }
 
   // 10. The current cycle, only where the calculations support it.
@@ -239,15 +277,17 @@ export function buildReport(input: ReportInput): Report {
         `${it.report.transitsLead} ${notable
           .map(
             (transit) =>
-              `${bodyReadings[transit.transiting].label} ${aspectReadings[transit.aspect].label.toLowerCase()} ` +
-              `a ${natalPointLabel(transit.natalPoint)}, che tocca ${bodyReadings[transit.transiting].keywords[0]}`,
+              `${pointLabel(transit.transiting)} ${aspectName(transit.aspect, transit.transiting)} ` +
+              `${toPoint(transit.natalPoint)} natale, che tocca ${bodyReadings[transit.transiting].keywords[0]}`,
           )
           .join('; ')}.`,
       )
       for (const transit of notable) {
         evidence.push({
           system: 'astrologia',
-          label: `${bodyReadings[transit.transiting].label} ${aspectReadings[transit.aspect].label.toLowerCase()} (orbita ${transit.orb.toFixed(1)}°)`,
+          label:
+            `${pointLabel(transit.transiting)} ${aspectName(transit.aspect, transit.transiting)} ` +
+            `${toPoint(transit.natalPoint)} natale (orbita ${transit.orb.toFixed(1)}°)`,
           key: `transit:${transit.transiting}:${transit.aspect}:${transit.natalPoint}`,
         })
       }
@@ -262,20 +302,11 @@ export function buildReport(input: ReportInput): Report {
     omitted.push({ id: 'ciclo', title: it.report.sections.ciclo, reason: it.report.reasons.noName })
   }
 
-  return { sections, omitted, themes: ranked, signals }
-}
+  // Every paragraph passes through the tidier, so composition artefacts never
+  // reach the page.
+  const tidied = sections.map((section) => ({ ...section, paragraphs: clean(section.paragraphs) }))
 
-function natalPointLabel(point: string): string {
-  const names: Record<string, string> = {
-    sun: 'Sole natale',
-    moon: 'Luna natale',
-    mercury: 'Mercurio natale',
-    venus: 'Venere natale',
-    mars: 'Marte natale',
-    ascendant: 'Ascendente',
-    midheaven: 'Medio Cielo',
-  }
-  return names[point] ?? point
+  return { sections: tidied, omitted, themes: ranked, signals }
 }
 
 function dedupeEvidence(items: readonly Evidence[]): Evidence[] {

@@ -375,6 +375,99 @@ describe('the portrait is a synthesis, not a concatenation', () => {
   })
 })
 
+describe('aspect language is varied and specific', () => {
+  const chart = FULL.chart
+
+  test('a known pair gets its own meaning, not a generic one', () => {
+    if (chart?.kind !== 'complete') return
+    const signals = astrologySignals(chart)
+    const known = signals.filter((signal) => {
+      const parts = signal.evidence.key.split(':')
+      if (parts[0] !== 'aspect') return false
+      const pair = [parts[1], parts[3]].sort().join('|')
+      return ['moon|sun', 'saturn|sun', 'mars|venus', 'moon|saturn', 'mercury|saturn'].includes(pair)
+    })
+    for (const signal of known) {
+      // The generic family fallbacks must not be used where a pair is known.
+      expect(signal.statement, signal.evidence.label).not.toMatch(
+        /le due cose si attivano insieme|la combinazione funziona da sola|quando entrambe entrano in gioco/,
+      )
+    }
+  })
+
+  test('several aspects in one report do not all use the same phrasing', () => {
+    if (chart?.kind !== 'complete') return
+    const statements = astrologySignals(chart)
+      .filter((signal) => signal.evidence.key.startsWith('aspect:'))
+      .map((signal) => signal.statement.split(':')[0])
+    if (statements.length < 3) return
+    expect(new Set(statements).size).toBeGreaterThan(1)
+  })
+
+  test('the phrasing chosen for a pair never changes between runs', () => {
+    if (chart?.kind !== 'complete') return
+    const first = astrologySignals(chart).map((signal) => signal.statement)
+    const second = astrologySignals(chart).map((signal) => signal.statement)
+    expect(first).toEqual(second)
+  })
+
+  test('every aspect sentence names both functions and a consequence', () => {
+    if (chart?.kind !== 'complete') return
+    for (const signal of astrologySignals(chart).filter((s) => s.evidence.key.startsWith('aspect:'))) {
+      expect(signal.statement, signal.evidence.label).toContain(':')
+      const [relation, consequence] = signal.statement.split(':')
+      expect((relation ?? '').length).toBeGreaterThan(20)
+      expect((consequence ?? '').trim().length).toBeGreaterThan(20)
+    }
+  })
+})
+
+describe('the report shape follows the evidence', () => {
+  test('a single strength does not get a "punti di forza" section', () => {
+    const report = buildReport(FULL)
+    const strong = strengths(report.themes)
+    const section = report.sections.find((entry) => entry.id === 'forze')
+    if (strong.length <= 1) {
+      expect(section).toBeUndefined()
+      expect(report.omitted.map((entry) => entry.id)).toContain('forze')
+    } else {
+      expect(section).toBeDefined()
+    }
+  })
+
+  test('a tension already explained in a domain is not repeated', () => {
+    const report = buildReport(FULL)
+    const domainText = report.sections
+      .filter((section) => (DOMAINS as readonly string[]).includes(section.id))
+      .flatMap((section) => section.paragraphs)
+      .join(' ')
+    const tensionSection = report.sections.find((section) => section.id === 'tensioni')
+    for (const paragraph of tensionSection?.paragraphs ?? []) {
+      const firstSentence = paragraph.split(/(?<=\.)\s+/)[0]?.trim() ?? ''
+      if (firstSentence.length < 25) continue
+      expect(domainText, `tension repeats a domain sentence: "${firstSentence.slice(0, 50)}"`).not.toContain(firstSentence)
+    }
+  })
+
+  test('a thinner chart produces a shorter report than a dense one', () => {
+    const dense = buildReport(FULL)
+    // Same birth data, no name: strictly less evidence.
+    const thin = buildReport(NO_NAME)
+    expect(thin.sections.length).toBeLessThanOrEqual(dense.sections.length)
+    const words = (report: typeof dense): number =>
+      report.sections.flatMap((section) => section.paragraphs).join(' ').split(/\s+/).length
+    expect(words(thin)).toBeLessThan(words(dense))
+  })
+
+  test('every omitted section carries a reason the reader can act on', () => {
+    for (const input of [FULL, NO_TIME, NO_NAME]) {
+      for (const omission of buildReport(input).omitted) {
+        expect(omission.reason.length).toBeGreaterThan(20)
+      }
+    }
+  })
+})
+
 describe('language discipline', () => {
   const text = buildReport(FULL)
     .sections.flatMap((section) => section.paragraphs)

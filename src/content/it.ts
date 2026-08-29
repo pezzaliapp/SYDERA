@@ -154,6 +154,9 @@ export const it = {
       noSignals: 'gli indicatori disponibili non dicono abbastanza su questo ambito',
       noTension: 'non emergono spinte in aperto contrasto fra loro',
       noCycle: 'il ciclo richiede i dati numerologici',
+      thinEvidence: 'gli indicatori disponibili per questo ambito si riducono a un solo elemento secondario',
+      singleStrength: 'emerge un solo tema ricorrente, che da solo non fa un insieme di punti di forza',
+      threadRepeats: 'il tema dominante è già l’unico punto di forza indicato, e ripeterlo non aggiungerebbe nulla',
     },
     noTensionFound:
       'Dagli indicatori disponibili non emergono spinte in aperto contrasto: il quadro risulta relativamente coerente al suo interno. Questo non significa assenza di conflitti reali, solo che questi due linguaggi simbolici non ne segnalano fra loro.',

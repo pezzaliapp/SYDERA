@@ -21,8 +21,11 @@ import {
 import type { DomainId, Signal } from './types.ts'
 import {
   ascendantInSign,
-  aspectPhrase,
+  aspectFamily,
+  aspectRelations,
   bodyFunction,
+  familyConsequence,
+  pairConsequence,
   expressionStyle,
   houseArea,
   lifePathDirection,
@@ -35,6 +38,7 @@ import {
   sunInSign,
   venusInSign,
 } from '../../content/interpretation.it.ts'
+import { aspectLabel, stableIndex } from './italian.ts'
 import { signReadings } from '../../content/astrologyThemes.it.ts'
 
 const SIGN_LABEL = (sign: ZodiacSign): string => signReadings[sign].label
@@ -126,13 +130,13 @@ export function astrologySignals(chart: CompleteChart): Signal[] {
     signals.push({
       evidence: {
         system: 'astrologia',
-        label: `${labelOf(aspect.a)} ${aspectWord(aspect.aspect, labelOf(aspect.b))} (orbita ${aspect.orb.toFixed(1)}°)`,
+        label: `${aspectLabel(aspect.a, aspect.aspect, aspect.b)} (orbita ${aspect.orb.toFixed(1)}°)`,
         key: `aspect:${aspect.a}:${aspect.aspect}:${aspect.b}`,
       },
       weight,
       themes: [],
       domain: domainOfAspect(aspect.a, aspect.b),
-      statement: aspectPhrase[aspect.aspect](functionA, functionB),
+      statement: aspectStatement(aspect.a, aspect.b, aspect.aspect, functionA, functionB),
     })
   }
 
@@ -173,6 +177,32 @@ export function numerologySignals(profile: NumerologyProfile): Signal[] {
   return signals
 }
 
+/**
+ * function A + relation + function B + practical consequence.
+ *
+ * The relation phrasing and, where several exist, the consequence are chosen
+ * by a stable hash of the body pair: the same chart always reads identically,
+ * and two aspects in one report rarely land on the same wording.
+ */
+function aspectStatement(
+  a: AspectPoint,
+  b: AspectPoint,
+  aspect: keyof typeof aspectRelations,
+  functionA: string,
+  functionB: string,
+): string {
+  const pairKey = [a, b].sort().join('|')
+  const relations = aspectRelations[aspect]
+  const relation = relations[stableIndex(`${pairKey}:${aspect}`, relations.length)] as (x: string, y: string) => string
+
+  const family = aspectFamily[aspect]
+  const specific = pairConsequence[pairKey]?.[family]
+  const generic = familyConsequence[family]
+  const consequence = specific ?? (generic[stableIndex(pairKey, generic.length)] as string)
+
+  return `${relation(functionA, functionB)}: ${consequence}`
+}
+
 function labelOf(point: AspectPoint): string {
   const names: Record<string, string> = {
     sun: 'Sole',
@@ -189,20 +219,6 @@ function labelOf(point: AspectPoint): string {
     midheaven: 'Medio Cielo',
   }
   return names[point] ?? point
-}
-
-/** "a" elides before a vowel: "in quadrato all'Ascendente", not "a Ascendente". */
-function aspectWord(aspect: string, target: string): string {
-  const vowelStart = /^[AEIOU]/i.test(target)
-  const preposition = vowelStart ? 'all’' : 'a '
-  const words: Record<string, string> = {
-    congiunzione: `congiunto ${preposition}`,
-    sestile: `in sestile ${preposition}`,
-    quadrato: `in quadrato ${preposition}`,
-    trigono: `in trigono ${preposition}`,
-    opposizione: `in opposizione ${preposition}`,
-  }
-  return `${words[aspect] ?? aspect}${target}`
 }
 
 /** An aspect speaks about the domain of the more personal point involved. */

@@ -384,3 +384,146 @@ export const hardAspectConsequence: Readonly<Record<string, string>> = Object.fr
   quadrato: 'quando entrambe entrano in gioco una delle due tende a cedere, e il compromesso va ricostruito ogni volta',
   opposizione: 'si tende a oscillare fra i due poli invece di tenerli insieme, e l’equilibrio è una posizione da mantenere attivamente',
 })
+
+/* ------------------------------------------------------------------ aspects
+ *
+ * An aspect sentence is built from four parts:
+ *
+ *   function A  +  relation  +  function B  +  practical consequence
+ *
+ * The relation has three or four phrasings per aspect, chosen deterministically
+ * by the pair of bodies involved, so the same chart always reads the same way
+ * and a report with several aspects does not repeat one template.
+ *
+ * The consequence is where the meaning is. Twelve pairs that carry a
+ * recognisable meaning in ordinary practice have their own; everything else
+ * falls back to a phrasing for the aspect family, which stays honest rather
+ * than pretending to a specificity it does not have.
+ */
+
+/** Aspect families, for the consequence tables. */
+export type AspectFamily = 'congiunzione' | 'armonico' | 'teso'
+
+export const aspectFamily: Readonly<Record<AspectId, AspectFamily>> = Object.freeze({
+  congiunzione: 'congiunzione',
+  sestile: 'armonico',
+  trigono: 'armonico',
+  quadrato: 'teso',
+  opposizione: 'teso',
+})
+
+/** Three to four ways of stating each relation. */
+export const aspectRelations: Readonly<Record<AspectId, ReadonlyArray<(a: string, b: string) => string>>> =
+  Object.freeze({
+    congiunzione: [
+      (a, b) => `${a} e ${b} lavorano come una cosa sola`,
+      (a, b) => `${a} arriva sempre insieme a ${b}`,
+      (a, b) => `${a} e ${b} sono difficili da separare`,
+    ],
+    sestile: [
+      (a, b) => `${a} e ${b} si prestano aiuto, quando li si mette insieme`,
+      (a, b) => `fra ${a} e ${b} c’è un passaggio aperto, che però va usato`,
+      (a, b) => `${a} trova in ${b} un appoggio disponibile`,
+    ],
+    trigono: [
+      (a, b) => `${a} e ${b} vanno d’accordo senza sforzo`,
+      (a, b) => `${a} scorre verso ${b} con naturalezza`,
+      (a, b) => `fra ${a} e ${b} non c’è attrito`,
+    ],
+    quadrato: [
+      (a, b) => `${a} e ${b} si ostacolano`,
+      (a, b) => `${a} entra in urto con ${b}`,
+      (a, b) => `${a} e ${b} tirano in direzioni che non coincidono`,
+      (a, b) => `fra ${a} e ${b} c’è un attrito che non si scioglie da solo`,
+    ],
+    opposizione: [
+      (a, b) => `${a} e ${b} stanno ai due capi della stessa questione`,
+      (a, b) => `${a} guarda in una direzione, ${b} nell’altra`,
+      (a, b) => `${a} e ${b} si bilanciano a fatica`,
+    ],
+  })
+
+/**
+ * The twelve pairs with a recognisable meaning. The key is the two bodies in
+ * alphabetical order, so lookup does not depend on which one the engine
+ * happened to list first.
+ */
+export const pairConsequence: Readonly<Record<string, Partial<Record<AspectFamily, string>>>> = Object.freeze({
+  'moon|sun': {
+    congiunzione: 'chi si è e ciò di cui si ha bisogno coincidono, il che dà compattezza ma lascia poco margine di manovra',
+    armonico: 'l’immagine di sé e il sentire si sostengono, e le decisioni raramente lasciano rimpianti',
+    teso: 'la direzione che si vorrebbe prendere e ciò di cui si ha bisogno per stare bene non chiedono la stessa cosa',
+  },
+  'saturn|sun': {
+    congiunzione: 'l’affermazione di sé passa da una prova: nulla viene riconosciuto senza averlo prima meritato',
+    armonico: 'l’ambizione trova una struttura che la regge, e i risultati arrivano tardi ma restano',
+    teso: 'ogni passo avanti costa una verifica: la fiducia in sé va costruita, non è data in partenza',
+  },
+  'sun|uranus': {
+    congiunzione: 'l’identità si riconosce nella differenza, e adattarsi allo standard è più faticoso che distinguersene',
+    armonico: 'l’originalità è utilizzabile senza scontro: si può essere fuori riga restando credibili',
+    teso: 'il bisogno di riconoscimento e quello di libertà si contendono lo stesso spazio',
+  },
+  'moon|saturn': {
+    congiunzione: 'il sentire viene tenuto sotto controllo, e l’autonomia emotiva si paga con una certa solitudine',
+    armonico: 'le emozioni hanno un contenitore affidabile: si sente senza essere travolti',
+    teso: 'chiedere sostegno costa, e la reazione più immediata è cavarsela da soli',
+  },
+  'moon|neptune': {
+    congiunzione: 'i confini fra ciò che si sente e ciò che sentono gli altri sono porosi',
+    armonico: 'la sensibilità è una risorsa utilizzabile, e l’immaginazione trova un canale',
+    teso: 'l’umore risente di ciò che arriva da fuori, e distinguere il proprio dal riflesso richiede attenzione',
+  },
+  'mercury|saturn': {
+    congiunzione: 'il pensiero è lento e rigoroso: poche affermazioni, ma verificate',
+    armonico: 'la mente ha disciplina senza rigidità, e ciò che si impara si sedimenta',
+    teso: 'il dubbio arriva prima della conclusione, e dire una cosa senza esserne certi risulta difficile',
+  },
+  'mercury|uranus': {
+    congiunzione: 'le intuizioni arrivano intere e in anticipo, e spiegarle richiede più tempo che averle',
+    armonico: 'la mente è rapida e poco convenzionale senza perdere il filo',
+    teso: 'il pensiero corre più veloce della sua esposizione, e la pazienza dei passaggi intermedi manca',
+  },
+  'mars|venus': {
+    congiunzione: 'desiderio e iniziativa coincidono: si va verso ciò che attrae senza troppe mediazioni',
+    armonico: 'ciò che piace e ciò che si fa si sostengono a vicenda',
+    teso: 'attrazione e conquista non seguono lo stesso ritmo, e il momento giusto è difficile da azzeccare',
+  },
+  'saturn|venus': {
+    congiunzione: 'nei legami si è selettivi e leali, con tempi lunghi prima di concedere fiducia',
+    armonico: 'l’affetto ha continuità: poche persone, tenute nel tempo',
+    teso: 'il valore di ciò che si prova viene messo in dubbio, e la conferma dall’esterno pesa più del dovuto',
+  },
+  'uranus|venus': {
+    congiunzione: 'il legame ha bisogno di spazio: la routine affettiva si logora in fretta',
+    armonico: 'la libertà personale convive bene con il legame, senza doverlo negoziare ogni volta',
+    teso: 'vicinanza e indipendenza si alternano, e la stabilità affettiva ne risente',
+  },
+  'mars|saturn': {
+    congiunzione: 'l’energia è disciplinata e resistente, ma parte solo quando le condizioni ci sono',
+    armonico: 'la spinta ad agire ha metodo: la fatica viene distribuita invece che scaricata',
+    teso: 'l’impulso viene frenato prima di esprimersi, e l’irritazione si accumula sotto',
+  },
+  'mars|uranus': {
+    congiunzione: 'l’azione è improvvisa e poco pianificabile, con esiti brillanti o bruschi',
+    armonico: 'la prontezza di reazione è una risorsa, non un problema',
+    teso: 'la pazienza si esaurisce prima del tempo, e le rotture arrivano più in fretta delle mediazioni',
+  },
+})
+
+/** When the pair has no specific meaning, the family still says something true. */
+export const familyConsequence: Readonly<Record<AspectFamily, readonly string[]>> = Object.freeze({
+  congiunzione: [
+    'le due cose si attivano insieme, ed è raro vederne una senza l’altra',
+    'i due movimenti si rinforzano, con il rischio di diventare un automatismo',
+  ],
+  armonico: [
+    'la combinazione funziona da sola, al punto che la si dà per scontata',
+    'il passaggio è disponibile, ma va usato: da solo non produce nulla',
+  ],
+  teso: [
+    'quando entrambe entrano in gioco una delle due cede, e il compromesso va ricostruito ogni volta',
+    'l’attrito è ricorrente, e si smorza scegliendo consapevolmente a quale delle due dare la precedenza',
+    'la tensione non si risolve una volta per tutte: si gestisce di volta in volta',
+  ],
+})
