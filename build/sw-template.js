@@ -77,7 +77,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       (async () => {
         try {
-          const fresh = await fetch(request)
+          // Revalidated rather than taken from the browser's own cache: the
+          // page is where a new release is discovered, and a ten-minute
+          // max-age was enough to keep a device on the previous build.
+          const fresh = await fetch(request, { cache: 'no-cache' })
           const cache = await caches.open(CACHE_NAME)
           cache.put('./', fresh.clone())
           return fresh

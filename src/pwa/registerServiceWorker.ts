@@ -17,6 +17,16 @@ export function registerServiceWorker(): void {
   // directory the application is actually deployed in.
   const base = import.meta.env.BASE_URL
 
+  // The worker script is registered under the build it belongs to.
+  //
+  // The host serves sw.js with a four-hour cache, and a content delivery
+  // network answered an update check with the previous release's worker: a
+  // device stayed on the old application for hours after a deployment, which
+  // is exactly what the automatic update is supposed to prevent. A URL the
+  // edge has never seen cannot be answered from its cache. The scope is set
+  // explicitly below, so it stays the application directory regardless.
+  const script = new URL(`${base}sw.js?build=${__SYDERA_COMMIT__}`, location.origin).href
+
   // Whether this page was already under a worker's control. On the very first
   // visit the worker claims the page and the controller changes for the first
   // time; reloading then would be a reload nobody asked for.
@@ -31,7 +41,7 @@ export function registerServiceWorker(): void {
 
   const register = (): void => {
     void navigator.serviceWorker
-      .register(new URL(`${base}sw.js`, location.origin).href, { scope: base })
+      .register(script, { scope: base })
       .then((registration) => {
         const check = (): void => {
           if (!navigator.onLine) return
