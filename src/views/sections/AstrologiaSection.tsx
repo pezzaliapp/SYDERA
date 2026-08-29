@@ -1,4 +1,6 @@
 import { it } from '../../content/it.ts'
+import { ReportSectionCard } from '../../components/ReportSectionCard.tsx'
+import type { Report } from '../../core/interpretation/types.ts'
 import { angleReadings, aspectReadings, bodyReadings, houseReadings, signReadings } from '../../content/astrologyThemes.it.ts'
 import { formatOffset } from '../../core/time/timezone.ts'
 import type { Chart } from '../../core/astrology/chart.ts'
@@ -16,7 +18,12 @@ const degrees = (value: number): string => {
   return minutes === 60 ? `${whole + 1}° 00'` : `${whole}° ${String(minutes).padStart(2, '0')}'`
 }
 
-export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
+export function AstrologiaSection({ chart, report }: { readonly chart: Chart | null; readonly report: Report }) {
+  // The sections of the reading that rest on astrological evidence.
+  const astrological = report.sections.filter((section) =>
+    section.evidence.some((evidence) => evidence.system === 'astrologia'),
+  )
+
   if (!chart) {
     return (
       <section className="card">
@@ -80,6 +87,14 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
         <p className="page-intro">{it.astrology.lead}</p>
       </div>
 
+      {astrological.length > 0 ? (
+        <div className="document document--inline">
+          {astrological.map((section) => (
+            <ReportSectionCard section={section} key={`astro-${section.id}`} />
+          ))}
+        </div>
+      ) : null}
+
       {provenance.caveats.length > 0 ? (
         <div className="notice notice--warning">
           <ul className="bullets">
@@ -90,6 +105,10 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
         </div>
       ) : null}
 
+      <details className="method method--data">
+        <summary>{it.astrology.showData}</summary>
+        <div className="method__body">
+          <div className="stack">
       <section className="card" aria-labelledby="angles-title">
         <div className="row row--between">
           <h3 className="section-title" id="angles-title">
@@ -277,6 +296,9 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
               <dd>{provenance.engine}</dd>
             </div>
           </dl>
+        </div>
+      </details>
+          </div>
         </div>
       </details>
     </>

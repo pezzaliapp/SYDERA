@@ -127,6 +127,44 @@ export const it = {
     referenceDate: 'Data di riferimento',
   },
 
+  report: {
+    title: 'La tua SYDERA',
+    framing:
+      'Questa lettura mette insieme i due sistemi simbolici di SYDERA a partire dai dati calcolati. Non è una descrizione scientifica della personalità né una previsione: è ciò che astrologia e numerologia, prese insieme, dicono di questa combinazione di indicatori.',
+    why: 'Perché questa lettura?',
+    whyClose: 'Nascondi le fonti',
+    evidenceIntro: 'Questa parte del testo poggia su:',
+    sections: {
+      profilo: 'Il tuo profilo',
+      presentazione: 'Come ti presenti al mondo',
+      mente: 'Come pensi e comunichi',
+      emozioni: 'Mondo emotivo',
+      relazioni: 'Relazioni',
+      azione: 'Azione, lavoro e realizzazione',
+      forze: 'Punti di forza',
+      tensioni: 'Possibili tensioni',
+      filo: 'Il filo conduttore',
+      ciclo: 'Ciclo attuale',
+    },
+    omitted: 'Non emerso',
+    omittedIntro: 'Alcune sezioni non compaiono perché i dati disponibili non le sostengono:',
+    reasons: {
+      noChart: 'senza ora e luogo di nascita non ci sono indicatori astrologici per questa parte',
+      noName: 'senza il nome completo di nascita mancano gli indicatori numerologici',
+      noSignals: 'gli indicatori disponibili non dicono abbastanza su questo ambito',
+      noTension: 'non emergono spinte in aperto contrasto fra loro',
+      noCycle: 'il ciclo richiede i dati numerologici',
+    },
+    noTensionFound:
+      'Dagli indicatori disponibili non emergono spinte in aperto contrasto: il quadro risulta relativamente coerente al suo interno. Questo non significa assenza di conflitti reali, solo che questi due linguaggi simbolici non ne segnalano fra loro.',
+    strengthLead: 'Questi temi ricorrono in più punti del quadro:',
+    convergesOnBoth: 'sostenuto da entrambi i sistemi',
+    fromAstrology: 'emerge soprattutto dall’astrologia',
+    fromNumerology: 'emerge soprattutto dalla numerologia',
+    threadLead: 'Se si cerca un filo che tiene insieme il quadro:',
+    cycleLead: 'Nel periodo attuale:',
+    transitsLead: 'Sul piano dei transiti in corso:',
+  },
   sintesi: {
     title: 'Sintesi',
     lead: 'I punti principali della tua SYDERA, con il rimando alle sezioni che li spiegano.',
@@ -141,7 +179,11 @@ export const it = {
 
   astrology: {
     title: 'Astrologia',
-    lead: 'Posizioni calcolate per l’istante di nascita convertito in UTC.',
+    lead: 'Che cosa dice il tema natale, e i dati su cui poggia.',
+    readingTitle: 'La lettura astrologica',
+    dataTitle: 'I dati calcolati',
+    dataLead: 'Posizioni calcolate per l’istante di nascita convertito in UTC.',
+    showData: 'Mostra posizioni, case e aspetti',
     positions: 'Posizioni',
     angles: 'Ascendente e Medio Cielo',
     houses: 'Case',
@@ -182,7 +224,11 @@ export const it = {
 
   numerology: {
     title: 'Numerologia',
-    lead: 'Numeri calcolati con le convenzioni dichiarate nel metodo.',
+    lead: 'Che cosa dicono i numeri, e come sono stati ottenuti.',
+    readingTitle: 'La lettura numerologica',
+    dataTitle: 'I numeri calcolati',
+    dataLead: 'Numeri calcolati con le convenzioni dichiarate nel metodo.',
+    showData: 'Mostra pinnacoli, sfide e lettere',
     missingName: 'Nome completo di nascita non inserito',
     missingNameBody:
       'La numerologia si calcola dalle lettere del nome di nascita. SYDERA non inventa un nome: aggiungilo dai tuoi dati per vedere questa sezione.',
@@ -304,6 +350,19 @@ export const it = {
     },
     fromAstrology: 'Fattori astrologici',
     fromNumerology: 'Fattori numerologici',
+    astrologySays: 'L’astrologia porta',
+    numerologySays: 'La numerologia porta',
+    nothingFrom: 'nulla di rilevante su questo tema',
+    combined: {
+      'convergenza-forte':
+        'I due sistemi insistono sullo stesso punto. Quando due linguaggi diversi arrivano allo stesso tema, quel tema è probabilmente centrale nella lettura complessiva — non perché sia dimostrato, ma perché regge da più parti.',
+      'convergenza-moderata':
+        'Entrambi i sistemi toccano il tema senza farne il centro: è presente nel quadro, ma non lo domina.',
+      neutro:
+        'Nessuno dei due sistemi mette in evidenza questo tema: nella lettura complessiva resta sullo sfondo.',
+      contrasto:
+        'Qui le due letture prendono direzioni diverse: un sistema mette il tema in primo piano, l’altro non lo rileva. Il punto non è stabilire chi ha ragione, ma notare che questa spinta poggia su un appoggio solo.',
+    },
     methodTitle: 'Come viene calcolato il confronto',
     methodBody:
       'A ogni segno e a ogni numero è associato un insieme di temi documentato e sempre uguale. I punteggi vengono normalizzati e confrontati con soglie fisse. Il procedimento è descritto in docs/CONVERGENCE_TAXONOMY.md.',

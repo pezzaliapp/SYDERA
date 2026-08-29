@@ -1,133 +1,61 @@
 import { it } from '../../content/it.ts'
 import { paths } from '../../app/router.ts'
-import { bodyReadings, signReadings, angleReadings } from '../../content/astrologyThemes.it.ts'
-import { themeFor } from '../../content/numerologyThemes.it.ts'
+import { ReportSectionCard } from '../../components/ReportSectionCard.tsx'
 import type { Analysis } from '../../app/useAnalysis.ts'
 
 /**
- * The first screen after a calculation: what stands out, in words, with a link
- * to the section that shows the numbers behind it. Never a data table.
+ * The reading itself: the first thing a person sees after calculating, and the
+ * part that answers the question they actually came with. The numbers behind it
+ * are reachable from every section, and in full in the other tabs.
  */
 export function SintesiSection({ analysis }: { readonly analysis: Analysis }) {
-  const { chart, numerology, convergence } = analysis
-  const complete = chart?.kind === 'complete' ? chart : null
+  const { report } = analysis
+  const [lead, ...rest] = report.sections
 
-  const sun = complete?.positions.find((position) => position.body === 'sun')
-  const moon = complete?.positions.find((position) => position.body === 'moon')
-  const ascendantSign = complete ? signOf(complete.ascendantValue) : null
-
-  const strongest = convergence.comparisons.filter((entry) => entry.level === 'convergenza-forte').slice(0, 2)
-  const contrasts = convergence.comparisons.filter((entry) => entry.level === 'contrasto').slice(0, 1)
+  if (!lead) {
+    return (
+      <section className="card">
+        <h2 className="section-title">{it.report.title}</h2>
+        <p className="muted">{it.sintesi.missingAstrology}</p>
+        <div className="row">
+          <a className="button button--primary" href={paths.data}>
+            {it.sintesi.completeData}
+          </a>
+        </div>
+      </section>
+    )
+  }
 
   return (
-    <>
-      <div className="stack stack--tight">
-        <h2 className="page-title">{it.sintesi.title}</h2>
-        <p className="page-intro">{it.sintesi.lead}</p>
-      </div>
+    <div className="document">
+      <header className="document__head">
+        <h1 className="document__title">{it.report.title}</h1>
+      </header>
 
-      <p className="notice small">{it.result.layerNote}</p>
+      <ReportSectionCard section={lead} lead />
 
-      <section className="card" aria-labelledby="sintesi-astro">
-        <h3 className="section-title" id="sintesi-astro">
-          {it.sintesi.astroTitle}
-        </h3>
-        {complete ? (
-          <ul className="bullets">
-            {sun ? (
-              <li>
-                <strong>{bodyReadings.sun.label} in {signReadings[sun.sign].label}</strong> — {signReadings[sun.sign].reading}
-              </li>
-            ) : null}
-            {moon ? (
-              <li>
-                <strong>{bodyReadings.moon.label} in {signReadings[moon.sign].label}</strong> — {bodyReadings.moon.reading}
-              </li>
-            ) : null}
-            {ascendantSign ? (
-              <li>
-                <strong>{angleReadings.ascendant.label} in {signReadings[ascendantSign].label}</strong> —{' '}
-                {angleReadings.ascendant.reading}
-              </li>
-            ) : null}
-          </ul>
-        ) : chart?.kind === 'partial-no-time' ? (
-          <p className="muted">{it.astrology.partialBody}</p>
-        ) : (
-          <p className="muted">{it.sintesi.missingAstrology}</p>
-        )}
-        <div className="row">
-          <a className="button button--quiet" href={paths.section('astrologia')}>
-            {it.sections.astrologia} →
-          </a>
-        </div>
-      </section>
+      {rest.map((section) => (
+        <ReportSectionCard section={section} key={section.id} />
+      ))}
 
-      <section className="card" aria-labelledby="sintesi-numero">
-        <h3 className="section-title" id="sintesi-numero">
-          {it.sintesi.numeroTitle}
-        </h3>
-        {numerology ? (
-          <ul className="bullets">
-            <li>
-              <strong>
-                {it.numerology.numbers.lifePath} {numerology.lifePath.value}
-              </strong>{' '}
-              — {themeFor(numerology.lifePath.value)?.reading}
-            </li>
-            <li>
-              <strong>
-                {it.numerology.numbers.expression} {numerology.expression.value}
-              </strong>{' '}
-              — {themeFor(numerology.expression.value)?.reading}
-            </li>
-          </ul>
-        ) : (
-          <p className="muted">{it.sintesi.missingNumerology}</p>
-        )}
-        <div className="row">
-          <a className="button button--quiet" href={paths.section('numerologia')}>
-            {it.sections.numerologia} →
-          </a>
-        </div>
-      </section>
-
-      <section className="card" aria-labelledby="sintesi-conv">
-        <h3 className="section-title" id="sintesi-conv">
-          {it.sintesi.convergenceTitle}
-        </h3>
-        {convergence.incomplete ? (
-          <p className="muted">{it.sintesi.missingConvergence}</p>
-        ) : (
-          <ul className="bullets">
-            {strongest.map((entry) => (
-              <li key={entry.theme}>
-                <strong>{it.convergence.themes[entry.theme]}</strong> — {it.convergence.levelExplanations[entry.level]}
+      {report.omitted.length > 0 ? (
+        <section className="reading reading--quiet">
+          <h2 className="reading__title">{it.report.omitted}</h2>
+          <p className="reading__text small">{it.report.omittedIntro}</p>
+          <ul className="bullets small">
+            {report.omitted.map((entry) => (
+              <li key={entry.id}>
+                <strong>{entry.title}</strong> — {entry.reason}.
               </li>
             ))}
-            {contrasts.map((entry) => (
-              <li key={entry.theme}>
-                <strong>{it.convergence.themes[entry.theme]}</strong> — {it.convergence.levelExplanations[entry.level]}
-              </li>
-            ))}
-            {strongest.length === 0 && contrasts.length === 0 ? <li>{it.convergence.levelExplanations.neutro}</li> : null}
           </ul>
-        )}
-        <div className="row">
-          <a className="button button--quiet" href={paths.section('convergenze')}>
-            {it.sections.convergenze} →
-          </a>
-        </div>
-      </section>
-    </>
+          <div className="row">
+            <a className="button button--quiet" href={paths.data}>
+              {it.sintesi.completeData}
+            </a>
+          </div>
+        </section>
+      ) : null}
+    </div>
   )
-}
-
-function signOf(longitude: number) {
-  const signs = [
-    'ariete', 'toro', 'gemelli', 'cancro', 'leone', 'vergine',
-    'bilancia', 'scorpione', 'sagittario', 'capricorno', 'acquario', 'pesci',
-  ] as const
-  const wrapped = ((longitude % 360) + 360) % 360
-  return signs[Math.floor(wrapped / 30)] as (typeof signs)[number]
 }

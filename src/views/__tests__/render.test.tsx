@@ -133,12 +133,66 @@ describe('returning screen', () => {
 })
 
 describe('result sections', () => {
-  it('opens on the summary, not on a data table', () => {
+  it('opens on the reading, not on a data table', () => {
     const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
-    expect(html).toContain('Sintesi')
-    expect(html).toContain('Dall’astrologia')
-    expect(html).toContain('Dalla numerologia')
+    expect(html).toContain('La tua SYDERA')
+    expect(html).toContain('Il tuo profilo')
     expect(html).not.toContain('<table')
+  })
+
+  it('answers "what does this say about me" before showing any number', () => {
+    const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    // The named sections of the portrait, in the order a person reads them.
+    for (const title of ['Il tuo profilo', 'Come ti presenti al mondo', 'Come pensi e comunichi']) {
+      expect(html).toContain(title)
+    }
+  })
+
+  it('states the symbolic framing once and does not repeat it', () => {
+    const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    const occurrences = html.match(/non è una descrizione scientifica/gi) ?? []
+    expect(occurrences).toHaveLength(1)
+  })
+
+  it('offers the evidence behind each reading without showing it upfront', () => {
+    const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    expect(html).toContain('Perché questa lettura?')
+    // Collapsed by default: the evidence list is not in the initial markup.
+    expect(html).not.toContain('evidence__list')
+  })
+
+  it('puts the interpretation before the tables in the astrology tab', () => {
+    const html = renderToStaticMarkup(<ResultView section="astrologia" analysis={analysis} sydera={SYDERA} />)
+    const readingAt = html.indexOf('reading__text')
+    const tableAt = html.indexOf('<table')
+    expect(readingAt).toBeGreaterThan(-1)
+    expect(readingAt, 'the reading must come before the first table').toBeLessThan(tableAt)
+  })
+
+  it('folds the large technical tables away by default', () => {
+    const html = renderToStaticMarkup(<ResultView section="numerologia" analysis={analysis} sydera={SYDERA} />)
+    expect(html).toContain('Mostra pinnacoli, sfide e lettere')
+  })
+
+  it('keeps every technical table inside a closed disclosure', () => {
+    for (const section of ['astrologia', 'numerologia'] as const) {
+      const html = renderToStaticMarkup(<ResultView section={section} analysis={analysis} sydera={SYDERA} />)
+      // No <details> may be open, and no table may precede the first summary:
+      // a table above the fold would put data back in front of the reading.
+      expect(html, `${section}: a disclosure is open by default`).not.toMatch(/<details[^>]*\sopen/)
+      const firstSummary = html.indexOf('<summary')
+      const firstTable = html.indexOf('<table')
+      if (firstTable === -1) continue
+      expect(firstTable, `${section}: a table appears before any disclosure`).toBeGreaterThan(firstSummary)
+    }
+  })
+
+  it('explains each convergence instead of labelling it', () => {
+    const html = renderToStaticMarkup(<ResultView section="convergenze" analysis={analysis} sydera={SYDERA} />)
+    expect(html).toContain('L’astrologia porta')
+    expect(html).toContain('La numerologia porta')
+    // A contrast must be explained, never averaged into neutrality.
+    expect(html).not.toMatch(/Contrasto significativo<\/span>\s*<\/div>\s*<\/section>/)
   })
 
   it('offers the five sections as the primary navigation', () => {

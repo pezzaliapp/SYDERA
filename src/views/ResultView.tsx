@@ -37,13 +37,14 @@ export function ResultView({ section, analysis, sydera }: ResultViewProps) {
       </nav>
 
       {section === 'sintesi' ? <SintesiSection analysis={analysis} /> : null}
-      {section === 'astrologia' ? <AstrologiaSection chart={analysis.chart} /> : null}
+      {section === 'astrologia' ? <AstrologiaSection chart={analysis.chart} report={analysis.report} /> : null}
       {section === 'numerologia' ? (
         <NumerologiaSection
           numerology={analysis.numerology}
           issues={analysis.numerologyIssues}
           warnings={analysis.numerologyWarnings}
           hasName={hasName}
+          report={analysis.report}
         />
       ) : null}
       {section === 'convergenze' ? <ConvergenzeSection convergence={analysis.convergence} /> : null}
