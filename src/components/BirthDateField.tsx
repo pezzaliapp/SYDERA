@@ -44,7 +44,7 @@ export function BirthDateField({ value, onChange, currentYear, error }: BirthDat
             inputMode="numeric"
             autoComplete="off"
             maxLength={2}
-            placeholder="01"
+            placeholder="GG"
             value={value.day}
             aria-describedby="birth-date-help"
             {...(error ? { 'aria-invalid': true } : {})}
@@ -63,7 +63,7 @@ export function BirthDateField({ value, onChange, currentYear, error }: BirthDat
             inputMode="numeric"
             autoComplete="off"
             maxLength={2}
-            placeholder="09"
+            placeholder="MM"
             value={value.month}
             ref={monthRef}
             aria-describedby="birth-date-help"
@@ -83,7 +83,7 @@ export function BirthDateField({ value, onChange, currentYear, error }: BirthDat
             inputMode="numeric"
             autoComplete="off"
             maxLength={4}
-            placeholder="1964"
+            placeholder="AAAA"
             value={value.year}
             ref={yearRef}
             aria-describedby="birth-date-help"

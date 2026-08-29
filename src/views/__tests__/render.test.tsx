@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { it as strings } from '../../content/it.ts'
@@ -366,5 +368,45 @@ describe('components', () => {
 
   it('renders the not found view', () => {
     expect(renderToStaticMarkup(<NotFoundView path="/ignoto" />)).toContain('404')
+  })
+})
+
+describe('mobile defects reported from a real device', () => {
+  it('offers neutral placeholders, never a plausible birth date', () => {
+    const html = renderToStaticMarkup(
+      <EntryView existing={null} acknowledged onAcknowledge={() => {}} onSaved={() => {}} currentYear={2026} />,
+    )
+    for (const placeholder of ['GG', 'MM', 'AAAA', 'HH']) {
+      expect(html, `missing ${placeholder}`).toContain(`placeholder="${placeholder}"`)
+    }
+    // A grey "01 / 09 / 1964" under an empty field reads as saved data.
+    expect(html).not.toMatch(/placeholder="(0[0-9]|1[0-2]|19[0-9]{2}|20[0-9]{2})"/)
+  })
+
+  it('lets the tab bar scroll without showing a scrollbar', () => {
+    const css = readFileSync(join(process.cwd(), 'src', 'styles', 'app.css'), 'utf8')
+    const bar = css.slice(css.indexOf('.sections {'), css.indexOf('.sections__list'))
+    expect(bar).toContain('scrollbar-width: none')
+    expect(css).toContain('.sections::-webkit-scrollbar')
+    // The faded edge is what says there are more tabs behind it.
+    expect(css).toContain(".sections[data-edge='both']")
+  })
+
+  it('brings the current tab into view instead of leaving it half cut', () => {
+    const source = readFileSync(join(process.cwd(), 'src', 'views', 'ResultView.tsx'), 'utf8')
+    expect(source).toContain('scrollIntoView')
+    expect(source).toContain('aria-current="page"')
+  })
+
+  it('turns the wide numerology tables into rows on a phone', () => {
+    const html = renderToStaticMarkup(<ResultView section="numerologia" analysis={analysis} sydera={SYDERA} />)
+    // Every cell carries its own label, so the stacked form still says what
+    // each value is.
+    expect(html).toContain('table--stacks')
+    expect(html).toContain('data-label')
+
+    const css = readFileSync(join(process.cwd(), 'src', 'styles', 'app.css'), 'utf8')
+    expect(css).toContain('.table--stacks td::before')
+    expect(css).toContain('content: attr(data-label)')
   })
 })

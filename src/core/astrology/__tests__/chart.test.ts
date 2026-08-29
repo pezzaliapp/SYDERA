@@ -44,10 +44,21 @@ describe('complete chart', () => {
     expect(chart.provenance.engine).toContain('astronomy-engine')
   })
 
-  it('flags a pre-1970 birth as needing confirmation', () => {
-    const chart = chartOf({ birthDate: { year: 1965, month: 6, day: 15 } })
-    if (chart.kind !== 'complete') return
-    expect(chart.provenance.caveats).toContain('pre-1970')
+  it('flags a pre-1970 birth only where the zone history is not verified', () => {
+    // The Italian record is complete in the time zone database and is checked
+    // against the legal periods of summer time in the timezone tests, so a
+    // birth in Rome in 1965 is not something to warn about.
+    const rome = chartOf({ birthDate: { year: 1965, month: 6, day: 15 } })
+    if (rome.kind !== 'complete') return
+    expect(rome.provenance.caveats).not.toContain('pre-1970')
+
+    const elsewhere = chartOf({
+      birthDate: { year: 1965, month: 6, day: 15 },
+      zoneId: 'America/Sao_Paulo',
+      place: { latitude: -23.55, longitude: -46.63, label: 'Luogo di prova' },
+    })
+    if (elsewhere.kind !== 'complete') return
+    expect(elsewhere.provenance.caveats).toContain('pre-1970')
   })
 
   it('reports the Ascendant uncertainty that the birth time precision implies', () => {

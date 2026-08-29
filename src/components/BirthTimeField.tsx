@@ -40,7 +40,7 @@ export function BirthTimeField({ value, onChange, error }: BirthTimeFieldProps) 
             inputMode="numeric"
             autoComplete="off"
             maxLength={2}
-            placeholder="07"
+            placeholder="HH"
             value={value.hour}
             aria-describedby="birth-time-help"
             {...(error ? { 'aria-invalid': true } : {})}
@@ -59,7 +59,7 @@ export function BirthTimeField({ value, onChange, error }: BirthTimeFieldProps) 
             inputMode="numeric"
             autoComplete="off"
             maxLength={2}
-            placeholder="30"
+            placeholder="MM"
             value={value.minute}
             ref={minuteRef}
             aria-describedby="birth-time-help"

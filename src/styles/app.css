@@ -234,6 +234,29 @@ a {
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  /* Keeps a tab clear of the faded edge when it is scrolled into view. */
+  scroll-padding-inline: var(--space-l);
+  /* The native bar was a grey line across the phone; the fade below says the
+     same thing without looking like a broken desktop control. */
+  scrollbar-width: none;
+}
+
+.sections::-webkit-scrollbar {
+  display: none;
+}
+
+/* Faded only on the side that still has tabs behind it. */
+.sections[data-edge='end'] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
+}
+
+.sections[data-edge='start'] {
+  mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent 100%);
+}
+
+.sections[data-edge='both'] {
+  mask-image: linear-gradient(to right, transparent 0, #000 2.5rem, #000 calc(100% - 2.5rem), transparent 100%);
 }
 
 .sections__list {
@@ -249,6 +272,7 @@ a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  scroll-margin-inline: var(--space-l);
   padding: 0 var(--space-s);
   border-radius: 999px;
   color: var(--text-2);
@@ -482,6 +506,65 @@ a {
 
 .cell-wrap {
   white-space: normal;
+}
+
+/*
+ * Tables that become a list on a phone.
+ *
+ * Four columns inside 360 pixels squeezed the only wrapping column — the
+ * reading — down to a couple of characters, one word per line, with the rest
+ * cut off. A row is a better shape than a table here: each value keeps its
+ * label and the text stays whole.
+ */
+@media (max-width: 47.99rem) {
+  .table--stacks,
+  .table--stacks tbody,
+  .table--stacks tr,
+  .table--stacks td {
+    display: block;
+    width: auto;
+  }
+
+  .table--stacks thead {
+    /* The labels move onto the cells; the header row would be a duplicate. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table--stacks tr {
+    padding: var(--space-2xs) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table--stacks tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .table--stacks td {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, auto) 1fr;
+    gap: var(--space-2xs);
+    align-items: baseline;
+    border-bottom: 0;
+    padding-block: 2px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .table--stacks td::before {
+    content: attr(data-label);
+    color: var(--text-3);
+    font-size: var(--step--1);
+  }
+
+  /* Nothing scrolls sideways any more, so the wrapper must not suggest it. */
+  .table-wrap:has(.table--stacks) {
+    overflow-x: visible;
+  }
 }
 
 /* --------------------------------------------------------- convergences */
@@ -997,6 +1080,35 @@ select {
 
 .number-card__name {
   font-weight: 600;
+}
+
+.number-card__trace {
+  align-self: flex-start;
+}
+
+/*
+ * Six numbers on a phone were six tall boxes and a very long scroll. Nothing
+ * is hidden or removed — the same values, readings and calculations are all
+ * still there — but the padding, the gaps and the size of the figure are
+ * brought back to what a consultation needs.
+ */
+@media (max-width: 47.99rem) {
+  .grid {
+    gap: var(--space-2xs);
+  }
+
+  .number-card {
+    gap: var(--space-3xs);
+    padding: var(--space-2xs) var(--space-xs);
+  }
+
+  .number-card__value {
+    font-size: var(--step-2);
+  }
+
+  .number-card__trace {
+    min-height: 40px;
+  }
 }
 
 .badge {

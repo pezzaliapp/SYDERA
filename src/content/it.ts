@@ -204,7 +204,8 @@ export const it = {
     uncertaintyBody: (degrees: string, minutes: string) =>
       `Con un’ora nota a ±${minutes} minuti, l’Ascendente è determinato entro circa ±${degrees}°. La precisione del calcolo non è la precisione del dato inserito.`,
     caveats: {
-      'pre-1970': 'Nascita precedente al 1970: i dati storici sui fusi orari sono dichiarati approssimativi dalla fonte. Verifica lo scarto applicato.',
+      'pre-1970':
+        'Nascita precedente al 1970: per questo fuso orario la fonte dichiara i dati storici come non garantiti. Lo scarto applicato è indicato qui sopra e puoi correggerlo manualmente se conosci l’ora legale in vigore quel giorno.',
       'local-mean-time': 'A questa data il luogo non adottava ancora un fuso standard: è stata usata l’ora media locale.',
       'unusual-offset': 'Lo scarto applicato non è un numero intero di mezze ore: verificalo se possibile.',
       'manual-override': 'Scarto impostato manualmente da te, non ricavato dalle regole del fuso.',

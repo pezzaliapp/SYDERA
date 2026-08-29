@@ -43,17 +43,15 @@ export function NumberCard({ name, source, result }: NumberCardProps) {
         </p>
       ) : null}
 
-      <div>
-        <button
-          type="button"
-          className="button button--quiet small"
-          aria-expanded={showTrace}
-          aria-controls={traceId}
-          onClick={() => setShowTrace((value) => !value)}
-        >
-          {showTrace ? it.result.hideCalculation : it.result.showCalculation}
-        </button>
-      </div>
+      <button
+        type="button"
+        className="button button--quiet small number-card__trace"
+        aria-expanded={showTrace}
+        aria-controls={traceId}
+        onClick={() => setShowTrace((value) => !value)}
+      >
+        {showTrace ? it.result.hideCalculation : it.result.showCalculation}
+      </button>
 
       {showTrace ? (
         <div className="trace" id={traceId}>

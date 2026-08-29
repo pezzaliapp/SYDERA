@@ -84,7 +84,7 @@ export function NumerologiaSection({ numerology, issues, warnings, hasName }: Pr
           {it.numerology.pinnacles}
         </h3>
         <div className="table-wrap">
-          <table>
+          <table className="table--stacks">
             <thead>
               <tr>
                 <th scope="col">#</th>
@@ -96,17 +96,19 @@ export function NumerologiaSection({ numerology, issues, warnings, hasName }: Pr
             <tbody>
               {numerology.pinnacles.map((pinnacle) => (
                 <tr key={pinnacle.index}>
-                  <td>{pinnacle.index}</td>
-                  <td>
+                  <td data-label="#">{pinnacle.index}</td>
+                  <td data-label={it.result.calculated}>
                     {pinnacle.value}
                     {pinnacle.isMaster ? ' ★' : ''}
                   </td>
-                  <td>
+                  <td data-label={it.numerology.ageRange}>
                     {pinnacle.endAge === null
                       ? `${it.numerology.fromAge} ${pinnacle.startAge} ${it.numerology.onwards}`
                       : `${pinnacle.startAge}–${pinnacle.endAge}`}
                   </td>
-                  <td className="cell-wrap">{themeFor(pinnacle.value)?.keywords.join(', ') ?? '—'}</td>
+                  <td className="cell-wrap" data-label={it.result.symbolic}>
+                    {themeFor(pinnacle.value)?.keywords.join(', ') ?? '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -119,7 +121,7 @@ export function NumerologiaSection({ numerology, issues, warnings, hasName }: Pr
           {it.numerology.challenges}
         </h3>
         <div className="table-wrap">
-          <table>
+          <table className="table--stacks">
             <thead>
               <tr>
                 <th scope="col">#</th>
@@ -130,9 +132,9 @@ export function NumerologiaSection({ numerology, issues, warnings, hasName }: Pr
             <tbody>
               {numerology.challenges.map((challenge) => (
                 <tr key={challenge.index}>
-                  <td>{challenge.index}</td>
-                  <td>{challenge.value}</td>
-                  <td>{challenge.expression}</td>
+                  <td data-label="#">{challenge.index}</td>
+                  <td data-label={it.result.calculated}>{challenge.value}</td>
+                  <td data-label={it.numerology.method}>{challenge.expression}</td>
                 </tr>
               ))}
             </tbody>

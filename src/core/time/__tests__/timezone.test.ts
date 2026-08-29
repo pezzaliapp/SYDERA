@@ -248,3 +248,69 @@ describe('zone fingerprint', () => {
     expect(zoneFingerprint(ROME, at)).not.toBe(zoneFingerprint('America/New_York', at))
   })
 })
+
+describe('the pre-1970 caveat says something true', () => {
+  /**
+   * The IANA maintainers declare pre-1970 data best effort, and that is why
+   * the caveat exists. But for Italy the record is complete: warning a 1964
+   * Italian birth that its offset may be approximate told the user to doubt a
+   * number that is right. These cases are the evidence for narrowing it.
+   */
+  const offsetAt = (year: number, month: number, day: number, zone = 'Europe/Rome'): number => {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'longOffset' })
+      .formatToParts(new Date(Date.UTC(year, month - 1, day, 12)))
+      .find((part) => part.type === 'timeZoneName')?.value
+    const match = /GMT([+-])(\d{2}):(\d{2})/.exec(parts ?? '')
+    if (!match) return 0
+    return (match[1] === '-' ? -1 : 1) * (Number(match[2]) * 60 + Number(match[3]))
+  }
+
+  it('reproduces the documented Italian periods of summer time', () => {
+    // year, a date in standard time, a date inside that year's ora legale
+    const periods: ReadonlyArray<readonly [number, readonly [number, number], readonly [number, number]]> = [
+      [1916, [3, 1], [7, 1]],
+      [1920, [2, 1], [6, 1]],
+      [1943, [2, 1], [6, 1]],
+      [1946, [2, 1], [6, 1]],
+      [1947, [2, 1], [6, 1]],
+      [1948, [1, 15], [6, 1]],
+      [1966, [3, 1], [7, 15]],
+      [1967, [4, 1], [8, 1]],
+      [1968, [4, 1], [7, 1]],
+      [1969, [4, 1], [7, 1]],
+    ]
+    for (const [year, standard, summer] of periods) {
+      expect(offsetAt(year, standard[0], standard[1]), `${year} standard`).toBe(60)
+      expect(offsetAt(year, summer[0], summer[1]), `${year} ora legale`).toBe(120)
+    }
+  })
+
+  it('knows Italy kept standard time all year between 1949 and 1965', () => {
+    for (const year of [1950, 1955, 1960, 1965]) {
+      expect(offsetAt(year, 1, 15), `${year} gennaio`).toBe(60)
+      expect(offsetAt(year, 7, 15), `${year} luglio`).toBe(60)
+    }
+  })
+
+  it('does not warn about a verified zone, and still warns about the others', () => {
+    const born1964 = { year: 1964, month: 9, day: 1, hour: 7, minute: 30 }
+    const instant = { epochMs: 0, offsetMinutes: 60 }
+    expect(caveatsFor(born1964, instant, false, 'Europe/Rome')).not.toContain('pre-1970')
+    expect(caveatsFor(born1964, instant, false, 'Europe/Vatican')).not.toContain('pre-1970')
+    expect(caveatsFor(born1964, instant, false, 'America/Sao_Paulo')).toContain('pre-1970')
+    // Unknown zone: the honest default is to keep the caveat.
+    expect(caveatsFor(born1964, instant, false)).toContain('pre-1970')
+  })
+
+  it('still flags a birth before Italy adopted a standard time', () => {
+    // Rome ran on local mean time until 1893: +49 minutes, not a round offset.
+    expect(offsetAt(1880, 6, 1)).toBe(49)
+    const caveats = caveatsFor(
+      { year: 1880, month: 6, day: 1, hour: 12, minute: 0 },
+      { epochMs: 0, offsetMinutes: 49 },
+      false,
+      'Europe/Rome',
+    )
+    expect(caveats).toContain('local-mean-time')
+  })
+})

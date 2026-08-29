@@ -198,15 +198,38 @@ export function zoneFingerprint(zoneId: string, aroundEpochMs: number): string {
   return probes.map((probe) => offsetMinutesAt(probe, zoneId)).join(',')
 }
 
+/**
+ * Zones whose pre-1970 history has been checked against the national legal
+ * record of summer time.
+ *
+ * The IANA maintainers state that data before 1970 is best effort, and that
+ * caution is real — but it is about zones whose early history is unrecorded or
+ * was merged with a neighbour's. Italy has had a single legal time since 1893,
+ * and the database reproduces its record exactly: every documented period of
+ * ora legale from 1916 to 1969 resolves correctly, the years 1949–1965 show no
+ * summer time as they should, and dates before 1893 report Rome's local mean
+ * time rather than a standard offset. Warning an Italian birth in 1964 that
+ * the offset may be approximate was telling the user to doubt a number that is
+ * right. The checks are in docs/TIMEZONE_PRE_1970.md and in the test suite.
+ */
+const VERIFIED_PRE_1970_ZONES: readonly string[] = ['Europe/Rome', 'Europe/Vatican', 'Europe/San_Marino']
+
 /** Offsets that are not whole hours or half hours deserve a second look. */
 function isUnusualOffset(offsetMinutes: number): boolean {
   return offsetMinutes % 30 !== 0
 }
 
-export function caveatsFor(local: LocalDateTime, instant: UtcInstant, manual: boolean): OffsetCaveat[] {
+export function caveatsFor(
+  local: LocalDateTime,
+  instant: UtcInstant,
+  manual: boolean,
+  zoneId: string | null = null,
+): OffsetCaveat[] {
   const caveats: OffsetCaveat[] = []
   if (manual) caveats.push('manual-override')
-  if (local.year < 1970) caveats.push('pre-1970')
+  if (local.year < 1970 && !(zoneId !== null && VERIFIED_PRE_1970_ZONES.includes(zoneId))) {
+    caveats.push('pre-1970')
+  }
   if (isUnusualOffset(instant.offsetMinutes)) {
     // Before standard time was adopted, zones report local mean time, which is
     // an arbitrary number of minutes from the meridian.
@@ -227,7 +250,7 @@ export function describeBirthInstant(
     zoneId,
     instant,
     source,
-    caveats: caveatsFor(local, instant, source === 'manual'),
+    caveats: caveatsFor(local, instant, source === 'manual', zoneId),
     zoneFingerprint: zoneFingerprint(zoneId, instant.epochMs),
   }
 }
