@@ -1,12 +1,11 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { it } from '../content/it.ts'
+import { release } from '../app/release.ts'
 import { paths, type Route } from '../app/router.ts'
 
 interface AppShellProps {
   readonly route: Route
   readonly children: ReactNode
-  readonly updateAvailable: boolean
-  readonly onApplyUpdate: () => void
   /** Chrome is hidden on the entry and returning screens, which are the whole app there. */
   readonly bare: boolean
 }
@@ -18,7 +17,7 @@ const SECONDARY = [
   { path: paths.settings, label: it.nav.settings, match: 'settings' },
 ] as const
 
-export function AppShell({ route, children, updateAvailable, onApplyUpdate, bare }: AppShellProps) {
+export function AppShell({ route, children, bare }: AppShellProps) {
   const mainRef = useRef<HTMLElement>(null)
   const firstRender = useRef(true)
 
@@ -34,17 +33,14 @@ export function AppShell({ route, children, updateAvailable, onApplyUpdate, bare
   if (bare) {
     return (
       <div className="app app--bare">
-        {updateAvailable ? (
-          <div className="banner" role="status">
-            <span>{it.common.updateAvailable}</span>
-            <button type="button" className="button button--quiet" onClick={onApplyUpdate}>
-              {it.common.updateAction}
-            </button>
-          </div>
-        ) : null}
         <main className="main main--bare" id="main" ref={mainRef} tabIndex={-1}>
           {children}
         </main>
+        {/* Which build is running has to be answerable on every screen,
+            including the one a new user sees first. */}
+        <footer className="app-footer app-footer--bare">
+          <p className="footer__release small">{release.label}</p>
+        </footer>
       </div>
     )
   }
@@ -70,14 +66,6 @@ export function AppShell({ route, children, updateAvailable, onApplyUpdate, bare
         </nav>
       </header>
 
-      {updateAvailable ? (
-        <div className="banner" role="status">
-          <span>{it.common.updateAvailable}</span>
-          <button type="button" className="button button--quiet" onClick={onApplyUpdate}>
-            {it.common.updateAction}
-          </button>
-        </div>
-      ) : null}
 
       <main className="main" id="main" ref={mainRef} tabIndex={-1}>
         {children}
@@ -100,6 +88,7 @@ export function AppShell({ route, children, updateAvailable, onApplyUpdate, bare
           </ul>
         </nav>
         <p className="footer__note small">{it.app.localNotice}</p>
+        <p className="footer__release small">{release.label}</p>
       </footer>
     </div>
   )

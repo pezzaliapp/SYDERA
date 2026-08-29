@@ -5,6 +5,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["vite.config.ts", "src/**/__tests__/**/*.ts", "src/**/__tests__/**/*.tsx"],
+  "include": ["vite.config.ts", "src/vite-env.d.ts", "src/**/__tests__/**/*.ts", "src/**/__tests__/**/*.tsx"],
   "exclude": []
 }

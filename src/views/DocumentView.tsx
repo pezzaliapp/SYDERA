@@ -1,7 +1,16 @@
 import type { LegalDocument } from '../content/types.ts'
+import { it } from '../content/it.ts'
+import { release } from '../app/release.ts'
 
 /** Renders Privacy, Disclaimer and About from the content layer. */
-export function DocumentView({ document: doc }: { readonly document: LegalDocument }) {
+export function DocumentView({
+  document: doc,
+  showRelease = false,
+}: {
+  readonly document: LegalDocument
+  /** Informazioni states which build is running; a green deploy does not. */
+  readonly showRelease?: boolean
+}) {
   return (
     <>
       <div className="stack stack--tight">
@@ -29,6 +38,22 @@ export function DocumentView({ document: doc }: { readonly document: LegalDocume
           ) : null}
         </section>
       ))}
+
+      {showRelease ? (
+        <section className="card" aria-labelledby="section-versione">
+          <h2 className="section-title" id="section-versione">
+            {it.about.releaseTitle}
+          </h2>
+          <dl className="release">
+            <dt>{it.about.version}</dt>
+            <dd>{release.version}</dd>
+            <dt>{it.about.build}</dt>
+            <dd>{release.commit}</dd>
+            <dt>{it.about.buildDate}</dt>
+            <dd>{release.buildDate}</dd>
+          </dl>
+        </section>
+      ) : null}
     </>
   )
 }

@@ -48,10 +48,13 @@ describe('no outbound traffic', () => {
     expect(source, 'the dataset loader must exist').not.toBe('')
     // The path is relative and is joined to the base the app was served from.
     expect(source).toContain("export const PLACE_DATASET_PATH = 'data/places.txt'")
-    expect(source).toContain('`${baseUrl}${PLACE_DATASET_PATH}`')
-    // No absolute URL, no host, no query string that could carry a place name.
+    expect(source).toContain('`${baseUrl}${PLACE_DATASET_URL}`')
+    // No absolute URL and no host.
     expect(source).not.toMatch(/https?:\/\//)
-    expect(source).not.toMatch(/\?\$\{|encodeURIComponent/)
+    // The only query string is the build's own dataset fingerprint. Nothing
+    // the user types may ever be put into a URL.
+    expect(source).toContain('?v=${__SYDERA_PLACES_VERSION__}')
+    expect(source).not.toMatch(/encodeURIComponent|\?\$\{query|\?q=/)
   })
 
   it('never sends a search query anywhere: searching is pure computation', () => {

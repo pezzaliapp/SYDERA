@@ -131,6 +131,13 @@ export const it = {
     referenceDate: 'Data di riferimento',
   },
 
+  about: {
+    releaseTitle: 'Versione in uso',
+    version: 'Versione',
+    build: 'Build',
+    buildDate: 'Data della build',
+  },
+
   report: {
     title: 'La tua SYDERA',
     /** One sober line under the title. The full notice lives in Avvertenze. */
@@ -536,7 +543,7 @@ export const disclaimerDocument: LegalDocument = {
 
 export const aboutDocument: LegalDocument = {
   title: 'Informazioni su SYDERA',
-  updated: 'Versione 0.2.0 — fase 2',
+  updated: 'Informazioni sull’applicazione',
   intro:
     'SYDERA è un’applicazione web progressiva locale dedicata all’analisi simbolica personale: astrologia occidentale e numerologia pitagorica, con calcoli trasparenti e ispezionabili.',
   sections: [

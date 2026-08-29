@@ -100,7 +100,9 @@ describe('dataset loading', () => {
     }) as unknown as typeof fetch
 
     const loaded = await loadPlaceDataset('/SYDERA/', fakeFetch)
-    expect(requested).toEqual(['/SYDERA/data/places.txt'])
+    // The fingerprint keeps a release from reading another release's dataset.
+    expect(requested).toHaveLength(1)
+    expect(requested[0]).toMatch(/^\/SYDERA\/data\/places\.txt\?v=[0-9a-f]+$/)
     expect(loaded.places[0]?.name).toBe('Roma')
     // Relative to the base: no absolute host, no third party.
     expect(requested[0]).not.toMatch(/^https?:\/\//)

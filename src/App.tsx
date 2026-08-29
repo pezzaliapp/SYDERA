@@ -28,7 +28,6 @@ export function App() {
   const route = useRoute()
   const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES)
   const [preferencesLoaded, setPreferencesLoaded] = useState(false)
-  const [applyUpdate, setApplyUpdate] = useState<(() => void) | null>(null)
   const [dataDeleted, setDataDeleted] = useState(false)
   const { state: sydera, reload } = useSydera()
 
@@ -38,7 +37,7 @@ export function App() {
   }, [])
 
   useEffect(() => {
-    registerServiceWorker((apply) => setApplyUpdate(() => apply))
+    registerServiceWorker()
   }, [])
 
   useTheme(preferences.theme)
@@ -128,7 +127,7 @@ export function App() {
       case 'disclaimer':
         return <DocumentView document={disclaimerDocument} />
       case 'about':
-        return <DocumentView document={aboutDocument} />
+        return <DocumentView document={aboutDocument} showRelease />
       case 'settings':
         return (
           <SettingsView
@@ -149,11 +148,6 @@ export function App() {
     <AppShell
       route={route}
       bare={bare}
-      updateAvailable={applyUpdate !== null}
-      onApplyUpdate={() => {
-        applyUpdate?.()
-        setApplyUpdate(null)
-      }}
     >
       {content}
     </AppShell>

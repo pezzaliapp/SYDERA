@@ -36,6 +36,15 @@ export interface PlaceDataset {
  */
 export const PLACE_DATASET_PATH = 'data/places.txt'
 
+/**
+ * The dataset URL carries the fingerprint of the file this build was made with.
+ *
+ * Without it the URL never changes between releases, and any cache holding the
+ * previous release's copy keeps answering for it — which is exactly how a build
+ * that shipped Italian place names ended up searching a file that had none.
+ */
+export const PLACE_DATASET_URL = `${PLACE_DATASET_PATH}?v=${__SYDERA_PLACES_VERSION__}`
+
 export function parsePlaceDataset(text: string): PlaceDataset {
   const [zoneBlock = '', placeBlock = ''] = text.split('\n\n')
   const zones = zoneBlock.split('\n').filter(Boolean)
@@ -73,7 +82,7 @@ export async function loadPlaceDataset(baseUrl: string, fetcher: typeof fetch = 
   if (inFlight) return inFlight
 
   inFlight = (async () => {
-    const response = await fetcher(`${baseUrl}${PLACE_DATASET_PATH}`)
+    const response = await fetcher(`${baseUrl}${PLACE_DATASET_URL}`)
     if (!response.ok) throw new Error(`place dataset unavailable (${response.status})`)
     const parsed = parsePlaceDataset(await response.text())
     cached = parsed

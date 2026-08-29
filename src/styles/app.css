@@ -188,6 +188,36 @@ a {
   font-weight: 600;
 }
 
+.app-footer--bare {
+  border-top: 0;
+  padding-block: var(--space-xs);
+  text-align: center;
+}
+
+.footer__release {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.release {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3xs) var(--space-xs);
+  margin: 0;
+  font-size: var(--step--1);
+}
+
+.release dt {
+  color: var(--text-3);
+}
+
+.release dd {
+  margin: 0;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
 .footer__note {
   color: var(--text-3);
 }
