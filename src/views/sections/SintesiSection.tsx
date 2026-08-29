@@ -1,6 +1,7 @@
 import { it } from '../../content/it.ts'
 import { paths } from '../../app/router.ts'
 import { ReportSectionCard } from '../../components/ReportSectionCard.tsx'
+import { ReportEvidence } from '../../components/ReportEvidence.tsx'
 import type { Analysis } from '../../app/useAnalysis.ts'
 
 /**
@@ -30,6 +31,12 @@ export function SintesiSection({ analysis }: { readonly analysis: Analysis }) {
     <div className="document">
       <header className="document__head">
         <h1 className="document__title">{it.report.title}</h1>
+        <p className="document__framing">
+          {it.report.shortFraming}{' '}
+          <a className="link" href={paths.disclaimer}>
+            {it.report.readDisclaimer}
+          </a>
+        </p>
       </header>
 
       <ReportSectionCard section={lead} lead />
@@ -37,6 +44,8 @@ export function SintesiSection({ analysis }: { readonly analysis: Analysis }) {
       {rest.map((section) => (
         <ReportSectionCard section={section} key={section.id} />
       ))}
+
+      <ReportEvidence sections={report.sections} />
 
       {report.omitted.length > 0 ? (
         <section className="reading reading--quiet">

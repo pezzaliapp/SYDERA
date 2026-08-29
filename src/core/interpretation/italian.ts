@@ -110,3 +110,74 @@ export function stableIndex(key: string, buckets: number): number {
   }
   return buckets > 0 ? hash % buckets : 0
 }
+
+/**
+ * Italian contracts a preposition with the definite article that follows it:
+ * "a" + "il senso" is "al senso", never "a il senso". Templates that place a
+ * labelled factor after a preposition have to go through here.
+ */
+const CONTRACTIONS: Record<string, Record<string, string>> = {
+  a: { il: 'al', lo: 'allo', la: 'alla', i: 'ai', gli: 'agli', le: 'alle', "l'": 'all’', 'l’': 'all’' },
+  in: { il: 'nel', lo: 'nello', la: 'nella', i: 'nei', gli: 'negli', le: 'nelle', "l'": 'nell’', 'l’': 'nell’' },
+  di: { il: 'del', lo: 'dello', la: 'della', i: 'dei', gli: 'degli', le: 'delle', "l'": 'dell’', 'l’': 'dell’' },
+  da: { il: 'dal', lo: 'dallo', la: 'dalla', i: 'dai', gli: 'dagli', le: 'dalle', "l'": 'dall’', 'l’': 'dall’' },
+  su: { il: 'sul', lo: 'sullo', la: 'sulla', i: 'sui', gli: 'sugli', le: 'sulle', "l'": 'sull’', 'l’': 'sull’' },
+}
+
+export function contract(preposition: string, phrase: string): string {
+  const table = CONTRACTIONS[preposition]
+  if (!table) return `${preposition} ${phrase}`
+
+  // The elided article carries no space, so it needs matching before the rest.
+  const elided = /^(l['’])(.+)$/.exec(phrase)
+  if (elided?.[1] && elided[2]) {
+    const joined = table[elided[1]]
+    if (joined) return `${joined}${elided[2]}`
+  }
+
+  const [article, ...rest] = phrase.split(' ')
+  const joined = article ? table[article] : undefined
+  if (!joined || rest.length === 0) return `${preposition} ${phrase}`
+  return `${joined} ${rest.join(' ')}`
+}
+
+/**
+ * Joins a clause to the consequence that explains it.
+ *
+ * A colon is the natural join, but several consequences already carry one of
+ * their own, and "X non c’è attrito: il passaggio è disponibile, ma va usato:
+ * da solo non produce nulla" is unreadable. When the tail is already punctuated
+ * that way, the two become separate sentences instead.
+ */
+export function attach(lead: string, tail: string): string {
+  if (!tail) return lead
+  if (!tail.includes(':')) return `${lead}: ${tail}`
+  return `${lead}. ${tail.charAt(0).toUpperCase()}${tail.slice(1)}`
+}
+
+/**
+ * Picks from a pool without repeating a choice already made in this report.
+ *
+ * The stable hash alone gives the same chart the same wording every time, but
+ * two aspects that fall back to the same family pool land on the same sentence
+ * often enough to be visible — a third of reports carried one twice. Walking
+ * forward from the stable position keeps the choice deterministic while making
+ * a repeat impossible until the pool is exhausted.
+ */
+export function pickDistinct<T>(pool: readonly T[], key: string, used: Set<T>): T | undefined {
+  if (pool.length === 0) return undefined
+  const start = stableIndex(key, pool.length)
+  for (let step = 0; step < pool.length; step += 1) {
+    const candidate = pool[(start + step) % pool.length] as T
+    if (!used.has(candidate)) {
+      used.add(candidate)
+      return candidate
+    }
+  }
+  // More aspects than phrasings. Starting the cycle again spreads the reuse
+  // evenly instead of piling every overflow onto one sentence.
+  used.clear()
+  const again = pool[start] as T
+  used.add(again)
+  return again
+}

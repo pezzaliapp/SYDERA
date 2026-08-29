@@ -38,7 +38,7 @@ import {
   sunInSign,
   venusInSign,
 } from '../../content/interpretation.it.ts'
-import { aspectLabel, stableIndex } from './italian.ts'
+import { aspectLabel, attach, pickDistinct, stableIndex } from './italian.ts'
 import { signReadings } from '../../content/astrologyThemes.it.ts'
 
 const SIGN_LABEL = (sign: ZodiacSign): string => signReadings[sign].label
@@ -116,6 +116,11 @@ export function astrologySignals(chart: CompleteChart): Signal[] {
 
   // Aspects between points that carry weight. A generational body counts only
   // when it touches a personal one, which is the only way it becomes personal.
+  // The aspect list is deterministic, so tracking what has already been said
+  // keeps the wording varied without making it depend on anything but the chart.
+  const usedRelations = new Set<AspectRelation>()
+  const usedConsequences = new Set<string>()
+
   for (const aspect of chart.aspects) {
     const weightA = BODY_WEIGHT[aspect.a as keyof typeof BODY_WEIGHT] ?? 0
     const weightB = BODY_WEIGHT[aspect.b as keyof typeof BODY_WEIGHT] ?? 0
@@ -136,7 +141,7 @@ export function astrologySignals(chart: CompleteChart): Signal[] {
       weight,
       themes: [],
       domain: domainOfAspect(aspect.a, aspect.b),
-      statement: aspectStatement(aspect.a, aspect.b, aspect.aspect, functionA, functionB),
+      statement: aspectStatement(aspect, functionA, functionB, usedRelations, usedConsequences),
     })
   }
 
@@ -184,23 +189,32 @@ export function numerologySignals(profile: NumerologyProfile): Signal[] {
  * by a stable hash of the body pair: the same chart always reads identically,
  * and two aspects in one report rarely land on the same wording.
  */
+type AspectRelation = (a: string, b: string) => string
+
 function aspectStatement(
-  a: AspectPoint,
-  b: AspectPoint,
-  aspect: keyof typeof aspectRelations,
+  aspect: { readonly a: AspectPoint; readonly b: AspectPoint; readonly aspect: keyof typeof aspectRelations },
   functionA: string,
   functionB: string,
+  usedRelations: Set<AspectRelation>,
+  usedConsequences: Set<string>,
 ): string {
-  const pairKey = [a, b].sort().join('|')
-  const relations = aspectRelations[aspect]
-  const relation = relations[stableIndex(`${pairKey}:${aspect}`, relations.length)] as (x: string, y: string) => string
+  const pairKey = [aspect.a, aspect.b].sort().join('|')
+  const relations = aspectRelations[aspect.aspect]
+  const relation =
+    pickDistinct(relations, `${pairKey}:${aspect.aspect}`, usedRelations) ??
+    (relations[stableIndex(pairKey, relations.length)] as AspectRelation)
 
-  const family = aspectFamily[aspect]
+  // A named pair says something only that pair can say, so it is never
+  // interchangeable and never needs the collision check.
+  const family = aspectFamily[aspect.aspect]
   const specific = pairConsequence[pairKey]?.[family]
   const generic = familyConsequence[family]
-  const consequence = specific ?? (generic[stableIndex(pairKey, generic.length)] as string)
+  const consequence =
+    specific ??
+    pickDistinct(generic, pairKey, usedConsequences) ??
+    (generic[stableIndex(pairKey, generic.length)] as string)
 
-  return `${relation(functionA, functionB)}: ${consequence}`
+  return attach(relation(functionA, functionB), consequence)
 }
 
 function labelOf(point: AspectPoint): string {

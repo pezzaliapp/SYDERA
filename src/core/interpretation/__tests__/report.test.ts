@@ -7,6 +7,7 @@ import { buildReport, type ReportInput } from '../report.ts'
 import { astrologySignals, signOfLongitude } from '../signals.ts'
 import { rankThemes, strengths, tensions } from '../synthesis.ts'
 import { DOMAINS } from '../types.ts'
+import { hardAspectConsequence } from '../../../content/interpretation.it.ts'
 
 /**
  * Synthetic technical fixtures. No real person's data anywhere.
@@ -153,7 +154,7 @@ describe('no generic fallback invents a personality', () => {
   test('two different charts produce different portraits', () => {
     const first = buildReport(FULL).sections.find((section) => section.id === 'profilo')
     const second = buildReport(OTHER).sections.find((section) => section.id === 'profilo')
-    expect(first?.paragraphs[1]).not.toBe(second?.paragraphs[1])
+    expect(first?.paragraphs[0]).not.toBe(second?.paragraphs[0])
   })
 
   test('every domain section differs between two different charts', () => {
@@ -304,7 +305,28 @@ describe('contrasts are never quietly turned into agreement', () => {
       (tension) => tension.kind === 'aspetto-di-tensione',
     )
     if (!hard) return
-    expect(hard.statement).toMatch(/tende a cedere|oscillare fra i due poli/)
+    // The cost comes from the pool for that aspect, whichever phrasing the
+    // chart lands on — pinning one sentence here just re-states the content.
+    const costs = Object.values(hardAspectConsequence).flat()
+    expect(costs.some((cost) => hard.statement.includes(cost))).toBe(true)
+  })
+
+  test('no sentence appears twice anywhere in a report', () => {
+    // There are more hard aspects in a busy chart than there are ways to
+    // describe one, so the pools alone cannot guarantee this — the report is
+    // where it has to hold, because that is what a reader sees.
+    for (const input of [FULL, OTHER, NO_TIME, NO_NAME]) {
+      const seen = new Set<string>()
+      for (const section of buildReport(input).sections) {
+        for (const paragraph of section.paragraphs) {
+          for (const sentence of paragraph.split(/(?<=[.!?])\s+/).map((part) => part.trim())) {
+            if (sentence.length < 25) continue
+            expect(seen.has(sentence), `repeated in "${section.title}": ${sentence}`).toBe(false)
+            seen.add(sentence)
+          }
+        }
+      }
+    }
   })
 
   test('a hard aspect between personal points becomes a named tension', () => {
@@ -330,7 +352,7 @@ describe('the portrait is a synthesis, not a concatenation', () => {
   const profile = report.sections.find((section) => section.id === 'profilo')
 
   test('it relates factors to one another', () => {
-    const text = profile?.paragraphs[1] ?? ''
+    const text = profile?.paragraphs[0] ?? ''
     // A relation, not two sentences side by side.
     expect(text).toMatch(/che si presenta con|Sotto,/)
   })
@@ -358,7 +380,7 @@ describe('the portrait is a synthesis, not a concatenation', () => {
   })
 
   test('the Life Path qualifies the portrait instead of standing alone', () => {
-    const text = profile?.paragraphs[1] ?? ''
+    const text = profile?.paragraphs[0] ?? ''
     expect(text).toMatch(/, con una direzione/)
   })
 
@@ -370,8 +392,7 @@ describe('the portrait is a synthesis, not a concatenation', () => {
   })
 
   test('it stays one or two paragraphs', () => {
-    // The framing line plus the portrait itself.
-    expect(profile?.paragraphs.length).toBeLessThanOrEqual(3)
+    expect(profile?.paragraphs.length).toBeLessThanOrEqual(2)
   })
 })
 
@@ -482,9 +503,13 @@ describe('language discipline', () => {
     expect(occurrences.length).toBeLessThanOrEqual(1)
   })
 
-  test('states the symbolic framing once, at the start', () => {
-    const profile = buildReport(FULL).sections.find((section) => section.id === 'profilo')
-    expect(profile?.paragraphs[0]).toMatch(/non è una descrizione scientifica/i)
+  test('leaves the symbolic framing to the page instead of opening the reading with it', () => {
+    const report = buildReport(FULL)
+    for (const section of report.sections) {
+      for (const paragraph of section.paragraphs) {
+        expect(paragraph).not.toMatch(/non è una descrizione scientifica/i)
+      }
+    }
   })
 
   test('offers no percentage or measurement of the person', () => {

@@ -10,14 +10,28 @@ import type { ConvergenceResult } from '../convergence/taxonomy.ts'
 import type { Transit } from '../cycles/transits.ts'
 import type { NumerologyProfile } from '../numerology/profile.ts'
 import { it } from '../../content/it.ts'
-import { personalYearTheme, themeMeaning } from '../../content/interpretation.it.ts'
+import {
+  personalYearTheme,
+  strengthsOpening,
+  themeCharacter,
+  themeDrive,
+  threadPhrases,
+} from '../../content/interpretation.it.ts'
 import { bodyReadings } from '../../content/astrologyThemes.it.ts'
 import { buildPortrait } from './portrait.ts'
 import { aspectName, pointLabel, tidy, toPoint } from './italian.ts'
 import { astrologySignals, numerologySignals } from './signals.ts'
 import { capitalise, rankThemes, strengths, tensions } from './synthesis.ts'
 import { MAX_STATEMENTS_PER_DOMAIN } from './weights.ts'
-import { DOMAINS, type DomainId, type Evidence, type OmittedSection, type Report, type ReportSection, type Signal } from './types.ts'
+import {
+  DOMAINS,
+  type DomainId,
+  type Evidence,
+  type OmittedSection,
+  type Report,
+  type ReportSection,
+  type Signal,
+} from './types.ts'
 
 export interface ReportInput {
   readonly chart: Chart | null
@@ -99,7 +113,7 @@ export function buildReport(input: ReportInput): Report {
     sections.push({
       id: 'profilo',
       title: it.report.sections.profilo,
-      paragraphs: [it.report.framing, ...portrait.paragraphs],
+      paragraphs: [...portrait.paragraphs],
       evidence: portrait.evidence,
     })
   } else {
@@ -161,22 +175,51 @@ export function buildReport(input: ReportInput): Report {
   // 7. Strengths: themes more than one factor supports.
   const strong = strengths(ranked)
   if (strong.length > 1) {
-    const lines = strong.slice(0, 4).map((entry) => {
-      const support =
-        entry.systems.length > 1
-          ? it.report.convergesOnBoth
-          : entry.systems[0] === 'astrologia'
-            ? it.report.fromAstrology
-            : it.report.fromNumerology
-      return `${capitalise(it.convergence.themes[entry.theme])}: ${themeMeaning[entry.theme]} — ${support}.`
-    })
+    const [first, second] = strong
+    const paragraphs: string[] = []
+
+    if (first) {
+      const distinct = new Set(first.evidence.map((item) => item.key)).size
+      const support = first.systems.length > 1 ? strengthsOpening.bothSystems : strengthsOpening.oneSystem
+      const drive = themeDrive[first.theme] ?? it.convergence.themes[first.theme]
+      const character = themeCharacter[first.theme]
+      const where = domainsOf(first.evidence, sections)
+
+      paragraphs.push(
+        `${strengthsOpening.lead(drive, distinct)}${support}. ` +
+          (character ? `${capitalise(character)}.` : '') +
+          (where ? ` ${strengthsOpening.domainsLead(where)}.` : ''),
+      )
+    }
+
+    if (second && first) {
+      const drive = themeDrive[second.theme] ?? it.convergence.themes[second.theme]
+      const character = themeCharacter[second.theme]
+      const support = second.systems.length > 1 ? strengthsOpening.bothSystems : strengthsOpening.oneSystem
+
+      const firstDomains = domainTitles(first.evidence, sections)
+      const shared = domainTitles(second.evidence, sections).filter((title) => firstDomains.includes(title))
+      // Re-listing the domains the paragraph above just named adds nothing;
+      // when the overlap is total, saying so is shorter and more honest.
+      const relation =
+        shared.length === 0
+          ? strengthsOpening.apartFrom(themeDrive[first.theme] ?? '', drive)
+          : shared.length === firstDomains.length
+            ? strengthsOpening.sameGround
+            : strengthsOpening.meetIn(joinTitles(shared))
+
+      paragraphs.push(
+        `${strengthsOpening.alongside(drive)}${support}. ` +
+          (character ? `${capitalise(character)}. ` : '') +
+          `${relation}.`,
+      )
+    }
+
     sections.push({
       id: 'forze',
       title: it.report.sections.forze,
-      paragraphs: [it.report.strengthLead, ...lines],
-      evidence: uniqueEvidence(
-        strong.slice(0, 4).flatMap((entry) => entry.evidence.map((evidence) => ({ evidence, weight: 0, themes: [], domain: null, statement: '' }) as Signal)),
-      ),
+      paragraphs,
+      evidence: dedupeEvidence(strong.slice(0, 3).flatMap((entry) => entry.evidence)),
     })
   } else {
     omitted.push({
@@ -225,36 +268,48 @@ export function buildReport(input: ReportInput): Report {
 
   // 9. The thread: the single dominant theme and where it shows up.
   const leading = ranked[0]
-  // With a single strength, a thread that names the same theme is the same
-  // paragraph written twice.
-  const threadWouldRepeatStrength = strong.length <= 1 && leading !== undefined && strong[0]?.theme === leading.theme
 
-  if (leading && leading.evidence.length >= 2 && !threadWouldRepeatStrength) {
-    const where = sections
-      .filter((section) => (DOMAINS as readonly string[]).includes(section.id))
-      .filter((section) => section.evidence.some((evidence) => leading.evidence.some((item) => item.key === evidence.key)))
-      .map((section) => section.title.toLowerCase())
+  // The closing section earns its place only when there is both something that
+  // recurs and something that qualifies it. A thread that restates the leading
+  // theme is the same paragraph written twice.
+  // A tension between two themes describes a richer dynamic than a single
+  // system falling silent, so it is preferred when both are available.
+  const qualifying =
+    foundTensions.find((tension) => tension.kind === 'temi-opposti' && tension.poles) ??
+    foundTensions.find((tension) => tension.kind === 'contrasto-fra-sistemi' && tension.poles)
 
-    const spread =
-      where.length > 1
-        ? ` Lo si ritrova in più ambiti: ${where.slice(0, 3).join(', ')}.`
-        : ''
+  const threadPossible = leading !== undefined && leading.evidence.length >= 2 && qualifying?.poles !== undefined
+
+  if (threadPossible && leading && qualifying?.poles) {
+    const leadingDrive = themeDrive[leading.theme] ?? it.convergence.themes[leading.theme]
+    // If the leading tendency is itself one pole of the tension, the other
+    // pole is what qualifies it; otherwise the tension's own leading pole does.
+    const counterDrive =
+      qualifying.poles.leading === leadingDrive ? qualifying.poles.counter : qualifying.poles.leading
+    // A system contrast already states that one language is silent; adding
+    // "both readings arrive here" on top of it would contradict the sentence
+    // immediately before.
+    const systems =
+      qualifying.kind === 'contrasto-fra-sistemi'
+        ? ''
+        : leading.systems.length > 1
+          ? threadPhrases.bothSystems
+          : threadPhrases.oneSystem
 
     sections.push({
       id: 'filo',
       title: it.report.sections.filo,
       paragraphs: [
-        `${it.report.threadLead} ${themeMeaning[leading.theme]} è l’elemento che ricorre più spesso, ` +
-          `sostenuto da ${leading.evidence.length} indicatori distinti${leading.systems.length > 1 ? ' in entrambi i sistemi' : ''}.` +
-          spread,
+        `${threadPhrases.opening(leadingDrive)}, ${threadPhrases.qualifiedBy(counterDrive)}. ` +
+          `${threadPhrases.closing[qualifying.kind] ?? ''} ${systems}`.trim(),
       ],
-      evidence: leading.evidence.slice(0, 6),
+      evidence: dedupeEvidence([...leading.evidence.slice(0, 3), ...qualifying.evidence.slice(0, 3)]),
     })
   } else {
     omitted.push({
       id: 'filo',
       title: it.report.sections.filo,
-      reason: threadWouldRepeatStrength ? it.report.reasons.threadRepeats : it.report.reasons.noSignals,
+      reason: leading ? it.report.reasons.threadRepeats : it.report.reasons.noSignals,
     })
   }
 
@@ -304,9 +359,60 @@ export function buildReport(input: ReportInput): Report {
 
   // Every paragraph passes through the tidier, so composition artefacts never
   // reach the page.
-  const tidied = sections.map((section) => ({ ...section, paragraphs: clean(section.paragraphs) }))
+  const tidied = sections
+    .map((section) => ({ ...section, paragraphs: clean(section.paragraphs) }))
+    .map(withoutRepeatedSentences())
 
   return { sections: tidied, omitted, themes: ranked, signals }
+}
+
+/**
+ * Drops any sentence the report has already used.
+ *
+ * The phrase pools are chosen so that two factors rarely land on the same
+ * wording, but a chart with more hard aspects than there are ways to describe
+ * one will exhaust a pool, and the reader then meets the same sentence twice.
+ * A generic phrase that has already been read adds nothing the second time, so
+ * the later copy goes rather than being reworded into something the evidence
+ * does not say. A paragraph never loses its first sentence, so none is emptied.
+ */
+function withoutRepeatedSentences(): (section: ReportSection) => ReportSection {
+  const seen = new Set<string>()
+  return (section) => ({
+    ...section,
+    paragraphs: section.paragraphs.map((paragraph) => {
+      const sentences = paragraph.split(/(?<=[.!?])\s+/)
+      const kept = sentences.filter((sentence, index) => {
+        const key = sentence.trim()
+        if (index === 0 || key.length < 25) return true
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      const first = sentences[0]?.trim()
+      if (first && first.length >= 25) seen.add(first)
+      return kept.join(' ')
+    }),
+  })
+}
+
+/** Which sections of the report a set of evidence actually shows up in. */
+function domainTitles(evidence: readonly Evidence[], sections: readonly ReportSection[]): string[] {
+  const keys = new Set(evidence.map((item) => item.key))
+  return sections
+    .filter((section) => (DOMAINS as readonly string[]).includes(section.id))
+    .filter((section) => section.evidence.some((item) => keys.has(item.key)))
+    .map((section) => section.title.toLowerCase())
+}
+
+function joinTitles(titles: readonly string[]): string {
+  if (titles.length === 0) return ''
+  if (titles.length === 1) return titles[0] as string
+  return `${titles.slice(0, -1).join(', ')} e ${titles[titles.length - 1]}`
+}
+
+function domainsOf(evidence: readonly Evidence[], sections: readonly ReportSection[]): string {
+  return joinTitles(domainTitles(evidence, sections))
 }
 
 function dedupeEvidence(items: readonly Evidence[]): Evidence[] {

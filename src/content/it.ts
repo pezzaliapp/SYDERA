@@ -129,11 +129,13 @@ export const it = {
 
   report: {
     title: 'La tua SYDERA',
-    framing:
-      'Questa lettura mette insieme i due sistemi simbolici di SYDERA a partire dai dati calcolati. Non è una descrizione scientifica della personalità né una previsione: è ciò che astrologia e numerologia, prese insieme, dicono di questa combinazione di indicatori.',
-    why: 'Perché questa lettura?',
+    /** Short, always visible under the title: the essential claim, in one line. */
+    shortFraming: 'Lettura simbolica costruita dai dati che hai inserito. Non è una descrizione scientifica della personalità né una previsione.',
+    readDisclaimer: 'Avvertenze complete',
+    evidenceTitle: 'Perché questa lettura?',
+    evidenceLead:
+      'Ogni parte del testo nasce da valori calcolati. Qui sotto, raggruppati per sezione, quelli che l’hanno prodotta.',
     whyClose: 'Nascondi le fonti',
-    evidenceIntro: 'Questa parte del testo poggia su:',
     sections: {
       profilo: 'Il tuo profilo',
       presentazione: 'Come ti presenti al mondo',
@@ -156,16 +158,12 @@ export const it = {
       noCycle: 'il ciclo richiede i dati numerologici',
       thinEvidence: 'gli indicatori disponibili per questo ambito si riducono a un solo elemento secondario',
       singleStrength: 'emerge un solo tema ricorrente, che da solo non fa un insieme di punti di forza',
-      threadRepeats: 'il tema dominante è già l’unico punto di forza indicato, e ripeterlo non aggiungerebbe nulla',
+      threadRepeats:
+        'non emerge una tensione che qualifichi il tema dominante, e ripetere quel tema da solo non aggiungerebbe nulla',
     },
     noTensionFound:
       'Dagli indicatori disponibili non emergono spinte in aperto contrasto: il quadro risulta relativamente coerente al suo interno. Questo non significa assenza di conflitti reali, solo che questi due linguaggi simbolici non ne segnalano fra loro.',
-    strengthLead: 'Questi temi ricorrono in più punti del quadro:',
-    convergesOnBoth: 'sostenuto da entrambi i sistemi',
-    fromAstrology: 'emerge soprattutto dall’astrologia',
-    fromNumerology: 'emerge soprattutto dalla numerologia',
-    threadLead: 'Se si cerca un filo che tiene insieme il quadro:',
-    cycleLead: 'Nel periodo attuale:',
+    cycleLead: 'Nel periodo attuale il ciclo numerologico indica',
     transitsLead: 'Sul piano dei transiti in corso:',
   },
   sintesi: {

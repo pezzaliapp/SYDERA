@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aspectLabel, aspectName, joinWithAnd, pointLabel, stableIndex, tidy, toPoint } from '../italian.ts'
+import { aspectLabel, aspectName, attach, contract, joinWithAnd, pointLabel, stableIndex, tidy, toPoint } from '../italian.ts'
 
 /**
  * Grammar of the generated Italian. These are the mistakes composition makes
@@ -119,5 +119,47 @@ describe('point labels', () => {
     expect(pointLabel('sun')).toBe('Sole')
     expect(pointLabel('midheaven')).toBe('Medio Cielo')
     expect(pointLabel('ascendant')).toBe('Ascendente')
+  })
+})
+
+describe('prepositions contract with the article that follows', () => {
+  it('joins "a" with every form of the definite article', () => {
+    expect(contract('a', 'il senso del limite')).toBe('al senso del limite')
+    expect(contract('a', 'la vita emotiva')).toBe('alla vita emotiva')
+    expect(contract('a', 'lo slancio')).toBe('allo slancio')
+    expect(contract('a', 'gli altri')).toBe('agli altri')
+  })
+
+  it('handles the elided article, which carries no space', () => {
+    expect(contract('a', 'l’espressione')).toBe('all’espressione')
+    expect(contract('in', 'l’azione')).toBe('nell’azione')
+  })
+
+  it('leaves a phrase without an article alone', () => {
+    expect(contract('a', 'Saturno')).toBe('a Saturno')
+    expect(contract('in', 'Cancro')).toBe('in Cancro')
+  })
+
+  it('never produces the uncontracted form', () => {
+    for (const article of ['il', 'lo', 'la', 'i', 'gli', 'le']) {
+      expect(contract('a', `${article} cosa`)).not.toMatch(/^a /)
+      expect(contract('in', `${article} cosa`)).not.toMatch(/^in /)
+    }
+  })
+})
+
+describe('a consequence attaches without stacking colons', () => {
+  it('uses a colon when the consequence has none of its own', () => {
+    expect(attach('due cose si ostacolano', 'l’umore ne risente')).toBe('due cose si ostacolano: l’umore ne risente')
+  })
+
+  it('starts a new sentence when the consequence already has a colon', () => {
+    const joined = attach('non c’è attrito', 'il passaggio è disponibile: va usato')
+    expect(joined).toBe('non c’è attrito. Il passaggio è disponibile: va usato')
+    expect(joined.match(/:/g) ?? []).toHaveLength(1)
+  })
+
+  it('returns the lead unchanged when there is nothing to attach', () => {
+    expect(attach('una frase', '')).toBe('una frase')
   })
 })

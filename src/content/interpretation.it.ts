@@ -13,6 +13,7 @@
  * No calculation happens in this file.
  */
 import type { AspectId, BodyId, ZodiacSign } from '../core/astrology/types.ts'
+import { contract } from '../core/interpretation/italian.ts'
 
 type BySign = Readonly<Record<ZodiacSign, string>>
 
@@ -142,15 +143,6 @@ export const bodyFunction: Readonly<Record<BodyId | 'ascendant' | 'midheaven', s
   pluto: 'la spinta a trasformare',
   ascendant: 'il modo di presentarsi',
   midheaven: 'la direzione pubblica',
-})
-
-/** How an aspect between two functions reads. */
-export const aspectPhrase: Readonly<Record<AspectId, (a: string, b: string) => string>> = Object.freeze({
-  congiunzione: (a, b) => `${a} e ${b} agiscono insieme, al punto che è difficile attivare l’uno senza l’altro`,
-  sestile: (a, b) => `${a} e ${b} collaborano, ma la combinazione va attivata di proposito`,
-  quadrato: (a, b) => `${a} e ${b} si intralciano a vicenda: la combinazione produce attrito e chiede un compromesso`,
-  trigono: (a, b) => `${a} e ${b} scorrono insieme con facilità, al punto che la cosa si dà per scontata`,
-  opposizione: (a, b) => `${a} e ${b} si fronteggiano: due esigenze legittime che chiedono di essere bilanciate`,
 })
 
 /** A retrograde personal planet, read as an inward turn rather than a fault. */
@@ -379,10 +371,23 @@ export const oppositionResolution: Readonly<Record<string, string>> = Object.fre
     'Ciò che si sente viene quindi gestito più che seguito: il metodo serve a tenere in ordine l’emotività, non a sostituirla.',
 })
 
-/** What a hard aspect costs in practice, once both sides have been named. */
-export const hardAspectConsequence: Readonly<Record<string, string>> = Object.freeze({
-  quadrato: 'quando entrambe entrano in gioco una delle due tende a cedere, e il compromesso va ricostruito ogni volta',
-  opposizione: 'si tende a oscillare fra i due poli invece di tenerli insieme, e l’equilibrio è una posizione da mantenere attivamente',
+/**
+ * What a hard aspect costs in practice, once both sides have been named.
+ *
+ * Several per aspect: a chart with two squares used to state the same cost
+ * twice, one paragraph after the other.
+ */
+export const hardAspectConsequence: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  quadrato: [
+    'quando entrambe entrano in gioco una delle due tende a cedere, e il compromesso va ricostruito ogni volta',
+    'soddisfare l’una si paga sull’altra, e il conto arriva sempre',
+    'non esiste una posizione stabile fra le due: si sceglie, e la scelta va rifatta',
+  ],
+  opposizione: [
+    'si tende a oscillare fra i due poli invece di tenerli insieme, e l’equilibrio è una posizione da mantenere attivamente',
+    'ciascuna delle due sembra avere ragione al proprio turno, e questo rende difficile fermarsi su una',
+    'il rischio non è scegliere male, ma passare da un estremo all’altro senza accorgersene',
+  ],
 })
 
 /* ------------------------------------------------------------------ aspects
@@ -417,13 +422,13 @@ export const aspectRelations: Readonly<Record<AspectId, ReadonlyArray<(a: string
   Object.freeze({
     congiunzione: [
       (a, b) => `${a} e ${b} lavorano come una cosa sola`,
-      (a, b) => `${a} arriva sempre insieme a ${b}`,
+      (a, b) => `${a} arriva sempre insieme ${contract('a', b)}`,
       (a, b) => `${a} e ${b} sono difficili da separare`,
     ],
     sestile: [
       (a, b) => `${a} e ${b} si prestano aiuto, quando li si mette insieme`,
       (a, b) => `fra ${a} e ${b} c’è un passaggio aperto, che però va usato`,
-      (a, b) => `${a} trova in ${b} un appoggio disponibile`,
+      (a, b) => `${a} trova ${contract('in', b)} un appoggio disponibile`,
     ],
     trigono: [
       (a, b) => `${a} e ${b} vanno d’accordo senza sforzo`,
@@ -516,14 +521,98 @@ export const familyConsequence: Readonly<Record<AspectFamily, readonly string[]>
   congiunzione: [
     'le due cose si attivano insieme, ed è raro vederne una senza l’altra',
     'i due movimenti si rinforzano, con il rischio di diventare un automatismo',
+    'le due spinte partono insieme, e separarle richiede uno sforzo deliberato',
+    'quando una entra in gioco l’altra la segue, senza una scelta consapevole in mezzo',
   ],
   armonico: [
     'la combinazione funziona da sola, al punto che la si dà per scontata',
     'il passaggio è disponibile, ma va usato: da solo non produce nulla',
+    'le due cose si appoggiano a vicenda senza che serva forzarle',
+    'la facilità c’è, ed è proprio per questo che rischia di restare inutilizzata',
   ],
   teso: [
     'quando entrambe entrano in gioco una delle due cede, e il compromesso va ricostruito ogni volta',
     'l’attrito è ricorrente, e si smorza scegliendo consapevolmente a quale delle due dare la precedenza',
     'la tensione non si risolve una volta per tutte: si gestisce di volta in volta',
+    'le due richieste si presentano insieme e non stanno in piedi nello stesso momento: una va rimandata',
+    'ogni volta che una avanza l’altra arretra, e il punto di equilibrio si sposta',
+    'convivono, ma a patto di non pretendere che rispondano nello stesso momento',
   ],
 })
+
+/* ---------------------------------------------------------------- strengths
+ *
+ * A recurring tendency is not a merit and not a competency. These lines say
+ * what each theme actually looks like when it keeps coming back, so the
+ * section can be written as prose instead of as a labelled list.
+ */
+export const themeCharacter: Readonly<Record<string, string>> = Object.freeze({
+  analisi:
+    'non è diffidenza: è il modo in cui una cosa viene messa alla prova prima di riceverne fiducia',
+  comunicazione:
+    'non riguarda la quantità di parole, ma il fatto che capire e far capire siano il canale principale',
+  indipendenza:
+    'non significa isolamento: significa che una decisione presa da altri fatica a essere sentita come propria',
+  creativita:
+    'non è estro decorativo: è il bisogno che una cosa porti un segno riconoscibile invece di essere neutra',
+  stabilita:
+    'non è semplice prudenza: è la preferenza per ciò che regge nel tempo rispetto a ciò che rende subito',
+  emotivita:
+    'non vuol dire fragilità: vuol dire che il registro affettivo arriva prima di quello razionale, e orienta le scelte',
+  relazione:
+    'non è dipendenza: è il fatto che le cose prendono senso quando qualcun altro è coinvolto',
+  organizzazione:
+    'non è amore per le procedure: è il bisogno che le cose abbiano una forma prima di essere messe in movimento',
+  innovazione:
+    'non è insofferenza per le regole: è la difficoltà a considerare definitivo un assetto solo perché esiste',
+  introspezione:
+    'non è chiusura: è il bisogno di capire dall’interno prima di esporsi',
+  concretezza:
+    'non è materialismo: è la richiesta che un’idea mostri un effetto verificabile',
+})
+
+/** How the report introduces what recurs, without praising it. */
+export const strengthsOpening = Object.freeze({
+  lead: (drive: string, count: number) =>
+    `Fra gli elementi che tornano più spesso c’è ${drive}: compare in ${count} punti distinti del quadro`,
+  bothSystems: ', e lo indicano sia le posizioni sia i numeri',
+  oneSystem: ', da una sola delle due letture',
+  alongside: (drive: string) => `Accanto a questo torna ${drive}`,
+  domainsLead: (domains: string) => `Nel testo lo si incontra soprattutto in ${domains}`,
+  /** Total overlap: the domains were already named, so they are not repeated. */
+  sameGround: 'Le due cose compaiono negli stessi punti del quadro, e nel testo si sostengono a vicenda',
+  /** Where the two recurring tendencies actually overlap in the reading. */
+  meetIn: (domains: string) =>
+    `Le due cose si incontrano soprattutto in ${domains}: è lì che il quadro le mette in gioco insieme`,
+  /** And when they do not overlap at all, that is worth saying plainly. */
+  apartFrom: (first: string, second: string) =>
+    `${capitaliseFirst(first)} e ${second} non compaiono negli stessi punti del quadro: tornano entrambe, ma in ambiti distinti`,
+})
+
+/* ------------------------------------------------------------------- thread
+ *
+ * The closing section is the only place allowed to draw a conclusion, and it
+ * earns the right only when there is both a recurring tendency and something
+ * that qualifies it. Otherwise it is omitted.
+ */
+export const threadPhrases = Object.freeze({
+  opening: (drive: string) => `Se si riduce tutto a una dinamica, il filo non è ${drive} in sé`,
+  /**
+   * How to hold the dynamic — deliberately not a restatement of it. The
+   * tension section has already explained what the two poles do to each other;
+   * repeating that here would make the closing section redundant.
+   */
+  closing: {
+    'temi-opposti':
+      'Non è una contraddizione da risolvere una volta per tutte: è il criterio con cui, di volta in volta, si decide quale delle due venga prima.',
+    'contrasto-fra-sistemi':
+      'Vale la pena tenerlo presente proprio perché una sola delle due letture lo indica: è la parte del quadro con meno conferme incrociate, non la meno operante.',
+  } as Record<string, string>,
+  qualifiedBy: (drive: string) => `ma il modo in cui deve fare i conti con ${drive}`,
+  bothSystems: 'Le due letture arrivano qui dallo stesso punto, per strade diverse.',
+  oneSystem: 'La cosa emerge da una sola delle due letture, e va presa per quello che è.',
+})
+
+function capitaliseFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}

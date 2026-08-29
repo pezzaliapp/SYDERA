@@ -69,6 +69,13 @@ export interface Tension {
   readonly kind: 'contrasto-fra-sistemi' | 'aspetto-di-tensione' | 'temi-opposti'
   readonly statement: string
   readonly evidence: readonly Evidence[]
+  /**
+   * The two poles in plain language, carried as data rather than left to be
+   * recovered from the prose. The closing section needs them, and parsing a
+   * sentence back into its parts is how "dall'altra parte" gets mistaken for
+   * the second pole.
+   */
+  readonly poles?: { readonly leading: string; readonly counter: string }
 }
 
 export const SECTION_IDS = [

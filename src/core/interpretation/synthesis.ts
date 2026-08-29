@@ -13,6 +13,7 @@ import {
   themeDrive,
   themeMeaning,
 } from '../../content/interpretation.it.ts'
+import { pickDistinct } from './italian.ts'
 import { HARD_ASPECTS, MIN_FACTORS_FOR_STRENGTH, STRENGTH_RELATIVE_FLOOR } from './weights.ts'
 import type { Evidence, Signal, SystemId, Tension, ThemeSupport } from './types.ts'
 
@@ -106,17 +107,19 @@ export function tensions(
         counterClause +
         ` Le due spinte non si annullano: la prima resta, e va tenuta sapendo che poggia su un appoggio solo.`,
       evidence: (ranked.find((entry) => entry.theme === comparison.theme)?.evidence ?? []).slice(0, 4),
+      ...(counterDrive ? { poles: { leading: drive, counter: counterDrive } } : {}),
     })
   }
 
   // 2. A hard aspect between two personal points is a tension by definition.
   //    The two functions are already named; what was missing was the cost.
+  const usedCosts = new Set<string>()
   for (const signal of signals) {
     const parts = signal.evidence.key.split(':')
     if (parts[0] !== 'aspect') continue
     const aspect = parts[2] as (typeof HARD_ASPECTS)[number]
     if (!HARD_ASPECTS.includes(aspect)) continue
-    const consequence = hardAspectConsequence[aspect]
+    const consequence = pickDistinct(hardAspectConsequence[aspect] ?? [], signal.evidence.key, usedCosts)
     // The base sentence already carries a colon, so the consequence is joined
     // as a clause rather than with a second one.
     const base = capitalise(signal.statement)
@@ -150,8 +153,9 @@ export function tensions(
       statement:
         `Da una parte ${themeDrive[first] ?? first} (${labelList(firstEvidence)}); ` +
         `dall’altra ${themeDrive[second] ?? second} (${labelList(secondEvidence)}).` +
-        (resolution ? ` ${resolution}` : ` Le due cose non si annullano: si alternano, e conta sapere quale sta guidando.'`),
+        (resolution ? ` ${resolution}` : ` Le due cose non si annullano: si alternano, e conta sapere quale sta guidando.`),
       evidence,
+      poles: { leading: themeDrive[first] ?? first, counter: themeDrive[second] ?? second },
     })
   }
 

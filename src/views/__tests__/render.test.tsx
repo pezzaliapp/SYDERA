@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { it as strings } from '../../content/it.ts'
 import { EntryView } from '../EntryView.tsx'
 import { ReturningView } from '../ReturningView.tsx'
 import { ResultView } from '../ResultView.tsx'
@@ -154,11 +155,40 @@ describe('result sections', () => {
     expect(occurrences).toHaveLength(1)
   })
 
-  it('offers the evidence behind each reading without showing it upfront', () => {
+  it('offers the evidence behind the reading without showing it upfront', () => {
     const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
     expect(html).toContain('Perché questa lettura?')
     // Collapsed by default: the evidence list is not in the initial markup.
     expect(html).not.toContain('evidence__list')
+  })
+
+  it('discloses the evidence once for the whole report, not under every section', () => {
+    const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    const controls = html.match(/Perché questa lettura\?/g) ?? []
+    expect(controls, 'one grouped disclosure, not one control per section').toHaveLength(1)
+  })
+
+  it('states the framing near the title, before the reading begins', () => {
+    const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    const framingAt = html.indexOf('Lettura simbolica costruita dai dati')
+    const firstSectionAt = html.indexOf('Il tuo profilo')
+    expect(framingAt).toBeGreaterThan(-1)
+    expect(framingAt, 'the framing belongs to the page head, not inside the reading').toBeLessThan(firstSectionAt)
+    // Short enough not to displace the reading itself.
+    expect(strings.report.shortFraming.length).toBeLessThan(180)
+  })
+
+  it('links the framing to the full notice instead of inlining it', () => {
+    const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    expect(html).toContain('Avvertenze complete')
+    expect(html).toContain('#/avvertenze')
+  })
+
+  it('leaves the reading itself free of controls in the other tabs', () => {
+    for (const section of ['astrologia', 'numerologia'] as const) {
+      const html = renderToStaticMarkup(<ResultView section={section} analysis={analysis} sydera={SYDERA} />)
+      expect(html, `${section} repeats the evidence control`).not.toContain('Perché questa lettura?')
+    }
   })
 
   it('puts the interpretation before the tables in the astrology tab', () => {
