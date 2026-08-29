@@ -58,6 +58,25 @@ const FROM_THEME: Readonly<Record<ThemeId, TendencyId>> = Object.freeze({
 export const PRACTICAL: readonly TendencyId[] = ['analisi', 'struttura', 'concretezza', 'espressione', 'cambiamento', 'autonomia']
 export const AFFECTIVE: readonly TendencyId[] = ['sensibilita', 'relazione', 'autonomia', 'espressione']
 
+/**
+ * Pairs that pull against each other. Two tendencies that genuinely compete
+ * say more about someone than two that merely coexist.
+ */
+export const OPPOSED: readonly string[] = [
+  'autonomia|relazione',
+  'cambiamento|struttura',
+  'analisi|sensibilita',
+  'cambiamento|concretezza',
+  'autonomia|sensibilita',
+  'espressione|struttura',
+  'concretezza|sensibilita',
+  'analisi|espressione',
+  'sensibilita|struttura',
+  'cambiamento|relazione',
+  'analisi|cambiamento',
+  'concretezza|espressione',
+]
+
 export interface Tendency {
   readonly id: TendencyId
   readonly score: number
@@ -250,13 +269,6 @@ function rank(contributions: readonly Contribution[]): Tendency[] {
 
   const leader = all[0]?.score ?? 0
   return all.filter((tendency) => tendency.score >= leader * RELATIVE_FLOOR)
-}
-
-/** The two strongest tendencies, which is where the balance point lives. */
-export function balancePair(model: PersonModel): readonly [Tendency, Tendency] | null {
-  const [first, second] = model.tendencies
-  if (!first || !second) return null
-  return [first, second]
 }
 
 /** The strongest tendencies within one area of life. */

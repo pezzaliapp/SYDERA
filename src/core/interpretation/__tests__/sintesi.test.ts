@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildReport } from '../sintesi.ts'
 import { buildPerson, TENDENCIES } from '../person.ts'
-import { balance, moment, voice } from '../../../content/person.it.ts'
+import { balance, combination, moment, voice } from '../../../content/person.it.ts'
 import {
   A_FACTORS, A_NUMBERS, B_FACTORS, B_NUMBERS, C_NUMBERS, D_FACTORS, D_NUMBERS,
   chartOf, numerologyOf,
@@ -115,12 +115,18 @@ describe('the reading opens with the portrait', () => {
     }
   })
 
-  it('says something in the first three sentences, not a preamble', () => {
+  it('opens on what the leading tendencies do to each other', () => {
     const opening = REPORTS.D.sections[0]?.paragraphs[0] ?? ''
     const sentences = opening.split(/(?<=[.!?])\s+/).filter((part) => part.trim().length > 0)
-    expect(sentences.length).toBeGreaterThanOrEqual(3)
+    expect(sentences.length).toBeGreaterThanOrEqual(2)
     // Second person: the reading addresses the reader directly.
-    expect(opening).toMatch(/\b(hai|ti|sei|senti|vai|decidi|noti|cerchi)\b/i)
+    expect(opening).toMatch(/\b(hai|ti|sei|senti|vai|decidi|noti|cerchi|vuoi|percepisci|giudichi)\b/i)
+
+    // The first sentence must be one of the pair statements, never a
+    // description of the single strongest tendency.
+    const person = buildPerson(chartOf(D_FACTORS), numerologyOf(D_NUMBERS))
+    const [first, second] = person.tendencies
+    expect(sentences[0]).toBe(combination[first!.id][second!.id])
   })
 
   it('never opens with a disclaimer', () => {

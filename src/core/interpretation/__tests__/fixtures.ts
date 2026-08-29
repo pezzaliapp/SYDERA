@@ -143,3 +143,47 @@ export const B_NUMBERS = { lifePath: 9, expression: 7, soulUrge: 5, personality:
 
 /** C — sparse: numbers only, no birth time and so no chart at all. */
 export const C_NUMBERS = { lifePath: 4, expression: 8, soulUrge: 22, personality: 4, personalYear: 3 }
+
+/**
+ * The two configurations that produced the failure reported from real use.
+ *
+ * Both had emotional perception as their strongest tendency, and the reading
+ * opened from that alone: two different people were given the same two
+ * sentences, and only the third differed. What separates them is what the
+ * second tendency does to the first — deciding alone with what you feel, or
+ * checking it before you trust it. Symbolic factors only: no name, no date,
+ * no place, nothing belonging to anyone.
+ */
+export const SHAPE_A_FACTORS: Factors = {
+  ascendant: 'ariete',
+  placements: [
+    ['sun', 'ariete', 1],
+    ['moon', 'gemelli', 4],
+    ['mercury', 'scorpione', 3],
+    ['venus', 'leone', 7],
+    ['mars', 'leone', 10],
+    ['saturn', 'toro', 11],
+  ],
+  aspects: [
+    ['sun', 'trigono', 'moon', 2.0],
+    ['mercury', 'quadrato', 'saturn', 3.0],
+  ],
+}
+export const SHAPE_A_NUMBERS = { lifePath: 2, expression: 11, soulUrge: 7, personality: 1, personalYear: 6 }
+
+export const SHAPE_B_FACTORS: Factors = {
+  ascendant: 'ariete',
+  placements: [
+    ['sun', 'toro', 1],
+    ['moon', 'cancro', 4],
+    ['mercury', 'gemelli', 3],
+    ['venus', 'vergine', 7],
+    ['mars', 'vergine', 10],
+    ['saturn', 'sagittario', 11],
+  ],
+  aspects: [
+    ['sun', 'trigono', 'moon', 2.0],
+    ['mercury', 'quadrato', 'saturn', 3.0],
+  ],
+}
+export const SHAPE_B_NUMBERS = { lifePath: 1, expression: 7, soulUrge: 11, personality: 3, personalYear: 2 }

@@ -200,3 +200,230 @@ export const moment: Readonly<Record<number, string>> = Object.freeze({
   22: 'È un periodo in cui puoi mettere in piedi qualcosa di grosso, a patto di procedere per gradi. Qui l’ambizione regge solo se poggia su un lavoro ordinato.',
   33: 'È un periodo in cui quello che fai riguarda gli altri più del solito. Il peso si sente, ma è il tipo di peso che dà senso alle cose.',
 })
+
+/**
+ * How the leading tendency behaves once the second one acts on it.
+ *
+ * This is where the portrait starts, and it is deliberately keyed to a pair
+ * rather than to one tendency. Writing the opening from the strongest trait
+ * alone meant two people who shared it opened with the same two sentences,
+ * whatever else was true of them: the reading described a category, not a
+ * person. A trait says little on its own — sensitivity checked against
+ * evidence and sensitivity kept to oneself are not the same way of being.
+ *
+ * Ordered: `combination.sensibilita.analisi` is sensitivity as analysis shapes
+ * it, which is not the same statement as analysis shaped by sensitivity.
+ */
+export const combination: Readonly<Record<TendencyId, Readonly<Partial<Record<TendencyId, string>>>>> = Object.freeze({
+  autonomia: {
+    struttura:
+      'Decidi con la tua testa, e il tuo modo di farlo è ordinato: non è insofferenza alle regole, è insofferenza alle regole scritte da altri.',
+    concretezza:
+      'Decidi da solo e giudichi dai risultati: quello che funziona lo tieni, quello che ti viene raccomandato senza prove no.',
+    analisi:
+      'Decidi con la tua testa perché prima vuoi capire: una risposta ti convince quando la controlli tu, non quando arriva da qualcuno di autorevole.',
+    espressione:
+      'Decidi per conto tuo e lo dici: raramente scopri di aver pensato una cosa e detta un’altra.',
+    relazione:
+      'Decidi da solo, ma su chi ricadranno le conseguenze ci pensi prima: l’indipendenza non ti rende distratto rispetto alle persone.',
+    sensibilita:
+      'Decidi da solo e senti molto: gran parte di quello che ti fa scegliere non lo dici, e a volte non sapresti spiegarlo neanche a te stesso.',
+    cambiamento:
+      'Decidi da solo e cambi strada spesso: nessuno ti convince a restare dove non ha più senso, e il prezzo lo paghi in continuità.',
+  },
+  struttura: {
+    autonomia:
+      'Ti serve un ordine chiaro, ma dev’essere il tuo: segui volentieri un metodo, molto meno un metodo imposto.',
+    concretezza:
+      'Metti le cose in ordine per farle funzionare: l’organizzazione non ti interessa in sé, ti interessa perché quello che prepari bene poi regge.',
+    analisi:
+      'Vuoi che le cose stiano in ordine e vuoi sapere perché ci stanno: non ti basta che un metodo funzioni, vuoi sapere dove si rompe.',
+    espressione:
+      'Prepari bene e poi lo dici bene: quello che presenti è chiaro perché prima l’hai messo in fila tu.',
+    relazione:
+      'Ti organizzi soprattutto attorno alle persone: ricordare, occuparsi, mantenere è il modo in cui tieni ai rapporti.',
+    sensibilita:
+      'Ti serve ordine perché senti molto: il metodo non è freddezza, è come tieni sotto controllo quello che ti arriva addosso.',
+    cambiamento:
+      'Vuoi cambiare le cose sapendo dove metti i piedi: i tuoi cambiamenti riescono più spesso di quelli fatti d’impulso, e arrivano più tardi.',
+  },
+  concretezza: {
+    autonomia:
+      'Vai al sodo e ci vai da solo: chiedi aiuto tardi, quando la faccenda è già più complicata di quanto sarebbe stata.',
+    struttura:
+      'Vai al sodo con metodo: quello che costruisci sta in piedi, e di solito sta in piedi anche fra qualche anno.',
+    analisi:
+      'Vuoi risultati, ma non prima di aver capito il meccanismo: eviti sia le soluzioni improvvisate sia le discussioni che non portano da nessuna parte.',
+    espressione:
+      'Fai le cose e le sai raccontare: è una combinazione che ti rende credibile, a patto di non promettere alla velocità con cui parli.',
+    relazione:
+      'Il tuo modo di tenere alle persone passa dalle cose fatte: risolvi, ti occupi, ci sei, e chi non ti conosce ancora rischia di non accorgersene.',
+    sensibilita:
+      'Da fuori sembri pratico e lo sei, ma registri molto più di quanto mostri: il conto di quello che assorbi lo paghi dopo.',
+    cambiamento:
+      'Ti interessa cambiare, ma solo se il cambiamento produce qualcosa di reale: le novità che restano discorsi ti stancano quanto la routine.',
+  },
+  analisi: {
+    autonomia:
+      'Noti quello che non torna e vuoi verificarlo da solo: sei difficile da convincere, e altrettanto difficile da fregare.',
+    struttura:
+      'Noti quello che non torna e non lo lasci lì: metti a posto, e quello che sistemi tende a restare sistemato.',
+    concretezza:
+      'Noti quello che non torna, ma solo fino al punto in cui serve: capire ti interessa se poi cambia qualcosa.',
+    espressione:
+      'Capisci le cose a fondo e le sai spiegare, che è più raro di quanto sembri: il rischio è aspettare di aver capito tutto e non dire niente.',
+    relazione:
+      'Guardi le persone con attenzione e ti accorgi di parecchio: quello che noti riguarda gente a cui tieni, e questo rende la lucidità scomoda.',
+    sensibilita:
+      'Vuoi spiegarti le cose, ma le senti prima di riuscirci: la testa cerca una ragione quando la pancia ha già deciso.',
+    cambiamento:
+      'Vedi in fretta dove una cosa non regge e altrettanto in fretta vorresti rifarla: il lavoro vero è distinguere ciò che va ripensato da ciò che va solo finito.',
+  },
+  espressione: {
+    autonomia:
+      'Dici quello che pensi senza smussarlo troppo: sei chiaro, non sempre comodo, e il tono decide se arrivi o rimbalzi.',
+    struttura:
+      'Hai cose da dire e vuoi dirle bene: rimandi finché non è a posto, e a volte il momento buono per dirle era prima.',
+    concretezza:
+      'Racconti bene e concludi: la credibilità ti viene dal fatto che quello che dici poi lo fai.',
+    analisi:
+      'Parli molto ma non a vuoto: quello che dici l’hai già smontato una volta per conto tuo.',
+    relazione:
+      'Comunichi bene perché ti interessa davvero chi hai davanti: il punto è accorgerti di quando stai adattando quello che dici per non dispiacere.',
+    sensibilita:
+      'Senti molto e hai bisogno di dirlo: quando le due cose vanno insieme arrivi alle persone, quando vanno di fretta dici troppo presto.',
+    cambiamento:
+      'Le idee ti arrivano in fretta e le racconti subito: apri strade nuove, e il difficile è restare abbastanza a lungo su una.',
+  },
+  relazione: {
+    autonomia:
+      'Le persone contano molto in quello che scegli, ma la scelta resta tua: chiedi di rado il permesso e tieni conto lo stesso.',
+    struttura:
+      'Tieni alle persone in modo organizzato: ti ricordi, ti occupi, mantieni. Si vede poco e pesa parecchio.',
+    concretezza:
+      'Vuoi bene facendo: le cose che risolvi per qualcuno dicono più di quelle che gli diresti.',
+    analisi:
+      'Ti interessano le persone e le osservi a lungo: capisci presto come funziona qualcuno, e non sempre è comodo saperlo.',
+    espressione:
+      'Ti apri parlando: i rapporti che funzionano per te sono quelli in cui si può dire tutto, e dirlo subito.',
+    sensibilita:
+      'Senti come stanno le persone quasi prima di loro, e questo ti lega: il rischio è portare pesi che non erano tuoi.',
+    cambiamento:
+      'Hai bisogno di movimento, e le persone a cui tieni sono la cosa che ti fa restare.',
+  },
+  sensibilita: {
+    autonomia:
+      'Senti le cose prima di spiegartele, e quello che senti te lo tieni: decidi in base a qualcosa che racconti raramente.',
+    struttura:
+      'Senti molto, e per questo ti servono ordine e abitudini: sono il modo in cui tieni sotto controllo quello che ti arriva addosso.',
+    concretezza:
+      'Percepisci in fretta ma non ti fermi lì: quello che senti lo verifichi su come vanno le cose davvero.',
+    analisi:
+      'Percepisci in fretta e poi controlli: raramente ti fermi alla prima impressione, anche quando era quella giusta.',
+    espressione:
+      'Senti molto e hai bisogno di metterlo in parole: capisci quello che provi mentre lo stai raccontando a qualcuno.',
+    relazione:
+      'Ti accorgi di come sta chi hai davanti quasi subito, e ti lega: gran parte di quello che fai per gli altri parte da lì.',
+    cambiamento:
+      'Senti molto e ti muovi spesso: ogni cambiamento ti costa più di quanto ammetti, e una parte di te lo cerca lo stesso.',
+  },
+  cambiamento: {
+    autonomia:
+      'Ti annoi in fretta e cambi strada da solo: nessuno riesce a trattenerti dove non ha più senso stare.',
+    struttura:
+      'Cerchi movimento ma non improvvisi: il cambiamento lo prepari, ed è per questo che ti riesce più spesso che agli altri.',
+    concretezza:
+      'Cerchi novità che producano qualcosa: le idee che restano discorsi le scarti in fretta, a volte prima del tempo.',
+    analisi:
+      'Cambi perché vedi prima degli altri dove una cosa non regge: il rovescio è rifare quando bastava correggere.',
+    espressione:
+      'Ti muovi e lo racconti: spesso sei tu a proporre un altro modo di fare le cose, e spesso è qualcun altro a finirlo.',
+    relazione:
+      'Ti muovi spesso, ma non da solo: nei tuoi cambiamenti provi a portare dentro le persone a cui tieni.',
+    sensibilita:
+      'Cerchi movimento e senti molto: cambi ambiente più spesso della media, e ogni volta ci metti più tempo del previsto a ricomporti.',
+  },
+})
+
+/**
+ * How someone thinks and works, written from the two strongest practical
+ * tendencies rather than from each one separately.
+ *
+ * The same reasoning as `combination`, one level down: a section built by
+ * listing traits one sentence at a time gave two different people the same
+ * paragraphs whenever their strongest traits happened to coincide.
+ */
+export const thinkingPair: Readonly<Record<TendencyId, Readonly<Partial<Record<TendencyId, string>>>>> = Object.freeze({
+  analisi: {
+    struttura: 'Capisci le cose smontandole e poi rimetti tutto in ordine: quello che hai verificato lo lasci in una forma che regge anche fra un anno.',
+    concretezza: 'Indaghi finché la cosa non funziona, e lì ti fermi: la spiegazione perfetta non ti interessa se quella buona basta.',
+    espressione: 'Ragioni parlando: smonti un problema meglio se hai qualcuno davanti a cui spiegarlo.',
+    cambiamento: 'Ti accorgi presto di dove un ragionamento si rompe e proponi subito un altro modo, a volte prima che il primo avesse finito di provarci.',
+    autonomia: 'Verifichi tutto per conto tuo: accetti una conclusione quando l’hai rifatta, non quando te l’hanno spiegata bene.',
+  },
+  struttura: {
+    analisi: 'Organizzi e nel farlo capisci: il tuo metodo nasce da come le cose funzionano davvero, non da come si fa di solito.',
+    concretezza: 'Prepari perché poi le cose vadano: l’ordine, per te, è quello che riduce il numero di sorprese.',
+    espressione: 'Metti in fila e poi spieghi: quando presenti qualcosa si capisce, perché la fatica l’hai fatta prima.',
+    cambiamento: 'Cambi le cose con un piano: prepari a lungo, poi ti muovi in fretta, e agli altri sembra improvviso.',
+    autonomia: 'Lavori bene quando ti danno l’obiettivo e ti lasciano il metodo: quando succede il contrario si vede subito.',
+  },
+  concretezza: {
+    analisi: 'Fai, ma prima capisci quanto basta: parti da quello che si può sistemare e vai a fondo solo dove serve.',
+    struttura: 'Procedi per passi e ognuno regge il successivo: raramente ti trovi a rifare qualcosa perché la base non teneva.',
+    espressione: 'Risolvi e lo racconti: quello che hai sistemato lo sai anche spiegare a chi non c’era.',
+    cambiamento: 'Provi presto e scarti presto: se una cosa non produce niente in tempi ragionevoli cambi, senza rimpianti.',
+    autonomia: 'Ti muovi da solo e concludi: prima di chiedere una mano tenti sempre un giro in più.',
+  },
+  espressione: {
+    analisi: 'Spieghi bene perché prima hai capito bene: quando semplifichi non stai togliendo, stai scegliendo.',
+    struttura: 'Dici le cose in ordine: chi ti ascolta segue il ragionamento senza doverlo ricostruire.',
+    concretezza: 'Racconti quello che hai fatto, non quello che si potrebbe fare: le tue parole hanno di solito qualcosa dietro.',
+    cambiamento: 'Le idee ti arrivano mentre parli: ne apri tre e ne chiudi una, e funziona solo se qualcuno tiene il conto.',
+    autonomia: 'Dici la tua anche quando nessuno l’ha chiesta: è il motivo per cui ti si ascolta, e ogni tanto quello per cui si discute.',
+  },
+  cambiamento: {
+    analisi: 'Cambi perché hai visto dove non regge: i tuoi cambi di rotta hanno una ragione, anche quando agli altri sembrano improvvisi.',
+    struttura: 'Ti muovi spesso ma non a caso: prima di lasciare una strada hai già guardato la successiva.',
+    concretezza: 'Cambi quando il rendimento cala: la noia da sola non ti basta, ti serve vedere che non porta più niente.',
+    espressione: 'Proponi molto: sei quello che apre la discussione, e spesso quello che non la chiude.',
+    autonomia: 'Cambi da solo e senza chiedere: quando hai deciso che una cosa è finita, è finita.',
+  },
+  autonomia: {
+    analisi: 'Decidi da solo dopo aver controllato: il tuo criterio è tuo perché l’hai costruito, non perché rifiuti quello degli altri.',
+    struttura: 'Fai a modo tuo, e il tuo modo è preciso: gli altri lo scoprono quando provano a cambiartelo.',
+    concretezza: 'Decidi e fai: la discussione ti interessa poco se non porta a qualcosa entro breve.',
+    espressione: 'Decidi da solo e lo comunichi chiaramente: raramente qualcuno resta a chiedersi che cosa hai in mente.',
+    cambiamento: 'Ti muovi quando vuoi tu: le situazioni che ti trattengono le lasci prima di quanto gli altri si aspettino.',
+  },
+  relazione: {},
+  sensibilita: {},
+})
+
+/** The same, for the way someone is with people. */
+export const relatingPair: Readonly<Record<TendencyId, Readonly<Partial<Record<TendencyId, string>>>>> = Object.freeze({
+  sensibilita: {
+    relazione: 'Ti accorgi presto di come sta chi hai davanti e ti muovi di conseguenza: molte delle cose che fai per gli altri partono da qualcosa che nessuno ti ha detto.',
+    autonomia: 'Senti molto e lo tieni per te: ti avvicini alle persone senza raccontare quasi nulla di quello che ti ha fatto avvicinare.',
+    espressione: 'Quello che senti hai bisogno di dirlo, e lo dici presto: nei rapporti sei più esposto di quanto vorresti essere.',
+  },
+  relazione: {
+    sensibilita: 'I legami contano molto e li senti addosso: quando qualcosa non va con una persona a cui tieni lo sai prima che ne parliate.',
+    autonomia: 'Ci tieni alle persone e vuoi comunque decidere tu: stai vicino a chi non ti chiede di rinunciare a questo.',
+    espressione: 'I rapporti che ti riescono sono quelli in cui si parla: quando una cosa si può dire, per te è già mezza risolta.',
+  },
+  autonomia: {
+    sensibilita: 'Nei rapporti ti serve spazio e ti accorgi subito quando qualcuno prova a stringerlo: ti allontani prima ancora di spiegare perché.',
+    relazione: 'Difendi il tuo spazio e allo stesso tempo non vuoi perdere nessuno: la distanza che prendi è quasi sempre più corta di come sembra.',
+    espressione: 'Nei rapporti dici come stai e che cosa ti serve: chi ti sta accanto non deve indovinare, ma deve accettare che decidi tu.',
+  },
+  espressione: {
+    sensibilita: 'Nei rapporti parli molto e senti molto: il silenzio di qualcuno ti arriva più forte delle sue parole.',
+    relazione: 'Parli per restare in contatto: poche persone con cui si parla a lungo valgono, per te, più di molte conoscenze.',
+    autonomia: 'Dici quello che pensi anche quando complica le cose: preferisci un rapporto scomodo e chiaro a uno comodo e taciuto.',
+  },
+  struttura: {},
+  concretezza: {},
+  analisi: {},
+  cambiamento: {},
+})
