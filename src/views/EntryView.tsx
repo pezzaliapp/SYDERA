@@ -2,8 +2,20 @@ import { useState, type FormEvent } from 'react'
 import { it } from '../content/it.ts'
 import { paths, useNavigate } from '../app/router.ts'
 import { PlaceField } from '../components/PlaceField.tsx'
+import { BirthDateField } from '../components/BirthDateField.tsx'
+import { BirthTimeField } from '../components/BirthTimeField.tsx'
 import { saveSydera, type StoredSydera, type SyderaInput } from '../core/storage/sydera.ts'
-import { MAX_YEAR, MIN_YEAR, isValidBirthDate } from '../core/numerology/dateNumbers.ts'
+import {
+  dateToParts,
+  earliestYear,
+  parseBirthDate,
+  parseBirthTime,
+  timeToParts,
+  type BirthDateParts,
+  type BirthTimeParts,
+  type DateProblem,
+  type TimeProblem,
+} from '../app/birthInput.ts'
 import type { Place } from '../core/places/dataset.ts'
 
 interface EntryViewProps {
@@ -11,6 +23,8 @@ interface EntryViewProps {
   readonly acknowledged: boolean
   readonly onAcknowledge: () => void
   readonly onSaved: () => void
+  /** Supplied by the caller so the form stays deterministic in tests. */
+  readonly currentYear: number
 }
 
 interface FormErrors {
@@ -27,22 +41,20 @@ const PRECISIONS = [
   { minutes: 60, key: 'hour' },
 ] as const
 
+const PRECISION_VALUES = PRECISIONS.map((option) => option.minutes)
+
 /**
  * The whole application before a calculation exists: four fields and one
  * button. The disclaimer acknowledgement is part of this screen on first use,
  * so the introduction never becomes a separate bureaucratic flow.
  */
-export function EntryView({ existing, acknowledged, onAcknowledge, onSaved }: EntryViewProps) {
+export function EntryView({ existing, acknowledged, onAcknowledge, onSaved, currentYear }: EntryViewProps) {
   const navigate = useNavigate()
   const input = existing?.input
 
-  const [date, setDate] = useState(
-    input ? `${String(input.birthDate.year).padStart(4, '0')}-${String(input.birthDate.month).padStart(2, '0')}-${String(input.birthDate.day).padStart(2, '0')}` : '',
-  )
+  const [date, setDate] = useState<BirthDateParts>(dateToParts(input?.birthDate ?? null))
   const [timeKnown, setTimeKnown] = useState(input ? input.birthTime !== null : true)
-  const [time, setTime] = useState(
-    input?.birthTime ? `${String(input.birthTime.hour).padStart(2, '0')}:${String(input.birthTime.minute).padStart(2, '0')}` : '',
-  )
+  const [time, setTime] = useState<BirthTimeParts>(timeToParts(input?.birthTime ?? null))
   const [precision, setPrecision] = useState(input?.birthTimePrecisionMinutes ?? 1)
   const [place, setPlace] = useState<Place | null>(
     input?.place
@@ -67,22 +79,21 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved }: En
     event.preventDefault()
     const next: FormErrors = {}
 
-    const parsedDate = parseDate(date)
-    if (!parsedDate) next.date = date === '' ? it.entry.errors.dateRequired : it.entry.errors.dateInvalid
-    else if (!isValidBirthDate(parsedDate)) next.date = it.entry.errors.dateInvalid
-    else if (parsedDate.year < MIN_YEAR || parsedDate.year > MAX_YEAR) next.date = it.entry.errors.dateRange
+    const dateResult = parseBirthDate(date, currentYear)
+    if (!dateResult.ok) next.date = dateProblemMessage(dateResult.problem, currentYear)
 
-    const parsedTime = timeKnown ? parseTime(time) : null
-    if (timeKnown && !parsedTime) next.time = time === '' ? it.entry.errors.timeRequired : it.entry.errors.timeInvalid
+    const timeResult = timeKnown ? parseBirthTime(time) : null
+    if (timeResult && !timeResult.ok) next.time = timeProblemMessage(timeResult.problem)
     if (timeKnown && !place) next.place = it.entry.errors.placeRequired
     if (!accepted) next.acknowledgement = it.intro.acknowledgeRequired
 
     setErrors(next)
-    if (Object.keys(next).length > 0 || !parsedDate) return
+    if (Object.keys(next).length > 0 || !dateResult.ok) return
+    const parsedTime = timeResult && timeResult.ok ? timeResult.time : null
 
     const record: SyderaInput = {
       fullBirthName: name.trim() === '' ? null : name.trim(),
-      birthDate: parsedDate,
+      birthDate: dateResult.date,
       birthTime: parsedTime,
       birthTimePrecisionMinutes: timeKnown ? precision : 0,
       place: place
@@ -123,52 +134,26 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved }: En
             void submit(event)
           }}
         >
-          <div className="field">
-            <label className="field__label" htmlFor="birth-date">
-              {it.entry.dateLabel}
-            </label>
-            <input
-              id="birth-date"
-              type="date"
-              value={date}
-              min={`${MIN_YEAR}-01-01`}
-              max={`${MAX_YEAR}-12-31`}
-              aria-describedby="birth-date-help"
-              {...(errors.date ? { 'aria-invalid': true } : {})}
-              onChange={(event) => setDate(event.target.value)}
-            />
-            <p className="field__help" id="birth-date-help">
-              {it.entry.dateHelp}
-            </p>
-            {errors.date ? (
-              <p className="field__error" role="alert">
-                {errors.date}
-              </p>
-            ) : null}
-          </div>
+          <BirthDateField
+            value={date}
+            onChange={(next) => {
+              setDate(next)
+              // Stop showing an error while it is being corrected.
+              if (errors.date) setErrors(({ date: _cleared, ...rest }) => rest)
+            }}
+            currentYear={currentYear}
+            error={errors.date}
+          />
 
           {timeKnown ? (
-            <div className="field">
-              <label className="field__label" htmlFor="birth-time">
-                {it.entry.timeLabel}
-              </label>
-              <input
-                id="birth-time"
-                type="time"
-                value={time}
-                aria-describedby="birth-time-help"
-                {...(errors.time ? { 'aria-invalid': true } : {})}
-                onChange={(event) => setTime(event.target.value)}
-              />
-              <p className="field__help" id="birth-time-help">
-                {it.entry.timeHelp}
-              </p>
-              {errors.time ? (
-                <p className="field__error" role="alert">
-                  {errors.time}
-                </p>
-              ) : null}
-            </div>
+            <BirthTimeField
+              value={time}
+              onChange={(next) => {
+                setTime(next)
+                if (errors.time) setErrors(({ time: _cleared, ...rest }) => rest)
+              }}
+              error={errors.time}
+            />
           ) : (
             <p className="notice notice--warning small">{it.entry.timeUnknownHelp}</p>
           )}
@@ -184,23 +169,24 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved }: En
 
           {timeKnown ? (
             <div className="field">
-              <span className="field__label" id="precision-label">
+              <label className="field__label" htmlFor="precision">
                 {it.entry.precisionLabel}
-              </span>
-              <div className="segmented" role="group" aria-labelledby="precision-label">
+              </label>
+              <select
+                id="precision"
+                value={precision}
+                aria-describedby="precision-help"
+                onChange={(event) => setPrecision(Number(event.target.value))}
+              >
                 {PRECISIONS.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    className="segmented__option"
-                    aria-pressed={precision === option.minutes}
-                    onClick={() => setPrecision(option.minutes)}
-                  >
+                  <option key={option.key} value={option.minutes}>
                     {it.entry.precisionOptions[option.key]}
-                  </button>
+                  </option>
                 ))}
-              </div>
-              <p className="field__help">{it.entry.precisionHelp}</p>
+              </select>
+              <p className="field__help" id="precision-help">
+                {it.entry.precisionHelp}
+              </p>
             </div>
           ) : null}
 
@@ -281,17 +267,34 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved }: En
   )
 }
 
-export function parseDate(value: string): { year: number; month: number; day: number } | null {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
-  if (!match) return null
-  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) }
+function dateProblemMessage(problem: DateProblem, currentYear: number): string {
+  switch (problem) {
+    case 'empty':
+      return it.entry.errors.dateRequired
+    case 'incomplete':
+      return it.entry.errors.dateIncomplete
+    case 'day-range':
+      return it.entry.errors.dayRange
+    case 'month-range':
+      return it.entry.errors.monthRange
+    case 'year-range':
+      return it.entry.errors.yearRange(earliestYear(currentYear), currentYear)
+    default:
+      return it.entry.errors.dateImpossible
+  }
 }
 
-export function parseTime(value: string): { hour: number; minute: number } | null {
-  const match = /^(\d{2}):(\d{2})$/.exec(value)
-  if (!match) return null
-  const hour = Number(match[1])
-  const minute = Number(match[2])
-  if (hour > 23 || minute > 59) return null
-  return { hour, minute }
+function timeProblemMessage(problem: TimeProblem): string {
+  switch (problem) {
+    case 'empty':
+      return it.entry.errors.timeRequired
+    case 'incomplete':
+      return it.entry.errors.timeIncomplete
+    case 'hour-range':
+      return it.entry.errors.hourRange
+    default:
+      return it.entry.errors.minuteRange
+  }
 }
+
+export { PRECISION_VALUES }

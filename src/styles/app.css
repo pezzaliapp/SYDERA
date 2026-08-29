@@ -773,6 +773,85 @@ input[type='checkbox'] {
   font-weight: 600;
 }
 
+
+/* ------------------------------------------------- grouped numeric fields
+   Birth date and birth time are typed as separate numbers rather than chosen
+   from a native picker, which on a phone would open on today and have to be
+   walked backwards year by year. */
+
+.group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.group > legend {
+  padding: 0;
+}
+
+.group__row {
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.group__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.group__cell--short {
+  flex: 0 1 4.5rem;
+}
+
+.group__cell--long {
+  flex: 1 1 6rem;
+}
+
+.group__label {
+  font-size: var(--step--1);
+  color: var(--text-3);
+}
+
+/* Element-qualified so it outranks the generic input[type='text'] rule: these
+   are the primary touch targets of the form and get a little more room. */
+input.group__input {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-m);
+  background: var(--surface-1);
+  color: var(--text-1);
+  font: inherit;
+  font-size: var(--step-1);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.group__input::placeholder {
+  color: var(--text-3);
+  opacity: 0.55;
+}
+
+/* A compact control for a secondary choice, so it does not dominate the form. */
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-m);
+  background: var(--surface-1);
+  color: var(--text-1);
+  font: inherit;
+}
+
 /* ----------------------------------------------------------- number cards */
 
 .number-card {

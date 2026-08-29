@@ -38,7 +38,7 @@ const noop = (): void => undefined
 
 describe('entry screen', () => {
   const html = renderToStaticMarkup(
-    <EntryView existing={null} acknowledged={false} onAcknowledge={noop} onSaved={noop} />,
+    <EntryView existing={null} acknowledged={false} onAcknowledge={noop} onSaved={noop} currentYear={2026} />,
   )
 
   it('is the whole application before a calculation exists', () => {
@@ -54,6 +54,53 @@ describe('entry screen', () => {
     expect(html).toContain('Luogo di nascita')
     expect(html).toContain('Nome completo di nascita')
     expect(html).not.toMatch(/e-?mail|telefono|password|account/i)
+  })
+
+  it('takes the birth date as three numbers, not a calendar', () => {
+    expect(html).toContain('Giorno')
+    expect(html).toContain('Mese')
+    expect(html).toContain('Anno')
+    // A native date control would open on today and force backwards navigation.
+    expect(html).not.toContain('type="date"')
+  })
+
+  it('takes the birth time as two numbers, not a native picker', () => {
+    expect(html).toContain('>Ora<')
+    expect(html).toContain('Minuti')
+    expect(html).not.toContain('type="time"')
+  })
+
+  it('asks every numeric field for a numeric keyboard', () => {
+    // Attribute names are matched case-insensitively: the static renderer
+    // preserves the React casing, while the DOM attribute is lower case.
+    const numericInputs = html.match(/inputmode="numeric"/gi) ?? []
+    // day, month, year, hour, minute
+    expect(numericInputs).toHaveLength(5)
+  })
+
+  it('limits each numeric field to the digits it can hold', () => {
+    const inputTag = (id: string): string => html.match(new RegExp(`<input[^>]*id="${id}"[^>]*>`, 'i'))?.[0] ?? ''
+    expect(inputTag('birth-day')).toMatch(/maxlength="2"/i)
+    expect(inputTag('birth-month')).toMatch(/maxlength="2"/i)
+    expect(inputTag('birth-year')).toMatch(/maxlength="4"/i)
+    expect(inputTag('birth-hour')).toMatch(/maxlength="2"/i)
+    expect(inputTag('birth-minute')).toMatch(/maxlength="2"/i)
+  })
+
+  it('states the accepted year range', () => {
+    expect(html).toContain('Anni ammessi: dal 1896 al 2026.')
+  })
+
+  it('groups the parts of a date under one accessible legend', () => {
+    expect(html).toMatch(/<fieldset[^>]*class="field group"/)
+    expect(html).toMatch(/<legend[^>]*>Data di nascita<\/legend>/)
+    expect(html).toMatch(/<legend[^>]*>Ora di nascita<\/legend>/)
+  })
+
+  it('keeps the time precision as a compact select, not stacked buttons', () => {
+    expect(html).toContain('<select')
+    expect(html).toContain('Precisione dell’ora')
+    expect(html).toContain('Al minuto')
   })
 
   it('marks the name as needed only for numerology', () => {

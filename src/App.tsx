@@ -80,6 +80,7 @@ export function App() {
   // The reference date belongs to the interface: every engine receives it as
   // an explicit input and stays deterministic.
   const analysis = stored ? buildAnalysis(stored, Date.now()) : null
+  const currentYear = new Date().getFullYear()
 
   const bare = route.name === 'start' || route.name === 'data'
 
@@ -89,11 +90,23 @@ export function App() {
         return stored ? (
           <ReturningView sydera={stored} />
         ) : (
-          <EntryView existing={null} acknowledged={acknowledged} onAcknowledge={acknowledge} onSaved={reload} />
+          <EntryView
+            existing={null}
+            acknowledged={acknowledged}
+            onAcknowledge={acknowledge}
+            onSaved={reload}
+            currentYear={currentYear}
+          />
         )
       case 'data':
         return (
-          <EntryView existing={stored} acknowledged={acknowledged} onAcknowledge={acknowledge} onSaved={reload} />
+          <EntryView
+            existing={stored}
+            acknowledged={acknowledged}
+            onAcknowledge={acknowledge}
+            onSaved={reload}
+            currentYear={currentYear}
+          />
         )
       case 'result':
         if (!stored || !analysis) {
