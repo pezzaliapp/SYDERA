@@ -38,6 +38,7 @@ export function BirthTimeField({ value, onChange, error }: BirthTimeFieldProps) 
             className="group__input"
             type="text"
             inputMode="numeric"
+            autoComplete="off"
             maxLength={2}
             placeholder="07"
             value={value.hour}
@@ -56,6 +57,7 @@ export function BirthTimeField({ value, onChange, error }: BirthTimeFieldProps) 
             className="group__input"
             type="text"
             inputMode="numeric"
+            autoComplete="off"
             maxLength={2}
             placeholder="30"
             value={value.minute}

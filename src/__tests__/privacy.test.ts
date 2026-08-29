@@ -47,13 +47,15 @@ describe('no outbound traffic', () => {
     const source = FILES.find((entry) => entry.file === PLACE_DATASET_LOADER)?.source ?? ''
     expect(source, 'the dataset loader must exist').not.toBe('')
     // The path is relative and is joined to the base the app was served from.
-    expect(source).toContain("export const PLACE_DATASET_PATH = 'data/places.txt'")
-    expect(source).toContain('`${baseUrl}${PLACE_DATASET_URL}`')
+    expect(source).toContain("export const PLACE_DATASET_PATHS = ['data/places-it.txt', 'data/places-world.txt']")
+    expect(source).toContain('`${baseUrl}${PLACE_DATASET_URLS[0]}`')
+    expect(source).toContain('`${baseUrl}${PLACE_DATASET_URLS[1]}`')
     // No absolute URL and no host.
     expect(source).not.toMatch(/https?:\/\//)
     // The only query string is the build's own dataset fingerprint. Nothing
     // the user types may ever be put into a URL.
-    expect(source).toContain('?v=${__SYDERA_PLACES_VERSION__}')
+    expect(source).toContain('?v=${__SYDERA_PLACES_IT_VERSION__}')
+    expect(source).toContain('?v=${__SYDERA_PLACES_WORLD_VERSION__}')
     expect(source).not.toMatch(/encodeURIComponent|\?\$\{query|\?q=/)
   })
 
@@ -136,5 +138,58 @@ describe('no profile-management interface', () => {
   it('speaks of "la mia SYDERA" rather than of a profile', () => {
     const content = readFileSync(join(SRC, 'content', 'it.ts'), 'utf8')
     expect(content).toContain('La mia SYDERA')
+  })
+})
+
+describe('the application never puts back what a person entered before', () => {
+  const entry = FILES.find((file) => file.file === 'src/views/EntryView.tsx')?.source ?? ''
+
+  it('has a calculation form that opens empty', () => {
+    expect(entry, 'the entry view must exist').not.toBe('')
+    // No state initialiser may read the stored record: that is exactly how
+    // yesterday's birth date, place and name came back unasked.
+    for (const field of ['birthDate', 'birthTime', 'birthTimePrecisionMinutes', 'fullBirthName']) {
+      expect(entry, `the form pre-fills ${field}`).not.toMatch(
+        new RegExp(`useState[^\\n]*input[?.]*\\.${field}`),
+      )
+    }
+    expect(entry).toContain('useState<BirthDateParts>(dateToParts(null))')
+    expect(entry).toContain('useState<BirthTimeParts>(timeToParts(null))')
+    expect(entry).toContain("useState('')")
+    expect(entry).toContain('useState<Place | null>(null)')
+  })
+
+  it('never asks the browser to remember a birth date', () => {
+    // "bday-day" and friends are a request to autofill and store a birthday.
+    for (const file of FILES) {
+      expect(file.source, `${file.file} opts into birthday autofill`).not.toMatch(/autoComplete="bday/)
+    }
+  })
+
+  it('turns autocomplete off on every personal field', () => {
+    for (const name of [
+      'src/components/BirthDateField.tsx',
+      'src/components/BirthTimeField.tsx',
+      'src/components/PlaceField.tsx',
+    ]) {
+      const source = FILES.find((file) => file.file === name)?.source ?? ''
+      expect(source, `${name} not found`).not.toBe('')
+      const inputs = source.match(/<input/g)?.length ?? 0
+      const offs = source.match(/autoComplete="off"/g)?.length ?? 0
+      expect(offs, `${name}: ${offs} of ${inputs} inputs opt out`).toBeGreaterThanOrEqual(inputs - 1)
+    }
+  })
+})
+
+describe('deleting personal data reaches everything SYDERA wrote', () => {
+  const prefs = FILES.find((file) => file.file === 'src/core/prefs/preferences.ts')?.source ?? ''
+
+  it('sweeps both web storages, not only localStorage', () => {
+    expect(prefs).toContain('sessionStorage')
+    expect(prefs).toContain('localStorage')
+  })
+
+  it('matches keys left by earlier versions, not only the current prefix', () => {
+    expect(prefs).toMatch(/\/\^sydera\[/)
   })
 })

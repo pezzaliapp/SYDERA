@@ -50,27 +50,17 @@ const PRECISION_VALUES = PRECISIONS.map((option) => option.minutes)
  */
 export function EntryView({ existing, acknowledged, onAcknowledge, onSaved, currentYear }: EntryViewProps) {
   const navigate = useNavigate()
-  const input = existing?.input
 
-  const [date, setDate] = useState<BirthDateParts>(dateToParts(input?.birthDate ?? null))
-  const [timeKnown, setTimeKnown] = useState(input ? input.birthTime !== null : true)
-  const [time, setTime] = useState<BirthTimeParts>(timeToParts(input?.birthTime ?? null))
-  const [precision, setPrecision] = useState(input?.birthTimePrecisionMinutes ?? 1)
-  const [place, setPlace] = useState<Place | null>(
-    input?.place
-      ? {
-          name: input.place.label,
-          asciiName: '',
-          countryCode: '',
-          admin1: '',
-          aliases: [],
-          latitude: input.place.latitude,
-          longitude: input.place.longitude,
-          timeZoneId: input.place.timeZoneId,
-        }
-      : null,
-  )
-  const [name, setName] = useState(input?.fullBirthName ?? '')
+  // The form always opens empty. SYDERA never puts back what a person entered
+  // on another day: a birth date, a birth time, a place and a full name are
+  // not values an application should offer unasked. `existing` is used only to
+  // keep the record's creation date when it is replaced.
+  const [date, setDate] = useState<BirthDateParts>(dateToParts(null))
+  const [timeKnown, setTimeKnown] = useState(true)
+  const [time, setTime] = useState<BirthTimeParts>(timeToParts(null))
+  const [precision, setPrecision] = useState(1)
+  const [place, setPlace] = useState<Place | null>(null)
+  const [name, setName] = useState('')
   const [accepted, setAccepted] = useState(acknowledged)
   const [errors, setErrors] = useState<FormErrors>({})
   const [saving, setSaving] = useState(false)
@@ -100,7 +90,7 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved, curr
       place: place
         ? { label: place.name, latitude: place.latitude, longitude: place.longitude, timeZoneId: place.timeZoneId }
         : null,
-      houseSystem: input?.houseSystem ?? 'whole-sign',
+      houseSystem: existing?.input.houseSystem ?? 'whole-sign',
       offsetOverrideMinutes: null,
     }
 

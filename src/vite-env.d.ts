@@ -7,5 +7,6 @@
 declare const __SYDERA_VERSION__: string
 declare const __SYDERA_COMMIT__: string
 declare const __SYDERA_BUILD_DATE__: string
-/** Fingerprint of the shipped place dataset; see vite.config.ts. */
-declare const __SYDERA_PLACES_VERSION__: string
+/** Fingerprints of the shipped place datasets; see vite.config.ts. */
+declare const __SYDERA_PLACES_IT_VERSION__: string
+declare const __SYDERA_PLACES_WORLD_VERSION__: string

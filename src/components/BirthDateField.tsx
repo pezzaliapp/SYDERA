@@ -42,7 +42,7 @@ export function BirthDateField({ value, onChange, currentYear, error }: BirthDat
             className="group__input"
             type="text"
             inputMode="numeric"
-            autoComplete="bday-day"
+            autoComplete="off"
             maxLength={2}
             placeholder="01"
             value={value.day}
@@ -61,7 +61,7 @@ export function BirthDateField({ value, onChange, currentYear, error }: BirthDat
             className="group__input"
             type="text"
             inputMode="numeric"
-            autoComplete="bday-month"
+            autoComplete="off"
             maxLength={2}
             placeholder="09"
             value={value.month}
@@ -81,7 +81,7 @@ export function BirthDateField({ value, onChange, currentYear, error }: BirthDat
             className="group__input"
             type="text"
             inputMode="numeric"
-            autoComplete="bday-year"
+            autoComplete="off"
             maxLength={4}
             placeholder="1964"
             value={value.year}

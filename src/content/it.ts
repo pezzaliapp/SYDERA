@@ -384,16 +384,16 @@ export const it = {
       'Tradizioni astrologiche diverse usano sistemi di case diversi e ottengono posizioni diverse dagli stessi dati. SYDERA non sostiene che un sistema sia scientificamente o oggettivamente superiore a un altro.',
     data: 'Dati locali',
     dataBody:
-      'SYDERA conserva la tua analisi in IndexedDB e alcune preferenze non personali in localStorage. Nessun dato viene inviato all’esterno.',
+      'I tuoi dati di nascita restano in IndexedDB su questo dispositivo, insieme a poche preferenze non personali in localStorage. Nulla viene inviato a un server di SYDERA. Il modulo di un nuovo calcolo parte sempre vuoto: SYDERA non ripropone i dati inseriti in precedenza.',
     stored: 'Analisi salvata su questo dispositivo',
     storedYes: 'Sì',
     storedNo: 'No',
-    deleteAll: 'ELIMINA TUTTI I MIEI DATI',
-    deleteAllTitle: 'Eliminare tutti i dati locali di SYDERA?',
+    deleteAll: 'CANCELLA TUTTI I MIEI DATI',
+    deleteAllTitle: 'Cancellare tutti i dati personali salvati da SYDERA su questo dispositivo?',
     deleteAllBody:
-      'Vengono rimossi la tua analisi e tutte le preferenze dell’applicazione su questo dispositivo. L’operazione è definitiva e non può essere annullata. I file che hai esportato manualmente non vengono toccati.',
-    deleteAllConfirm: 'Sì, elimina tutto',
-    deleteAllWorking: 'Eliminazione in corso…',
+      'Vengono cancellati i dati di nascita, il nome, il luogo, i risultati calcolati e le preferenze salvati su questo dispositivo. L’operazione non può essere annullata. I file che hai esportato restano tuoi e non vengono toccati; l’applicazione resta installata e utilizzabile.',
+    deleteAllConfirm: 'CANCELLA DATI',
+    deleteAllWorking: 'Cancellazione in corso…',
     deleteAllRetry: 'Riprova',
     deleteAllBlockedTitle: 'Eliminazione non completata',
     deleteAllBlockedBody:
@@ -474,15 +474,24 @@ export const privacyDocument: LegalDocument = {
     {
       title: 'Dove sono conservati i dati',
       paragraphs: [
-        'La tua analisi è salvata in IndexedDB, l’archivio strutturato del browser. Alcune preferenze non personali (tema, avvenuta accettazione delle avvertenze, sistema di case scelto) sono salvate in localStorage.',
+        'La tua analisi è salvata in IndexedDB, l’archivio strutturato del browser, su questo dispositivo. Alcune preferenze non personali (tema, avvenuta accettazione delle avvertenze, sistema di case scelto) sono salvate in localStorage.',
+        'Servono a una cosa sola: farti ritrovare la tua lettura quando riapri SYDERA, senza reinserire i dati.',
         'La cache offline contiene solo i file del programma e l’archivio dei luoghi: nessuna informazione personale viene memorizzata in quella cache.',
+      ],
+    },
+    {
+      title: 'Il modulo parte sempre vuoto',
+      paragraphs: [
+        'Quando apri un nuovo calcolo, i campi personali sono vuoti. SYDERA non ripropone la data, l’ora, il luogo o il nome che avevi inserito in precedenza: se vuoi rifare un calcolo, li inserisci di nuovo.',
+        'I campi sono inoltre configurati per non chiedere al browser di ricordare o completare automaticamente questi valori. Il completamento automatico e la cronologia dei moduli sono però gestiti dal browser, non da SYDERA: se il tuo browser propone comunque un valore digitato in passato, quel suggerimento arriva da lui e si disattiva nelle sue impostazioni.',
       ],
     },
     {
       title: 'Cancellazione',
       paragraphs: [
-        'Puoi rimuovere tutti i dati locali dalla sezione Impostazioni, con il comando “Elimina tutti i miei dati”.',
-        'La cancellazione rimuove l’analisi salvata e le preferenze dell’applicazione. I file che hai esportato volontariamente non fanno parte dell’archivio dell’applicazione e non vengono modificati.',
+        'Puoi cancellare tutto quello che SYDERA ha salvato su questo dispositivo dalla sezione Impostazioni, con il comando “Cancella tutti i miei dati”. Serve una sola conferma.',
+        'Vengono rimossi i dati di nascita, il nome, il luogo, i risultati calcolati e le preferenze, comprese eventuali voci lasciate da versioni precedenti dell’applicazione. Il programma e l’archivio dei luoghi restano al loro posto: SYDERA rimane installata e utilizzabile, come se non ci avessi mai inserito dati.',
+        'I file che hai esportato volontariamente non fanno parte dell’archivio dell’applicazione e restano tuoi: non vengono modificati né cancellati.',
         'L’eliminazione viene confermata soltanto quando è stata effettivamente completata. Se SYDERA è aperta in un’altra scheda o finestra, il browser rinvia l’operazione: in quel caso non viene eliminato nulla e l’applicazione ti chiede di chiudere le altre schede e riprovare.',
       ],
     },

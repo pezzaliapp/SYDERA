@@ -75,20 +75,41 @@ export function isDisclaimerCurrent(preferences: Preferences): boolean {
 }
 
 /** Remove every SYDERA preference key. Used by "delete all my data". */
+/**
+ * Anything SYDERA has ever written, not only what it writes today.
+ *
+ * Matching on the name rather than on the current prefix means a key left
+ * behind by an earlier version is removed too: "delete all my data" that
+ * quietly skips an old record is not a deletion.
+ */
+const SYDERA_KEY = /^sydera[.:_-]/i
+
+function sweep(storage: Storage): string[] {
+  const removed: string[] = []
+  const keys: string[] = []
+  for (let index = 0; index < storage.length; index++) {
+    const key = storage.key(index)
+    if (key !== null && SYDERA_KEY.test(key)) keys.push(key)
+  }
+  for (const key of keys) {
+    storage.removeItem(key)
+    removed.push(key)
+  }
+  return removed
+}
+
 export function clearPreferences(): string[] {
   const removed: string[] = []
-  try {
-    const keys: string[] = []
-    for (let index = 0; index < localStorage.length; index++) {
-      const key = localStorage.key(index)
-      if (key !== null && key.startsWith(PREFERENCE_PREFIX)) keys.push(key)
+  for (const storage of [
+    typeof localStorage === 'undefined' ? null : localStorage,
+    typeof sessionStorage === 'undefined' ? null : sessionStorage,
+  ]) {
+    if (!storage) continue
+    try {
+      removed.push(...sweep(storage))
+    } catch {
+      // Nothing to clear if this storage is unavailable.
     }
-    for (const key of keys) {
-      localStorage.removeItem(key)
-      removed.push(key)
-    }
-  } catch {
-    // Nothing to clear if storage is unavailable.
   }
   return removed
 }

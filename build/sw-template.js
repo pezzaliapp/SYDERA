@@ -19,8 +19,17 @@ const CACHE_VERSION = '__SYDERA_CACHE_VERSION__'
 const CACHE_NAME = `sydera-shell-${CACHE_VERSION}`
 const PRECACHE = __SYDERA_PRECACHE_MANIFEST__
 
-/** Vite writes a content hash into these names, so they are safe to keep. */
-const IMMUTABLE = /\/assets\/[^/]+-[A-Za-z0-9_-]{8,}\.[a-z0-9]+$/
+/**
+ * Content-addressed responses: Vite writes a hash into asset names, and the
+ * place datasets carry a fingerprint of the file in their query string. Either
+ * way the URL changes when the bytes change, so the copy on disk is always
+ * right and revalidating it is pure cost — a background re-download of the
+ * datasets on every single visit.
+ */
+function isImmutable(url) {
+  if (/\/assets\/[^/]+-[A-Za-z0-9_-]{8,}\.[a-z0-9]+$/.test(url.pathname)) return true
+  return /^v=[0-9a-f]{8,}$/.test(url.search.slice(1))
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -91,7 +100,7 @@ self.addEventListener('fetch', (event) => {
       const cached = await cache.match(request)
 
       // A hashed asset cannot change behind its name.
-      if (cached && IMMUTABLE.test(url.pathname)) return cached
+      if (cached && isImmutable(url)) return cached
 
       // Everything else is revalidated in the background, so the copy on disk
       // is at most one visit out of date and never permanently wrong.

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { it } from '../content/it.ts'
-import { loadPlaceDataset, type Place, type PlaceDataset } from '../core/places/dataset.ts'
-import { describePlace, placeRegion, searchPlaces } from '../core/places/search.ts'
+import type { Place } from '../core/places/dataset.ts'
+import { searchPlacesAsync } from '../core/places/client.ts'
+import { placeRegion, type PlaceMatch } from '../core/places/search.ts'
 import { isValidTimeZone } from '../core/time/timezone.ts'
 
 interface PlaceFieldProps {
@@ -10,11 +11,7 @@ interface PlaceFieldProps {
   readonly error?: string | undefined
 }
 
-type DatasetState =
-  | { readonly status: 'idle' }
-  | { readonly status: 'loading' }
-  | { readonly status: 'ready'; readonly dataset: PlaceDataset }
-  | { readonly status: 'error' }
+type DatasetState = 'idle' | 'loading' | 'ready' | 'error'
 
 /**
  * Birth place selection.
@@ -26,22 +23,35 @@ type DatasetState =
  */
 export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
   const [query, setQuery] = useState('')
-  const [dataset, setDataset] = useState<DatasetState>({ status: 'idle' })
+  const [dataset, setDataset] = useState<DatasetState>('idle')
+  const [results, setResults] = useState<readonly PlaceMatch[]>([])
   const [manual, setManual] = useState(false)
   const [manualPlace, setManualPlace] = useState({ label: '', latitude: '', longitude: '', timeZoneId: '' })
   const [manualError, setManualError] = useState<string | null>(null)
-  const requested = useRef(false)
 
+  // The search runs in a worker, so a keystroke never waits for the datasets
+  // to be parsed. Only the newest answer is shown.
   useEffect(() => {
-    if (requested.current || query.trim().length < 2 || dataset.status !== 'idle') return
-    requested.current = true
-    setDataset({ status: 'loading' })
-    loadPlaceDataset(import.meta.env.BASE_URL)
-      .then((loaded) => setDataset({ status: 'ready', dataset: loaded }))
-      .catch(() => setDataset({ status: 'error' }))
-  }, [query, dataset.status])
-
-  const results = dataset.status === 'ready' ? searchPlaces(dataset.dataset, query) : []
+    const trimmed = query.trim()
+    if (trimmed.length < 2) {
+      setResults([])
+      return
+    }
+    let current = true
+    setDataset((state) => (state === 'ready' ? state : 'loading'))
+    searchPlacesAsync(import.meta.env.BASE_URL, trimmed)
+      .then((outcome) => {
+        if (!current) return
+        setResults(outcome.matches)
+        setDataset('ready')
+      })
+      .catch(() => {
+        if (current) setDataset('error')
+      })
+    return () => {
+      current = false
+    }
+  }, [query])
 
   if (value) {
     return (
@@ -85,6 +95,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
         <input
           id="manual-label"
           type="text"
+          autoComplete="off"
           value={manualPlace.label}
           onChange={(event) => setManualPlace({ ...manualPlace, label: event.target.value })}
         />
@@ -94,6 +105,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
         <input
           id="manual-lat"
           type="text"
+          autoComplete="off"
           inputMode="decimal"
           value={manualPlace.latitude}
           onChange={(event) => setManualPlace({ ...manualPlace, latitude: event.target.value })}
@@ -104,6 +116,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
         <input
           id="manual-lon"
           type="text"
+          autoComplete="off"
           inputMode="decimal"
           value={manualPlace.longitude}
           onChange={(event) => setManualPlace({ ...manualPlace, longitude: event.target.value })}
@@ -114,6 +127,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
         <input
           id="manual-zone"
           type="text"
+          autoComplete="off"
           value={manualPlace.timeZoneId}
           placeholder="Europe/Rome"
           onChange={(event) => setManualPlace({ ...manualPlace, timeZoneId: event.target.value })}
@@ -146,13 +160,17 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
               setManualError(null)
               onChange({
                 name: manualPlace.label.trim() || `${latitude.toFixed(3)}, ${longitude.toFixed(3)}`,
-                asciiName: '',
-                countryCode: '',
-                admin1: '',
                 aliases: [],
+                countryCode: '',
+                region: '',
+                province: '',
                 latitude,
                 longitude,
                 timeZoneId: manualPlace.timeZoneId.trim(),
+                population: 0,
+                haystack: '',
+                folded: '',
+                aliasKeys: '',
               })
             }}
           >
@@ -184,8 +202,8 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
         {it.entry.placeHelp}
       </p>
 
-      {dataset.status === 'loading' ? <p className="small muted">{it.entry.placeLoading}</p> : null}
-      {dataset.status === 'error' ? <p className="notice notice--warning small">{it.entry.placeLoadError}</p> : null}
+      {dataset === 'loading' ? <p className="small muted">{it.entry.placeLoading}</p> : null}
+      {dataset === 'error' ? <p className="notice notice--warning small">{it.entry.placeLoadError}</p> : null}
 
       {results.length > 0 ? (
         <div className="results">
@@ -204,7 +222,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
                   <span className="suggestion__text">
                     <span className="suggestion__name">{match.place.name}</span>
                     <span className="suggestion__where">
-                      {placeRegion(match.place) || describePlace(match.place)} · {match.place.timeZoneId}
+                      {placeRegion(match.place) || match.place.timeZoneId}
                     </span>
                   </span>
                   <span className="suggestion__pick" aria-hidden="true">
@@ -217,7 +235,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
         </div>
       ) : null}
 
-      {dataset.status === 'ready' && query.trim().length >= 2 && results.length === 0 ? (
+      {dataset === 'ready' && query.trim().length >= 2 && results.length === 0 ? (
         <p className="small muted">{it.entry.placeNoResults}</p>
       ) : null}
 

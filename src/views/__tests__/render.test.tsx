@@ -338,7 +338,7 @@ describe('settings and deletion', () => {
   })
 
   it('offers the deletion command', () => {
-    expect(html).toContain('ELIMINA TUTTI I MIEI DATI')
+    expect(html).toContain('CANCELLA TUTTI I MIEI DATI')
   })
 
   it('confirms a completed deletion explicitly', () => {

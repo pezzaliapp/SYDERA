@@ -29,9 +29,9 @@ function commitSha(): string {
  * fingerprint in the query string means a release can never read another
  * release's dataset, whatever any cache decides to keep.
  */
-function placesVersion(): string {
-  const file = readFileSync(new URL('./public/data/places.txt', import.meta.url))
-  return createHash('sha256').update(file).digest('hex').slice(0, 12)
+function placesVersion(file: string): string {
+  const contents = readFileSync(new URL(`./public/data/${file}`, import.meta.url))
+  return createHash('sha256').update(contents).digest('hex').slice(0, 12)
 }
 
 /**
@@ -75,7 +75,8 @@ function syderaServiceWorker(): Plugin {
       // worker that does not change is a worker that never activates.
       const version = createHash('sha256')
         .update(manifest.join('\n'))
-        .update(placesVersion())
+        .update(placesVersion('places-it.txt'))
+        .update(placesVersion('places-world.txt'))
         .digest('hex')
         .slice(0, 12)
       const template = readFileSync(new URL('./build/sw-template.js', import.meta.url), 'utf8')
@@ -100,7 +101,8 @@ export default defineConfig({
     __SYDERA_VERSION__: JSON.stringify(packageJson.version),
     __SYDERA_COMMIT__: JSON.stringify(commitSha()),
     __SYDERA_BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
-    __SYDERA_PLACES_VERSION__: JSON.stringify(placesVersion()),
+    __SYDERA_PLACES_IT_VERSION__: JSON.stringify(placesVersion('places-it.txt')),
+    __SYDERA_PLACES_WORLD_VERSION__: JSON.stringify(placesVersion('places-world.txt')),
   },
   build: {
     target: 'es2022',

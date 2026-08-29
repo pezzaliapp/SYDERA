@@ -91,18 +91,29 @@ producing a different chart.
 
 * Source: https://download.geonames.org/export/dump/
 * Licence: **CC BY 4.0** — free to redistribute, requires attribution.
-* `cities15000` contains roughly 25 000 places (population > 15 000, plus
-  capitals). Each record already carries latitude, longitude, country code,
-  population **and the IANA timezone identifier**, which removes the need for a
-  separate coordinate-to-timezone lookup for places chosen from the list.
-* Larger extracts exist (`cities5000`, `cities500`) at proportionally larger
-  size.
+* Each record carries latitude, longitude, country code, population **and the
+  IANA timezone identifier**, which removes the need for a separate
+  coordinate-to-timezone lookup for places chosen from the list.
 
-Plan: ship a trimmed, pre-processed snapshot (name, ASCII name, country,
-admin area, latitude, longitude, timezone, population) as a static asset,
-loaded on demand and cached by the service worker. A trimmed and compressed
-`cities15000` is a few hundred kilobytes, which is acceptable for a
-progressive download that is not needed for numerology.
+**Shipped (from v0.2.2): two extracts.**
+
+* `IT.txt` — every populated place in Italy, plus the ADM3 records, with no
+  population threshold: 63 564 places, about 1 MB compressed. A birthplace is
+  usually a small town, and the first release shipped `cities15000`, which
+  holds 661 Italian places out of 7 896 comuni — Calenzano, twelve thousand
+  inhabitants, was simply absent. A population threshold is the wrong filter
+  for this application.
+* `cities5000.txt` minus Italy — 67 634 places worldwide, about 2.8 MB
+  compressed, fetched only when a query is not well answered by Italy.
+
+Both are pre-processed into a compact tab-separated form (name, alternate
+names, country, region, province, coordinates, timezone, population), carry a
+content fingerprint in their URL, are parsed inside a Web Worker so a keystroke
+never waits for them, and are cached by the service worker after first use.
+
+Administrative names come from `admin1CodesASCII.txt` and `admin2Codes.txt`;
+the Italian provinces are named from their official two-letter codes, because
+GeoNames files the province of Firenze as "Province of Florence".
 
 Obligations to honour:
 
@@ -155,8 +166,9 @@ dataset.
    with the profile so charts stay reproducible.
 3. Births before 1970, and any zone whose historical data is known to be
    uncertain, are flagged and can be overridden manually.
-4. Place lookup uses a pinned, attributed GeoNames `cities15000` snapshot
-   shipped as a static asset; nothing is sent to a geocoding service.
+4. Place lookup uses pinned, attributed GeoNames snapshots (complete for
+   Italy, above 5 000 inhabitants elsewhere) shipped as static assets; nothing
+   is sent to a geocoding service.
 5. Manual coordinate and timezone entry is a first-class path, not a fallback
    of last resort.
 6. If the offset cannot be established, SYDERA says so and withholds the
