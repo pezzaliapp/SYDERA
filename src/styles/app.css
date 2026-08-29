@@ -10,6 +10,23 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/*
+ * The gutter, and the part of the screen the phone will not let us use.
+ *
+ * The page declares viewport-fit=cover, which asks the browser to lay the
+ * document out edge to edge, underneath the notch and the rounded corners.
+ * That is what we want vertically — the header and footer already add the top
+ * and bottom insets back. Horizontally nothing did, so on an iPhone held
+ * sideways the text ran under the notch on one side and under the rounded
+ * corner on the other and was cut. Android reports no such insets, which is
+ * why the same build looked right there.
+ */
+:root {
+  --gutter: clamp(var(--space-s), 3vw, var(--space-l));
+  --gutter-start: calc(var(--gutter) + env(safe-area-inset-left, 0px));
+  --gutter-end: calc(var(--gutter) + env(safe-area-inset-right, 0px));
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
@@ -94,7 +111,7 @@ a {
   justify-content: space-between;
   gap: var(--space-s);
   flex-wrap: wrap;
-  padding: var(--space-xs) clamp(var(--space-s), 3vw, var(--space-l));
+  padding: var(--space-xs) var(--gutter-end) var(--space-xs) var(--gutter-start);
   padding-top: calc(var(--space-xs) + env(safe-area-inset-top));
   border-bottom: 1px solid var(--border);
   background: var(--surface-1);
@@ -130,8 +147,7 @@ a {
   min-width: 0;
   max-width: 68rem;
   margin: 0 auto;
-  padding: clamp(var(--space-s), 3vw, var(--space-l));
-  padding-bottom: var(--space-l);
+  padding: var(--gutter) var(--gutter-end) var(--space-l) var(--gutter-start);
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
@@ -152,7 +168,7 @@ a {
 
 .app-footer {
   border-top: 1px solid var(--border);
-  padding: var(--space-s) clamp(var(--space-s), 3vw, var(--space-l));
+  padding: var(--space-s) var(--gutter-end) var(--space-s) var(--gutter-start);
   padding-bottom: calc(var(--space-s) + env(safe-area-inset-bottom));
   display: flex;
   flex-wrap: wrap;
@@ -227,8 +243,8 @@ a {
   position: sticky;
   top: 0;
   z-index: 5;
-  margin-inline: calc(-1 * clamp(var(--space-s), 3vw, var(--space-l)));
-  padding-inline: clamp(var(--space-s), 3vw, var(--space-l));
+  margin-inline: calc(-1 * var(--gutter-start)) calc(-1 * var(--gutter-end));
+  padding-inline: var(--gutter-start) var(--gutter-end);
   padding-block: var(--space-2xs);
   background: color-mix(in srgb, var(--surface-0) 92%, transparent);
   backdrop-filter: blur(8px);
@@ -300,6 +316,8 @@ a {
   justify-content: center;
   padding: clamp(var(--space-s), 4vw, var(--space-xl));
   padding-top: calc(clamp(var(--space-s), 4vw, var(--space-xl)) + env(safe-area-inset-top));
+  padding-inline: calc(clamp(var(--space-s), 4vw, var(--space-xl)) + env(safe-area-inset-left, 0px))
+    calc(clamp(var(--space-s), 4vw, var(--space-xl)) + env(safe-area-inset-right, 0px));
 }
 
 .entry__panel {
@@ -564,6 +582,18 @@ a {
   /* Nothing scrolls sideways any more, so the wrapper must not suggest it. */
   .table-wrap:has(.table--stacks) {
     overflow-x: visible;
+  }
+
+  /*
+   * Every cell was nowrap, so a table missed the width of its card by a few
+   * pixels and sat in a sideways scroller — one iOS never draws a bar for, so
+   * it simply looked like a column had been sliced off. Letting the cells wrap
+   * makes them fit instead.
+   */
+  table:not(.table--stacks) th,
+  table:not(.table--stacks) td {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -1482,6 +1512,8 @@ th {
   justify-content: center;
   padding: clamp(var(--space-s), 4vw, var(--space-xl));
   padding-top: calc(clamp(var(--space-s), 4vw, var(--space-xl)) + env(safe-area-inset-top));
+  padding-inline: calc(clamp(var(--space-s), 4vw, var(--space-xl)) + env(safe-area-inset-left, 0px))
+    calc(clamp(var(--space-s), 4vw, var(--space-xl)) + env(safe-area-inset-right, 0px));
 }
 
 .onboarding__panel {

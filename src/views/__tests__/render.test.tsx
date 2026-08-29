@@ -410,3 +410,48 @@ describe('mobile defects reported from a real device', () => {
     expect(css).toContain('content: attr(data-label)')
   })
 })
+
+describe('the layout keeps clear of the parts of the screen the phone reserves', () => {
+  const css = readFileSync(join(process.cwd(), 'src', 'styles', 'app.css'), 'utf8')
+
+  /**
+   * The page declares viewport-fit=cover, which lays the document out under
+   * the notch and the rounded corners. Vertically that was compensated; on an
+   * iPhone held sideways the text ran underneath and was cut. Every container
+   * that touches the edge of the screen has to add the horizontal insets back.
+   */
+  it('derives the horizontal gutter from the device insets', () => {
+    expect(css).toContain('--gutter-start: calc(var(--gutter) + env(safe-area-inset-left, 0px))')
+    expect(css).toContain('--gutter-end: calc(var(--gutter) + env(safe-area-inset-right, 0px))')
+  })
+
+  it('uses that gutter in every container that reaches the edge', () => {
+    for (const selector of ['.app-header', '.main', '.app-footer', '.sections']) {
+      const start = css.indexOf(`${selector} {`)
+      expect(start, `${selector} not found`).toBeGreaterThan(-1)
+      const block = css.slice(start, css.indexOf('}', start))
+      expect(block, `${selector} ignores the device insets`).toMatch(/--gutter-start|--gutter-end/)
+    }
+    // The first screen has its own layout and needs the same treatment.
+    const entry = css.slice(css.indexOf('.entry {'), css.indexOf('}', css.indexOf('.entry {')))
+    expect(entry).toContain('env(safe-area-inset-left, 0px)')
+    expect(entry).toContain('env(safe-area-inset-right, 0px)')
+  })
+
+  it('does not hide the overflow instead of preventing it', () => {
+    // A global overflow-x:hidden would make the check pass and the content
+    // disappear. The cause is fixed, so the cover-up must not exist.
+    for (const rule of ['html', 'body', '.app', '.main']) {
+      const start = css.indexOf(`${rule} {`)
+      if (start === -1) continue
+      const block = css.slice(start, css.indexOf('}', start))
+      expect(block, `${rule} hides horizontal overflow`).not.toMatch(/overflow-x:\s*hidden|overflow:\s*hidden/)
+    }
+  })
+
+  it('lets table cells wrap on a phone rather than overflow their card', () => {
+    expect(css).toContain('table:not(.table--stacks) th,')
+    const start = css.indexOf('table:not(.table--stacks) th,')
+    expect(css.slice(start, start + 200)).toContain('white-space: normal')
+  })
+})
