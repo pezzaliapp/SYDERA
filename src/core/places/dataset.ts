@@ -13,6 +13,8 @@ export interface Place {
   readonly asciiName: string
   readonly countryCode: string
   readonly admin1: string
+  /** Other names the place is known by, when they are not derivable. */
+  readonly aliases: readonly string[]
   readonly latitude: number
   readonly longitude: number
   readonly timeZoneId: string
@@ -41,7 +43,7 @@ export function parsePlaceDataset(text: string): PlaceDataset {
   const places: Place[] = []
   for (const line of placeBlock.split('\n')) {
     if (!line) continue
-    const [name, asciiName, countryCode, admin1, latitude, longitude, zoneIndex] = line.split('\t')
+    const [name, asciiName, countryCode, admin1, latitude, longitude, zoneIndex, aliases] = line.split('\t')
     const zone = zones[Number(zoneIndex)]
     if (!name || !zone) continue
     places.push({
@@ -49,6 +51,7 @@ export function parsePlaceDataset(text: string): PlaceDataset {
       asciiName: asciiName ?? '',
       countryCode: countryCode ?? '',
       admin1: admin1 ?? '',
+      aliases: aliases ? aliases.split('|') : [],
       latitude: Number(latitude),
       longitude: Number(longitude),
       timeZoneId: zone,

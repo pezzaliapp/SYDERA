@@ -2,8 +2,6 @@ import { it } from '../../content/it.ts'
 import { paths } from '../../app/router.ts'
 import { NumberCard } from '../../components/NumberCard.tsx'
 import { MethodDisclosure } from '../../components/MethodDisclosure.tsx'
-import { ReportSectionCard } from '../../components/ReportSectionCard.tsx'
-import type { Report } from '../../core/interpretation/types.ts'
 import { themeFor } from '../../content/numerologyThemes.it.ts'
 import type { NumerologyProfile } from '../../core/numerology/profile.ts'
 import type { NumerologyIssue } from '../../core/numerology/types.ts'
@@ -13,14 +11,9 @@ interface Props {
   readonly issues: readonly NumerologyIssue[]
   readonly warnings: readonly NumerologyIssue[]
   readonly hasName: boolean
-  readonly report: Report
 }
 
-export function NumerologiaSection({ numerology, issues, warnings, hasName, report }: Props) {
-  const numerological = report.sections.filter((section) =>
-    section.evidence.some((evidence) => evidence.system === 'numerologia'),
-  )
-
+export function NumerologiaSection({ numerology, issues, warnings, hasName }: Props) {
   if (!hasName) {
     return (
       <section className="card" aria-labelledby="numerology-missing">
@@ -56,14 +49,6 @@ export function NumerologiaSection({ numerology, issues, warnings, hasName, repo
         <h2 className="page-title">{it.numerology.title}</h2>
         <p className="page-intro">{it.numerology.lead}</p>
       </div>
-
-      {numerological.length > 0 ? (
-        <div className="document document--inline">
-          {numerological.map((section) => (
-            <ReportSectionCard section={section} key={`num-${section.id}`} />
-          ))}
-        </div>
-      ) : null}
 
       {warnings.length > 0 ? (
         <p className="notice small">

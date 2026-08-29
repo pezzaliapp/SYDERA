@@ -129,3 +129,43 @@ describe('dataset loading', () => {
     primePlaceDataset(null)
   })
 })
+
+describe('Italian names find Italian places', () => {
+  /**
+   * GeoNames files these cities under their English exonym, so before the
+   * alternate names were carried in the dataset an Italian typing "Roma" or
+   * "Firenze" found nothing at all.
+   */
+  const cities: ReadonlyArray<readonly [string, string]> = [
+    ['Roma', 'Rome'],
+    ['Milano', 'Milan'],
+    ['Firenze', 'Florence'],
+    ['Napoli', 'Naples'],
+    ['Torino', 'Turin'],
+    ['Venezia', 'Venice'],
+    ['Genova', 'Genoa'],
+  ]
+
+  for (const [typed, filedAs] of cities) {
+    it(`"${typed}" finds ${filedAs}, first`, () => {
+      const results = searchPlaces(dataset, typed)
+      const top = results[0]
+      expect(top, `"${typed}" found nothing`).toBeDefined()
+      expect(top?.place.name).toBe(filedAs)
+      expect(top?.place.countryCode).toBe('IT')
+    })
+  }
+
+  it('still finds places by the name they are filed under', () => {
+    for (const [typed, filedAs] of [...cities, ['Prato', 'Prato'], ['Paris', 'Paris'], ['London', 'London']] as const) {
+      const byFiledName = searchPlaces(dataset, filedAs)[0]
+      expect(byFiledName, `${filedAs} not found`).toBeDefined()
+      expect(searchPlaces(dataset, typed).length).toBeGreaterThan(0)
+    }
+  })
+
+  it('keeps the dataset small enough to reach a phone', () => {
+    const bytes = readFileSync(join(process.cwd(), 'public', 'data', 'places.txt')).byteLength
+    expect(bytes).toBeLessThan(1_400_000)
+  })
+})

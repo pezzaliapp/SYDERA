@@ -36,9 +36,6 @@ export const BODY_WEIGHT: Readonly<Record<BodyId | 'ascendant' | 'midheaven', nu
   pluto: 0,
 })
 
-/** Signs of the slow bodies describe a generation, not a person. */
-export const GENERATIONAL_BODIES: readonly BodyId[] = ['uranus', 'neptune', 'pluto']
-
 /** The angular houses are the ones traditionally read as most exposed. */
 export const ANGULAR_HOUSES: readonly number[] = [1, 4, 7, 10]
 export const ANGULAR_HOUSE_BONUS = 1
@@ -51,8 +48,6 @@ export const ASPECT_WEIGHT: Readonly<Record<AspectId, number>> = Object.freeze({
   trigono: 1,
   sestile: 1,
 })
-
-export const HARD_ASPECTS: readonly AspectId[] = ['quadrato', 'opposizione']
 
 /**
  * A tight aspect speaks more loudly than one at the edge of its orb.
@@ -79,11 +74,3 @@ export const NUMBER_WEIGHT = Object.freeze({
   maturity: 1,
 })
 
-/** A theme needs support from more than one factor before it is called a pattern. */
-export const MIN_FACTORS_FOR_STRENGTH = 2
-
-/** Below this share of the leading theme's score, a theme is background noise. */
-export const STRENGTH_RELATIVE_FLOOR = 0.45
-
-/** How many statements a domain paragraph may carry before it stops being readable. */
-export const MAX_STATEMENTS_PER_DOMAIN = 3

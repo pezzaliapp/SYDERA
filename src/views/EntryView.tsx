@@ -63,6 +63,7 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved, curr
           asciiName: '',
           countryCode: '',
           admin1: '',
+          aliases: [],
           latitude: input.place.latitude,
           longitude: input.place.longitude,
           timeZoneId: input.place.timeZoneId,
@@ -190,7 +191,14 @@ export function EntryView({ existing, acknowledged, onAcknowledge, onSaved, curr
             </div>
           ) : null}
 
-          <PlaceField value={place} onChange={setPlace} error={errors.place} />
+          <PlaceField
+            value={place}
+            onChange={(chosen) => {
+              setPlace(chosen)
+              if (chosen && errors.place) setErrors(({ place: _cleared, ...rest }) => rest)
+            }}
+            error={errors.place}
+          />
 
           <div className="field">
             <label className="field__label" htmlFor="birth-name">

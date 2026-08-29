@@ -137,21 +137,21 @@ describe('result sections', () => {
   it('opens on the reading, not on a data table', () => {
     const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
     expect(html).toContain('La tua SYDERA')
-    expect(html).toContain('Il tuo profilo')
+    expect(html).toContain('Il tuo ritratto')
     expect(html).not.toContain('<table')
   })
 
   it('answers "what does this say about me" before showing any number', () => {
     const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
-    // The named sections of the portrait, in the order a person reads them.
-    for (const title of ['Il tuo profilo', 'Come ti presenti al mondo', 'Come pensi e comunichi']) {
+    // The named sections of the reading, in the order a person reads them.
+    for (const title of ['Il tuo ritratto', 'Come pensi e agisci', 'Emozioni e relazioni']) {
       expect(html).toContain(title)
     }
   })
 
   it('states the symbolic framing once and does not repeat it', () => {
     const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
-    const occurrences = html.match(/non è una descrizione scientifica/gi) ?? []
+    const occurrences = html.match(/non è una valutazione scientifica/gi) ?? []
     expect(occurrences).toHaveLength(1)
   })
 
@@ -170,8 +170,8 @@ describe('result sections', () => {
 
   it('states the framing near the title, before the reading begins', () => {
     const html = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
-    const framingAt = html.indexOf('Lettura simbolica costruita dai dati')
-    const firstSectionAt = html.indexOf('Il tuo profilo')
+    const framingAt = html.indexOf('Lettura simbolica basata su')
+    const firstSectionAt = html.indexOf('Il tuo ritratto')
     expect(framingAt).toBeGreaterThan(-1)
     expect(framingAt, 'the framing belongs to the page head, not inside the reading').toBeLessThan(firstSectionAt)
     // Short enough not to displace the reading itself.
@@ -191,12 +191,13 @@ describe('result sections', () => {
     }
   })
 
-  it('puts the interpretation before the tables in the astrology tab', () => {
-    const html = renderToStaticMarkup(<ResultView section="astrologia" analysis={analysis} sydera={SYDERA} />)
-    const readingAt = html.indexOf('reading__text')
-    const tableAt = html.indexOf('<table')
-    expect(readingAt).toBeGreaterThan(-1)
-    expect(readingAt, 'the reading must come before the first table').toBeLessThan(tableAt)
+  it('keeps the reading out of the technical tabs', () => {
+    for (const section of ['astrologia', 'numerologia'] as const) {
+      const html = renderToStaticMarkup(<ResultView section={section} analysis={analysis} sydera={SYDERA} />)
+      for (const title of ['Il tuo ritratto', 'Come pensi e agisci', 'Il tuo punto di equilibrio']) {
+        expect(html, `${section} repeats the reading`).not.toContain(title)
+      }
+    }
   })
 
   it('folds the large technical tables away by default', () => {

@@ -1,6 +1,6 @@
 import { it } from '../../content/it.ts'
 import { paths } from '../../app/router.ts'
-import { themeMeaning } from '../../content/interpretation.it.ts'
+import { themeMeaning } from '../../content/convergence.it.ts'
 import type { ConvergenceResult } from '../../core/convergence/taxonomy.ts'
 
 const levelClass: Record<string, string> = {

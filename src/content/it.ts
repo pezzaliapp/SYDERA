@@ -79,6 +79,10 @@ export const it = {
       'Archivio dei luoghi non disponibile. Puoi inserire manualmente coordinate e fuso orario.',
     placeNoResults: 'Nessun luogo trovato. Prova un altro nome oppure inserisci le coordinate manualmente.',
     placeSelected: 'Luogo selezionato',
+    placeConfirmed: 'Luogo di nascita confermato',
+    placeChooseHint: 'Tocca il luogo giusto per confermarlo.',
+    placeChoose: 'Scegli',
+    placeResultsTitle: 'Risultati della ricerca',
     placeChange: 'Cambia luogo',
     placeManual: 'Inserisci coordinate manualmente',
     placeManualLabel: 'Nome del luogo',
@@ -129,42 +133,19 @@ export const it = {
 
   report: {
     title: 'La tua SYDERA',
-    /** Short, always visible under the title: the essential claim, in one line. */
-    shortFraming: 'Lettura simbolica costruita dai dati che hai inserito. Non è una descrizione scientifica della personalità né una previsione.',
+    /** One sober line under the title. The full notice lives in Avvertenze. */
+    shortFraming: 'Lettura simbolica basata su astrologia e numerologia; non è una valutazione scientifica o psicologica.',
     readDisclaimer: 'Avvertenze complete',
     evidenceTitle: 'Perché questa lettura?',
-    evidenceLead:
-      'Ogni parte del testo nasce da valori calcolati. Qui sotto, raggruppati per sezione, quelli che l’hanno prodotta.',
-    whyClose: 'Nascondi le fonti',
+    evidenceLead: 'Qui sotto, sezione per sezione, i valori calcolati da cui nasce ogni parte del testo.',
+    whyClose: 'Nascondi',
     sections: {
-      profilo: 'Il tuo profilo',
-      presentazione: 'Come ti presenti al mondo',
-      mente: 'Come pensi e comunichi',
-      emozioni: 'Mondo emotivo',
-      relazioni: 'Relazioni',
-      azione: 'Azione, lavoro e realizzazione',
-      forze: 'Punti di forza',
-      tensioni: 'Possibili tensioni',
-      filo: 'Il filo conduttore',
-      ciclo: 'Ciclo attuale',
+      ritratto: 'Il tuo ritratto',
+      pensiero: 'Come pensi e agisci',
+      emozioni: 'Emozioni e relazioni',
+      equilibrio: 'Il tuo punto di equilibrio',
+      momento: 'Questo momento',
     },
-    omitted: 'Non emerso',
-    omittedIntro: 'Alcune sezioni non compaiono perché i dati disponibili non le sostengono:',
-    reasons: {
-      noChart: 'senza ora e luogo di nascita non ci sono indicatori astrologici per questa parte',
-      noName: 'senza il nome completo di nascita mancano gli indicatori numerologici',
-      noSignals: 'gli indicatori disponibili non dicono abbastanza su questo ambito',
-      noTension: 'non emergono spinte in aperto contrasto fra loro',
-      noCycle: 'il ciclo richiede i dati numerologici',
-      thinEvidence: 'gli indicatori disponibili per questo ambito si riducono a un solo elemento secondario',
-      singleStrength: 'emerge un solo tema ricorrente, che da solo non fa un insieme di punti di forza',
-      threadRepeats:
-        'non emerge una tensione che qualifichi il tema dominante, e ripetere quel tema da solo non aggiungerebbe nulla',
-    },
-    noTensionFound:
-      'Dagli indicatori disponibili non emergono spinte in aperto contrasto: il quadro risulta relativamente coerente al suo interno. Questo non significa assenza di conflitti reali, solo che questi due linguaggi simbolici non ne segnalano fra loro.',
-    cycleLead: 'Nel periodo attuale il ciclo numerologico indica',
-    transitsLead: 'Sul piano dei transiti in corso:',
   },
   sintesi: {
     title: 'Sintesi',

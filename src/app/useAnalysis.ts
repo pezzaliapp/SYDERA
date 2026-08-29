@@ -10,7 +10,7 @@ import type { BodyId, ZodiacSign } from '../core/astrology/types.ts'
 import { compareSystems, type ConvergenceResult } from '../core/convergence/taxonomy.ts'
 import { currentTransits, type NatalPoint, type Transit } from '../core/cycles/transits.ts'
 import { computeNumerologyProfile, type NumerologyProfile } from '../core/numerology/profile.ts'
-import { buildReport } from '../core/interpretation/report.ts'
+import { buildReport } from '../core/interpretation/sintesi.ts'
 import type { Report } from '../core/interpretation/types.ts'
 import type { NumerologyIssue } from '../core/numerology/types.ts'
 import type { StoredSydera } from '../core/storage/sydera.ts'
@@ -106,7 +106,7 @@ export function buildAnalysis(sydera: StoredSydera, nowMs: number): Analysis {
     convergence,
     transits,
     referenceDate,
-    report: buildReport({ chart, numerology, convergence, transits }),
+    report: buildReport({ chart: chart?.kind === 'complete' ? chart : null, numerology }),
   }
 }
 

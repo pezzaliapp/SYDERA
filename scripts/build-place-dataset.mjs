@@ -41,6 +41,44 @@ const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'd
 
 const stripDiacritics = (value) => value.normalize('NFD').replace(/\p{Mn}/gu, '')
 
+/**
+ * Alternate names, for Italian places only.
+ *
+ * GeoNames stores the widely used English exonym as the primary name, so the
+ * dataset called Rome "Rome" and Florence "Florence" — and an Italian typing
+ * "Roma" or "Firenze" found nothing. The alternate names carry the Italian
+ * form. Keeping them for every city on earth would add well over half a
+ * megabyte to a file that has to reach a phone; keeping them for Italy costs
+ * about fifty kilobytes and fixes the case this application actually has.
+ *
+ * Airport codes and descriptive phrases from other languages ("Lungsod ng
+ * Roma") are dropped: they would only add noise to the result list.
+ */
+const LATIN_NAME = /^[\p{Script=Latin}0-9 '’.-]+$/u
+// The alternate names arrive in alphabetical order, so a low cap cuts off
+// exactly the forms that sort late — "Venezia" came after "Venetië". Italy is
+// small enough to keep them all.
+const MAX_ALIASES = 80
+
+function aliasesFor(countryCode, alternates, known) {
+  if (countryCode !== 'IT') return []
+  const kept = []
+  for (const raw of (alternates ?? '').split(',')) {
+    const alias = raw.trim()
+    if (alias.length < 2 || alias.length > 30) continue
+    if (!LATIN_NAME.test(alias)) continue
+    // An all-capitals short token is an airport or station code, not a name.
+    if (alias.length <= 4 && alias === alias.toUpperCase()) continue
+    if (alias.split(/\s+/).length > 2) continue
+    const folded = stripDiacritics(alias).toLowerCase()
+    if (known.has(folded)) continue
+    known.add(folded)
+    kept.push(alias)
+    if (kept.length >= MAX_ALIASES) break
+  }
+  return kept
+}
+
 const rows = readFileSync(source, 'utf8').split('\n').filter(Boolean)
 const places = []
 
@@ -48,6 +86,7 @@ for (const row of rows) {
   const columns = row.split('\t')
   const name = columns[1]
   const asciiName = columns[2]
+  const alternates = columns[3]
   const latitude = Number(columns[4])
   const longitude = Number(columns[5])
   const countryCode = columns[8]
@@ -62,8 +101,11 @@ for (const row of rows) {
   // in the browser; a transliteration is kept only for names in other scripts.
   const derivable = stripDiacritics(name).toLowerCase() === (asciiName ?? '').toLowerCase()
 
+  const known = new Set([stripDiacritics(name).toLowerCase(), (asciiName ?? '').toLowerCase()])
+
   places.push({
     name,
+    aliases: aliasesFor(countryCode, alternates, known),
     asciiName: derivable ? '' : (asciiName ?? ''),
     countryCode,
     admin1,
@@ -88,6 +130,7 @@ const lines = places.map((place) =>
     place.latitude.toFixed(3),
     place.longitude.toFixed(3),
     zoneIndex.get(place.timeZoneId),
+    place.aliases.join('|'),
   ].join('\t'),
 )
 

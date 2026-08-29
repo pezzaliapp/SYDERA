@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { it } from '../content/it.ts'
 import { loadPlaceDataset, type Place, type PlaceDataset } from '../core/places/dataset.ts'
-import { describePlace, searchPlaces } from '../core/places/search.ts'
+import { describePlace, placeRegion, searchPlaces } from '../core/places/search.ts'
 import { isValidTimeZone } from '../core/time/timezone.ts'
 
 interface PlaceFieldProps {
@@ -48,9 +48,16 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
       <div className="field">
         <span className="field__label">{it.entry.placeLabel}</span>
         <div className="chosen">
-          <span>
-            <strong>{value.name}</strong>
-            <span className="muted small"> · {describePlace(value)} · {value.timeZoneId}</span>
+          <span className="chosen__mark" aria-hidden="true">
+            ✓
+          </span>
+          <span className="chosen__body">
+            <span className="chosen__state">{it.entry.placeConfirmed}</span>
+            <strong className="chosen__name">
+              {value.name}
+              {placeRegion(value) ? ` · ${placeRegion(value)}` : ''}
+            </strong>
+            <span className="chosen__zone">{value.timeZoneId}</span>
           </span>
           <button
             type="button"
@@ -142,6 +149,7 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
                 asciiName: '',
                 countryCode: '',
                 admin1: '',
+                aliases: [],
                 latitude,
                 longitude,
                 timeZoneId: manualPlace.timeZoneId.trim(),
@@ -180,18 +188,33 @@ export function PlaceField({ value, onChange, error }: PlaceFieldProps) {
       {dataset.status === 'error' ? <p className="notice notice--warning small">{it.entry.placeLoadError}</p> : null}
 
       {results.length > 0 ? (
-        <ul className="suggestions">
-          {results.map((match) => (
-            <li key={`${match.place.name}-${match.place.latitude}-${match.place.longitude}`}>
-              <button type="button" className="suggestion" onClick={() => onChange(match.place)}>
-                <span>{match.place.name}</span>
-                <span className="muted small">
-                  {describePlace(match.place)} · {match.place.timeZoneId}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="results">
+          <p className="results__hint" id="place-results-hint">
+            {it.entry.placeChooseHint}
+          </p>
+          <ul className="suggestions" aria-label={it.entry.placeResultsTitle}>
+            {results.map((match) => (
+              <li key={`${match.place.name}-${match.place.latitude}-${match.place.longitude}`}>
+                <button
+                  type="button"
+                  className="suggestion"
+                  aria-describedby="place-results-hint"
+                  onClick={() => onChange(match.place)}
+                >
+                  <span className="suggestion__text">
+                    <span className="suggestion__name">{match.place.name}</span>
+                    <span className="suggestion__where">
+                      {placeRegion(match.place) || describePlace(match.place)} · {match.place.timeZoneId}
+                    </span>
+                  </span>
+                  <span className="suggestion__pick" aria-hidden="true">
+                    {it.entry.placeChoose}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       {dataset.status === 'ready' && query.trim().length >= 2 && results.length === 0 ? (

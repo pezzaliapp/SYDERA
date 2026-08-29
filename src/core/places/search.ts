@@ -30,15 +30,18 @@ export function searchPlaces(dataset: PlaceDataset, query: string, limit = 12): 
   const contains: PlaceMatch[] = []
 
   for (const place of dataset.places) {
-    const name = foldForSearch(place.name)
-    const ascii = place.asciiName ? foldForSearch(place.asciiName) : ''
+    // The name the place is filed under, plus any other name it is known by:
+    // GeoNames files Rome under "Rome", and an Italian types "Roma".
+    const forms = [foldForSearch(place.name)]
+    if (place.asciiName) forms.push(foldForSearch(place.asciiName))
+    for (const alias of place.aliases) forms.push(foldForSearch(alias))
 
-    if (name.startsWith(needle) || (ascii !== '' && ascii.startsWith(needle))) {
+    if (forms.some((form) => form.startsWith(needle))) {
       starts.push({ place, rank: 0 })
       if (starts.length >= limit) break
       continue
     }
-    if (contains.length < limit && (name.includes(needle) || (ascii !== '' && ascii.includes(needle)))) {
+    if (contains.length < limit && forms.some((form) => form.includes(needle))) {
       contains.push({ place, rank: 1 })
     }
   }
@@ -50,4 +53,28 @@ export function searchPlaces(dataset: PlaceDataset, query: string, limit = 12): 
 export function describePlace(place: Place): string {
   const region = place.admin1 && place.countryCode === 'US' ? `${place.countryCode}-${place.admin1}` : place.countryCode
   return `${place.name}, ${region}`
+}
+
+/**
+ * The country in words, for the confirmed place.
+ *
+ * `Intl.DisplayNames` ships with the browser, so this costs no dataset and
+ * works offline. A code the browser cannot name is shown as it is rather than
+ * guessed at.
+ */
+export function countryName(countryCode: string): string {
+  if (!countryCode) return ''
+  try {
+    return new Intl.DisplayNames(['it'], { type: 'region' }).of(countryCode) ?? countryCode
+  } catch {
+    return countryCode
+  }
+}
+
+/** Where the place is, in words: "Prato · Italia", "Springfield · Stati Uniti (MO)". */
+export function placeRegion(place: Place): string {
+  const country = countryName(place.countryCode)
+  // Only the United States carries a state code that reads as one.
+  const state = place.countryCode === 'US' && place.admin1 ? ` (${place.admin1})` : ''
+  return country ? `${country}${state}` : ''
 }
