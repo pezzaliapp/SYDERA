@@ -21,44 +21,37 @@ export type NatalPoint = BodyId | 'ascendant' | 'midheaven'
  * frame below can take it without bending the grammar.
  */
 export const signManner: Readonly<Record<ZodiacSign, string>> = Object.freeze({
-  ariete: 'la spinta a partire per primo, spesso prima di aver deciso del tutto',
-  toro: 'il bisogno di procedere con calma e di tenere fermo quello che funziona',
-  gemelli: 'la curiosità di collegare cose diverse e di metterle subito in parole',
-  cancro: 'l’attaccamento a ciò che senti tuo e la memoria di come sono andate le cose',
-  leone: 'il bisogno di metterci qualcosa di riconoscibile, che si veda che è tuo',
-  vergine: 'l’attenzione a quello che non torna e il gusto di rendere le cose utilizzabili',
-  bilancia: 'la ricerca di una misura fra te e gli altri, prima di prendere posizione',
-  scorpione: 'la tendenza ad andare a fondo, anche dove sarebbe più comodo fermarsi',
-  sagittario: 'il bisogno di un senso più largo di quello immediato, e di spazio per cercarlo',
-  capricorno: 'la pazienza di costruire qualcosa che regga, accettando che costi tempo',
-  acquario: 'il bisogno di fare a modo tuo, anche quando è la strada meno battuta',
-  pesci: 'la tendenza a lasciare che le cose ti arrivino, prima di dare loro un nome',
+  ariete: 'parti per primo e decidi mentre gli altri stanno ancora valutando',
+  toro: 'vai con calma e ti fidi di quello che ha già dimostrato di funzionare',
+  gemelli: 'colleghi cose diverse e le metti subito in parole',
+  cancro: 'ti leghi a quello che senti tuo e ti ricordi bene come sono andate le cose',
+  leone: 'ci metti qualcosa di riconoscibile, e passare inosservato ti pesa',
+  vergine: 'noti in fretta quello che non torna e vuoi renderlo utilizzabile',
+  bilancia: 'guardi come sta l’altro prima di prendere posizione',
+  scorpione: 'vai a fondo, anche quando fermarti prima sarebbe più comodo',
+  sagittario: 'cerchi un senso più largo di quello immediato e mal sopporti lo spazio stretto',
+  capricorno: 'costruisci piano e accetti che le cose costino tempo',
+  acquario: 'fai a modo tuo, anche quando è la strada meno battuta',
+  pesci: 'aspetti di sentire come stanno le cose prima di decidere con la testa',
 })
 
-/**
- * Which function a point stands for.
- *
- * `preposition` is joined to the article the manner begins with, because
- * Italian contracts the two: "in la spinta" is not a sentence.
- */
 export interface PointFrame {
-  readonly preposition: 'in' | 'di' | 'con' | 'da' | null
   readonly frame: (manner: string) => string
 }
 
 export const pointFrame: Readonly<Record<NatalPoint, PointFrame>> = Object.freeze({
-  ascendant: { preposition: null, frame: (m) => `Chi ti incontra percepisce, prima di tutto, ${m}.` },
-  sun: { preposition: 'in', frame: (m) => `Ti riconosci ${m}.` },
-  moon: { preposition: null, frame: (m) => `Quando qualcosa ti tocca da vicino emerge ${m}.` },
-  mercury: { preposition: null, frame: (m) => `Il tuo modo di ragionare e di dire le cose ha ${m}.` },
-  venus: { preposition: null, frame: (m) => `In quello che ti attrae e nei legami che scegli c’è ${m}.` },
-  mars: { preposition: null, frame: (m) => `Quando c’è da agire emerge ${m}.` },
-  jupiter: { preposition: null, frame: (m) => `Cresci dove trovi ${m}.` },
-  saturn: { preposition: 'con', frame: (m) => `Le prove che ti hanno formato hanno a che fare ${m}.` },
-  midheaven: { preposition: null, frame: (m) => `Nel lavoro e in quello di cui ti prendi la responsabilità porti ${m}.` },
-  uranus: { preposition: 'da', frame: (m) => `Le rotture con il consueto passano ${m}.` },
-  neptune: { preposition: null, frame: (m) => `Quello che immagini e desideri senza dirlo ha ${m}.` },
-  pluto: { preposition: null, frame: (m) => `Quando qualcosa cambia in profondità è in gioco ${m}.` },
+  ascendant: { frame: (m) => `Chi ti incontra si accorge subito che ${m}.` },
+  sun: { frame: (m) => `Ti senti nel tuo quando ${m}.` },
+  moon: { frame: (m) => `Quando qualcosa ti tocca da vicino, ${m}.` },
+  mercury: { frame: (m) => `Nel modo di ragionare e di comunicare, ${m}.` },
+  venus: { frame: (m) => `In quello che ti attrae e nei legami che scegli, ${m}.` },
+  mars: { frame: (m) => `Quando c’è da agire, ${m}.` },
+  jupiter: { frame: (m) => `Ti apri e prendi fiducia quando ${m}.` },
+  saturn: { frame: (m) => `Con te stesso sei più esigente che con gli altri: ${m}.` },
+  midheaven: { frame: (m) => `Nel lavoro e in quello di cui ti prendi la responsabilità, ${m}.` },
+  uranus: { frame: (m) => `Quando rompi con il consueto, ${m}.` },
+  neptune: { frame: (m) => `In quello che immagini e desideri senza dirlo, ${m}.` },
+  pluto: { frame: (m) => `Quando qualcosa cambia in profondità, ${m}.` },
 })
 
 /**
@@ -74,18 +67,18 @@ export const sameSignNote: Readonly<Partial<Record<NatalPoint, string>>> = Objec
 })
 
 export const echoFrame: Readonly<Record<NatalPoint, string>> = Object.freeze({
-  ascendant: 'La stessa qualità è anche la prima cosa che gli altri percepiscono di te',
-  sun: 'La stessa qualità sta al centro di come ti riconosci',
-  moon: 'La stessa qualità torna in quello che ti fa stare bene',
-  mercury: 'La stessa qualità si ritrova nel modo di ragionare e di dire le cose',
-  venus: 'La stessa qualità torna in quello che ti attrae e nei legami che scegli',
-  mars: 'La stessa qualità si ritrova nel modo di agire',
-  jupiter: 'La stessa qualità è anche il terreno dove cresci',
-  saturn: 'La stessa qualità è dove hai dovuto imparare qualcosa a tue spese',
-  midheaven: 'La stessa qualità la porti nel lavoro e nelle responsabilità',
-  uranus: 'La stessa qualità è dove rompi con il consueto',
-  neptune: 'La stessa qualità è in quello che immagini senza dirlo',
-  pluto: 'La stessa qualità è dove le cose cambiano in profondità',
+  ascendant: 'È anche la prima cosa che gli altri notano di te',
+  sun: 'Lo stesso vale per quello in cui ti riconosci',
+  moon: 'Lo stesso vale per come reagisci quando qualcosa ti tocca da vicino',
+  mercury: 'Lo stesso vale per il modo di ragionare e di comunicare',
+  venus: 'Lo stesso vale in quello che ti attrae e nei legami che scegli',
+  mars: 'Lo stesso vale quando c’è da agire',
+  jupiter: 'Lo stesso vale per quello che ti fa prendere fiducia',
+  saturn: 'Anche con te stesso sei esigente nello stesso modo',
+  midheaven: 'Lo stesso modo di fare lo porti nel lavoro e nelle responsabilità',
+  uranus: 'Lo stesso vale quando rompi con il consueto',
+  neptune: 'Lo stesso vale per quello che immagini senza dirlo',
+  pluto: 'Lo stesso vale quando qualcosa cambia in profondità',
 })
 
 /** Where a placement shows itself, appended to the statement above. */
@@ -106,11 +99,11 @@ export const houseArea: Readonly<Record<number, string>> = Object.freeze({
 
 /** Said once, when a personal planet is retrograde. */
 export const retrogradeNote: Readonly<Partial<Record<BodyId, string>>> = Object.freeze({
-  mercury: 'Questa funzione lavora più verso l’interno del solito: rivedi, torni sui tuoi passi e concludi quando ti sei convinto tu.',
-  venus: 'Questa funzione lavora più verso l’interno del solito: quello che ti attrae lo riconosci lentamente, e raramente al primo colpo.',
-  mars: 'Questa funzione lavora più verso l’interno del solito: l’iniziativa passa da una decisione interna prima di diventare visibile.',
-  jupiter: 'Questa funzione lavora più verso l’interno del solito: la fiducia te la costruisci per conto tuo, non la ricevi dall’ambiente.',
-  saturn: 'Questa funzione lavora più verso l’interno del solito: le regole che pesano davvero sono quelle che ti sei dato tu.',
+  mercury: 'Rivedi le cose più di una volta prima di dirle: ti convinci per conto tuo, non perché qualcuno ti ha convinto.',
+  venus: 'Quello che ti attrae lo riconosci lentamente, quasi mai al primo colpo, e cambi idea meno spesso di quanto sembri.',
+  mars: 'Prima di muoverti passi da una decisione tutta interna: da fuori sembra che tu stia fermo quando invece hai già scelto.',
+  jupiter: 'La fiducia te la costruisci da solo: gli incoraggiamenti che arrivano da fuori ti smuovono poco.',
+  saturn: 'Puoi essere più severo con te stesso di quanto gli altri immaginino: molte delle regole che senti di dover rispettare te le sei date tu.',
 })
 
 /**
@@ -148,7 +141,7 @@ export const aspectDynamics: Readonly<Record<string, Readonly<Partial<Record<Asp
     teso: 'Quello che senti e quello che mostri prendono strade diverse: puoi sembrare più distaccato di quanto tu sia.',
   },
   'saturn|sun': {
-    congiunzione: 'Ti riconosci in quello che hai dovuto meritare: poco ti è arrivato senza una prova, e questo ti ha reso solido e severo con te stesso.',
+    congiunzione: 'Ti riconosci in quello che ti sei meritato: quello che arriva senza una prova ti convince poco, e con te stesso sei severo più che con chiunque altro.',
     armonico: 'La tua ambizione trova una struttura che la regge: i risultati arrivano più tardi della media e restano più a lungo.',
     teso: 'Ogni passo avanti ti costa una verifica: la fiducia in te te la costruisci, non ti è data in partenza.',
   },
@@ -208,8 +201,8 @@ export const aspectDynamics: Readonly<Record<string, Readonly<Partial<Record<Asp
     teso: 'Rischi di innamorarti di un’immagine prima che della persona: il risveglio, quando arriva, è brusco.',
   },
   'pluto|sun': {
-    congiunzione: 'Quello che sei è passato da almeno una trasformazione seria: non sei più la persona di alcuni anni fa, e lo sai.',
+    congiunzione: 'Non ti accontenti di aggiustare: quando una cosa non va più bene tendi a rifarla da capo, e questo vale anche per come vedi te stesso.',
     armonico: 'Hai una capacità di ricominciare che si nota solo quando serve davvero.',
-    teso: 'Il controllo è un tema: quando qualcosa ti sfugge di mano la reazione è più forte di quanto la situazione richieda.',
+    teso: 'Tenere in mano le cose conta molto per te: quando qualcosa ti sfugge, la reazione è più forte di quanto la situazione richieda.',
   },
 })

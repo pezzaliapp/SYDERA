@@ -60,28 +60,6 @@ const POINT_LABEL: Readonly<Record<string, string>> = Object.freeze({
   ascendant: 'Ascendente', midheaven: 'Medio Cielo',
 })
 
-/** Italian contracts a preposition with the article that follows it. */
-const CONTRACTIONS: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({
-  in: { il: 'nel', lo: 'nello', la: 'nella', i: 'nei', gli: 'negli', le: 'nelle', 'l’': 'nell’' },
-  di: { il: 'del', lo: 'dello', la: 'della', i: 'dei', gli: 'degli', le: 'delle', 'l’': 'dell’' },
-  da: { il: 'dal', lo: 'dallo', la: 'dalla', i: 'dai', gli: 'dagli', le: 'dalle', 'l’': 'dall’' },
-  con: { il: 'con il', lo: 'con lo', la: 'con la', i: 'con i', gli: 'con gli', le: 'con le', 'l’': 'con l’' },
-})
-
-function join(preposition: string | null, phrase: string): string {
-  if (preposition === null) return phrase
-  const table = CONTRACTIONS[preposition]
-  if (!table) return `${preposition} ${phrase}`
-  const elided = /^(l’)(.+)$/.exec(phrase)
-  if (elided?.[1] && elided[2]) {
-    const joined = table[elided[1]]
-    if (joined) return `${joined}${elided[2]}`
-  }
-  const [article, ...rest] = phrase.split(' ')
-  const joined = article ? table[article] : undefined
-  return joined && rest.length > 0 ? `${joined} ${rest.join(' ')}` : `${preposition} ${phrase}`
-}
-
 /**
  * One placement, said as a sentence: which function, in what manner, and
  * where it shows.
@@ -94,8 +72,7 @@ function placement(point: NatalPoint, sign: ZodiacSign, house: number | null, se
     const echo = sameSignNote[point] ?? echoFrame[point]
     return where ? `${echo}, soprattutto ${where}.` : `${echo}.`
   }
-  const { preposition, frame } = pointFrame[point]
-  const statement = frame(join(preposition, signManner[sign]))
+  const statement = pointFrame[point].frame(signManner[sign])
   // Attached rather than made into a second clause with its own verb: the
   // frames already carry one, and two of them in a row read badly.
   return where ? `${statement.slice(0, -1)}, soprattutto ${where}.` : statement
@@ -130,15 +107,24 @@ const MAX_DYNAMICS = 5
 export function buildNatalReading(chart: CompleteChart, titles: Readonly<Record<string, string>>): NatalReading {
   const byBody = new Map(chart.positions.map((position) => [position.body, position]))
   const blocks: NatalBlock[] = []
-  // Across the whole page, not only within one block.
+  // A sign describes one way of behaving. The second point in it refers back
+  // rather than repeating the clause — but only the second: three sections in
+  // a row opening "Lo stesso vale" is worse than saying the thing again.
   const signsUsed = new Set<ZodiacSign>()
+  const signsEchoed = new Set<ZodiacSign>()
+  // Two sections in a row opening the same way reads worse than the
+  // repetition it was meant to avoid.
+  let previousWasEcho = false
 
   const add = (id: string, points: ReadonlyArray<readonly [NatalPoint, ZodiacSign, number, number | null]>): void => {
     if (points.length === 0) return
     const paragraphs: string[] = []
     const evidence: string[] = []
     for (const [point, sign, degree, house] of points) {
-      paragraphs.push(placement(point, sign, house, signsUsed.has(sign)))
+      const echo = signsUsed.has(sign) && !signsEchoed.has(sign) && !previousWasEcho
+      if (echo) signsEchoed.add(sign)
+      previousWasEcho = echo
+      paragraphs.push(placement(point, sign, house, echo))
       signsUsed.add(sign)
       evidence.push(evidenceFor(point, sign, degree, house))
       const position = byBody.get(point as BodyId)

@@ -178,7 +178,7 @@ export const it = {
       relazioni: 'Relazioni e desiderio',
       azione: 'Azione',
       crescita: 'Crescita e limiti',
-      dinamiche: 'Le dinamiche più forti del tema',
+      dinamiche: 'Le dinamiche che ti caratterizzano',
     },
     dataDisclosure: 'Mostra i dati astrologici',
     verifyDisclosure: 'Verifica del calcolo',

@@ -73,6 +73,53 @@ describe('the chart is explained before it is tabulated', () => {
     }
   })
 
+  test('talks about the person, never about the interpretation', () => {
+    // The reading used to say "questa funzione lavora più verso l'interno" —
+    // the machinery describing itself. Those belong to the evidence, if
+    // anywhere.
+    const method = [
+      /questa funzione/i, /questa qualità/i, /la stessa qualità/i, /questa posizione/i,
+      /questa energia/i, /questo fattore/i, /questa configurazione/i, /\bil tema\b/i,
+      /\bil quadro\b/i, /lavora verso/i, /si manifesta/i, /trova espressione/i,
+      /viene sostenuto da/i, /trovi il bisogno di/i, /ha a che fare con la tendenza/i,
+    ]
+    for (const reading of readings) {
+      for (const paragraph of prose(reading)) {
+        for (const term of method) {
+          expect(term.test(paragraph), `method language: ${paragraph.slice(0, 70)}`).toBe(false)
+        }
+      }
+    }
+  })
+
+  test('claims nothing about what actually happened to anyone', () => {
+    // A chart cannot establish a biography. "Le prove che ti hanno formato"
+    // said that it could.
+    const biography = [
+      /prove che ti hanno formato/i, /hai vissuto/i, /nella tua infanzia/i,
+      /le esperienze che hai avuto/i, /sei stato costretto/i, /gli altri ti hanno/i,
+      /ti hanno formato/i, /è passato da/i, /non sei più la persona/i, /hai dovuto meritare/i,
+    ]
+    for (const reading of readings) {
+      for (const paragraph of prose(reading)) {
+        for (const term of biography) {
+          expect(term.test(paragraph), `biographical claim: ${paragraph.slice(0, 70)}`).toBe(false)
+        }
+      }
+    }
+  })
+
+  test('never opens two sections in a row with the same back-reference', () => {
+    for (const reading of readings) {
+      const paragraphs = prose(reading)
+      for (let index = 1; index < paragraphs.length; index += 1) {
+        const previous = (paragraphs[index - 1] ?? '').startsWith('Lo stesso vale')
+        const current = (paragraphs[index] ?? '').startsWith('Lo stesso vale')
+        expect(previous && current, `two back-references in a row: ${paragraphs[index]?.slice(0, 60)}`).toBe(false)
+      }
+    }
+  })
+
   test('says nothing mystical, predictive or clinical', () => {
     const banned = [
       /energia cosmica/i, /vibrazion/i, /destino/i, /l’universo/i, /sei nato per/i,
