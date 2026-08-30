@@ -186,11 +186,34 @@ describe('result sections', () => {
     expect(html).toContain('#/avvertenze')
   })
 
-  it('leaves the reading itself free of controls in the other tabs', () => {
-    for (const section of ['astrologia', 'numerologia'] as const) {
-      const html = renderToStaticMarkup(<ResultView section={section} analysis={analysis} sydera={SYDERA} />)
-      expect(html, `${section} repeats the evidence control`).not.toContain('Perché questa lettura?')
-    }
+  it('keeps the Sintesi to a single grouped disclosure', () => {
+    // Numerologia has its own technical disclosures and no reading of its own.
+    const numerologia = renderToStaticMarkup(<ResultView section="numerologia" analysis={analysis} sydera={SYDERA} />)
+    expect(numerologia, 'numerologia repeats the evidence control').not.toContain('Perché questa lettura?')
+
+    // Astrologia now explains the chart, so each of its blocks carries the
+    // factors it was written from — that is the traceability, not a repeat of
+    // the Sintesi, whose own disclosure stays single.
+    const sintesi = renderToStaticMarkup(<ResultView section="sintesi" analysis={analysis} sydera={SYDERA} />)
+    expect((sintesi.match(/Perché questa lettura\?/g) ?? []).length).toBe(1)
+  })
+
+  it('explains the chart before it tabulates it', () => {
+    const html = renderToStaticMarkup(<ResultView section="astrologia" analysis={analysis} sydera={SYDERA} />)
+    const firstReading = html.indexOf('reading__text')
+    const firstTable = html.indexOf('<table')
+    expect(firstReading, 'no readable block on the astrology tab').toBeGreaterThan(-1)
+    expect(firstReading, 'a table comes before the explanation').toBeLessThan(firstTable)
+    // The tables are still there, and still closed.
+    expect(html).toContain('Mostra i dati astrologici')
+    expect(html).toContain('Verifica del calcolo')
+  })
+
+  it('does not break astrology terms on a phone', () => {
+    const html = renderToStaticMarkup(<ResultView section="astrologia" analysis={analysis} sydera={SYDERA} />)
+    // Stacked rows instead of columns squeezed until "Congiunzione" splits.
+    expect(html).toContain('table--stacks')
+    expect(html).toContain('data-label="Aspetto"')
   })
 
   it('keeps the reading out of the technical tabs', () => {

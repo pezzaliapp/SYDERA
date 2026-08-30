@@ -167,6 +167,22 @@ export const it = {
   },
 
   astrology: {
+    /** The readable part of the natal chart, before any table. */
+    readingLead: 'Il tuo tema natale, spiegato prima di mostrarne i calcoli.',
+    readingWhy: 'Perché questa lettura?',
+    readingBlocks: {
+      presentazione: 'Come ti presenti',
+      identita: 'Identità e direzione',
+      emozioni: 'Emozioni',
+      mente: 'Mente e comunicazione',
+      relazioni: 'Relazioni e desiderio',
+      azione: 'Azione',
+      crescita: 'Crescita e limiti',
+      dinamiche: 'Le dinamiche più forti del tema',
+    },
+    dataDisclosure: 'Mostra i dati astrologici',
+    verifyDisclosure: 'Verifica del calcolo',
+
     title: 'Astrologia',
     lead: 'Che cosa dice il tema natale, e i dati su cui poggia.',
     readingTitle: 'La lettura astrologica',

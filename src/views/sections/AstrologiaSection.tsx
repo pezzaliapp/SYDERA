@@ -1,4 +1,6 @@
+import { useId, useState } from 'react'
 import { it } from '../../content/it.ts'
+import { buildNatalReading } from '../../core/interpretation/natal.ts'
 import { angleReadings, aspectReadings, bodyReadings, houseReadings, signReadings } from '../../content/astrologyThemes.it.ts'
 import { formatOffset } from '../../core/time/timezone.ts'
 import type { Chart } from '../../core/astrology/chart.ts'
@@ -77,7 +79,7 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
     <>
       <div className="stack stack--tight">
         <h2 className="page-title">{it.astrology.title}</h2>
-        <p className="page-intro">{it.astrology.lead}</p>
+        <p className="page-intro">{it.astrology.readingLead}</p>
       </div>
 
       {provenance.caveats.length > 0 ? (
@@ -90,8 +92,14 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
         </div>
       ) : null}
 
+      <div className="document document--inline">
+        {buildNatalReading(chart, it.astrology.readingBlocks).blocks.map((block) => (
+          <NatalBlockCard block={block} key={block.id} />
+        ))}
+      </div>
+
       <details className="method method--data">
-        <summary>{it.astrology.showData}</summary>
+        <summary>{it.astrology.dataDisclosure}</summary>
         <div className="method__body">
           <div className="stack">
       <section className="card" aria-labelledby="angles-title">
@@ -130,7 +138,7 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
           <span className="badge badge--calculated">{it.result.calculated}</span>
         </div>
         <div className="table-wrap">
-          <table>
+          <table className="table--stacks">
             <thead>
               <tr>
                 <th scope="col">Corpo</th>
@@ -141,12 +149,12 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
             <tbody>
               {chart.positions.map((position) => (
                 <tr key={position.body}>
-                  <td>{bodyReadings[position.body].label}</td>
-                  <td>
+                  <td data-label="Corpo">{bodyReadings[position.body].label}</td>
+                  <td data-label="Posizione">
                     {degrees(position.degreeInSign)} {signReadings[position.sign].label}
                     {position.retrograde ? <span className="muted small"> · {it.astrology.retrograde}</span> : null}
                   </td>
-                  <td>{position.house ?? '—'}</td>
+                  <td data-label={it.astrology.house}>{position.house ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -175,7 +183,7 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
             <span className="badge">{it.astrology.houseSystemNames[chart.houses.system]}</span>
           </div>
           <div className="table-wrap">
-            <table>
+            <table className="table--stacks">
               <thead>
                 <tr>
                   <th scope="col">Casa</th>
@@ -186,11 +194,13 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
               <tbody>
                 {chart.houses.cusps.map((cusp, index) => (
                   <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>
+                    <td data-label="Casa">{index + 1}</td>
+                    <td data-label="Cuspide">
                       {degrees(cusp % 30)} {signReadings[signOf(cusp)].label}
                     </td>
-                    <td className="cell-wrap">{houseReadings[index + 1]?.keywords.join(', ')}</td>
+                    <td className="cell-wrap" data-label={it.result.symbolic}>
+                      {houseReadings[index + 1]?.keywords.join(', ')}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -217,7 +227,7 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
           <span className="badge badge--calculated">{it.result.calculated}</span>
         </div>
         <div className="table-wrap">
-          <table>
+          <table className="table--stacks">
             <thead>
               <tr>
                 <th scope="col">Relazione</th>
@@ -228,11 +238,11 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
             <tbody>
               {chart.aspects.map((aspect) => (
                 <tr key={`${aspect.a}-${aspect.b}-${aspect.aspect}`}>
-                  <td>
+                  <td data-label="Relazione">
                     {pointLabel(aspect.a)} — {pointLabel(aspect.b)}
                   </td>
-                  <td>{aspectReadings[aspect.aspect].label}</td>
-                  <td>
+                  <td data-label="Aspetto">{aspectReadings[aspect.aspect].label}</td>
+                  <td data-label={it.astrology.orb}>
                     {aspect.orb.toFixed(2)}° / {aspect.allowedOrb}°
                     {aspect.applying === null ? null : (
                       <span className="muted small">
@@ -249,7 +259,7 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
       </section>
 
       <details className="method">
-        <summary>{it.result.showCalculation}</summary>
+        <summary>{it.astrology.verifyDisclosure}</summary>
         <div className="method__body">
           <dl className="method__list">
             <div>
@@ -287,6 +297,47 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
         </div>
       </details>
     </>
+  )
+}
+
+/**
+ * One readable block: what the placement means, with the exact factors it was
+ * written from one tap away rather than in the way.
+ */
+function NatalBlockCard({ block }: { readonly block: ReturnType<typeof buildNatalReading>['blocks'][number] }) {
+  const [open, setOpen] = useState(false)
+  const panelId = useId()
+
+  return (
+    <section className="reading" aria-labelledby={`${panelId}-title`}>
+      <h3 className="reading__title" id={`${panelId}-title`}>
+        {block.title}
+      </h3>
+      {block.paragraphs.map((paragraph) => (
+        <p className="reading__text" key={paragraph.slice(0, 40)}>
+          {paragraph}
+        </p>
+      ))}
+      <button
+        type="button"
+        className="reading__why"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {open ? it.report.whyClose : it.astrology.readingWhy}
+      </button>
+      {open ? (
+        <ul className="evidence__list" id={panelId}>
+          {block.evidence.map((fact) => (
+            <li className="evidence__item" key={fact}>
+              <span className="evidence__tag">{it.result.calculated}</span>
+              <span>{fact}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   )
 }
 
