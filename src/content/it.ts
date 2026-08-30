@@ -375,6 +375,25 @@ export const it = {
   },
 
   cycles: {
+    /** The timeline, before any calculation. */
+    phasesTitle: 'Le fasi della tua vita',
+    /** One line above the timeline, so the answer is on the first screen. */
+    nowIn: (ages: string, years: string, title: string) => `Adesso sei in questa fase: ${ages} (${years}) — ${title.toLowerCase()}.`,
+    currentPhase: 'Fase attuale',
+    fromAge: (age: number) => `${age} anni in poi`,
+    ageRange: (from: number, to: number) => `${from}–${to} anni`,
+    fromYear: (year: number) => `dal ${year}`,
+    yearRange: (from: number, to: number) => `${from}–${to}`,
+    periodTitle: 'Il periodo che stai vivendo',
+    personalYearLabel: (value: number) => `Anno personale ${value}`,
+    periodRange: (from: string, to: string) => `Dal ${from} al ${to}`,
+    thisMonth: 'Questo mese',
+    today: 'Oggi',
+    momentTitle: 'Il momento attuale',
+    momentEmpty: 'In questo periodo non ci sono passaggi lenti abbastanza vicini da segnalare.',
+    showCalculations: 'Mostra i calcoli',
+    whyReading: 'Perché questa lettura?',
+
     title: 'Cicli',
     lead: 'Periodi in corso, calcolati alla data di riferimento.',
     caution:

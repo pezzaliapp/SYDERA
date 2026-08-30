@@ -1420,6 +1420,97 @@ th {
   border-color: var(--highlight);
 }
 
+/* The answer, before the timeline that supports it. */
+.phase__now {
+  color: var(--text-1);
+  padding: var(--space-2xs) var(--space-xs);
+  border-inline-start: 3px solid var(--accent);
+  background: var(--surface-2);
+  border-radius: var(--radius-m);
+}
+
+/* The life timeline: one block per phase, the current one marked. */
+.phases {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.phase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  min-width: 0;
+  padding: var(--space-2xs) 0 var(--space-2xs) var(--space-xs);
+  border-inline-start: 2px solid var(--border);
+}
+
+.phase--current {
+  border-inline-start-color: var(--accent);
+}
+
+.phase__when {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3xs) var(--space-2xs);
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.phase__ages {
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.phase__years {
+  font-size: var(--step--1);
+  color: var(--text-3);
+}
+
+.phase__title {
+  font-size: var(--step-1);
+  letter-spacing: -0.01em;
+}
+
+.phase__badge {
+  align-self: flex-start;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0 var(--space-3xs);
+}
+
+/* Month and today: short context, not chapters. */
+.shortterm {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3xs) var(--space-xs);
+  margin: var(--space-2xs) 0 0;
+  padding-top: var(--space-2xs);
+  border-top: 1px solid var(--border);
+  font-size: var(--step--1);
+}
+
+.shortterm dt {
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.6875rem;
+  align-self: baseline;
+}
+
+.shortterm dd {
+  margin: 0;
+  color: var(--text-1);
+}
+
 .contribution {
   display: flex;
   flex-direction: column;
