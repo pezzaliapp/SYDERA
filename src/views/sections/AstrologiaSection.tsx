@@ -258,6 +258,10 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
         </div>
       </section>
 
+          </div>
+        </div>
+      </details>
+
       <details className="method">
         <summary>{it.astrology.verifyDisclosure}</summary>
         <div className="method__body">
@@ -291,9 +295,6 @@ export function AstrologiaSection({ chart }: { readonly chart: Chart | null }) {
               <dd>{provenance.engine}</dd>
             </div>
           </dl>
-        </div>
-      </details>
-          </div>
         </div>
       </details>
     </>
